@@ -9,7 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
-
+  
   nix.settings = {
     experimental-features = "nix-command flakes";
   };
@@ -120,4 +120,3 @@
   system.stateVersion = "23.05"; # Did you read the comment?
 
 }
-
