@@ -6,7 +6,7 @@ I am revisiting NixOS after two/three long years full of macOS and Arch Linux (m
 
 ## Notes
 
-- To use dots, run `$ nixos-rebuild swtich --flake github:mjalen/dot`. Obviously, flakes must be enabled.
+- To use dots, run `$ nixos-rebuild switch --flake github:mjalen/dot`. Obviously, flakes must be enabled.
 - To update the home config, I am using the more verbose method to get used to the `nix` CLI:
 
 ``` sh

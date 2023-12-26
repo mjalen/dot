@@ -14,8 +14,8 @@
 
     outputs = { self, nixpkgs, ... }@inputs:
         let
-            # system = "x86_64-linux";
-            system = "aarch64-linux";
+            # system = "x86_64-linux"; # For when the framework comes in!
+            system = "aarch64-linux"; # parallels vm.
             pkgs = import nixpkgs {
                 inherit system;
                 config.allowUnfree = true;
