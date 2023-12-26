@@ -3,8 +3,7 @@
 
     inputs = {
         # nixpkgs.
-        nixos-pkgs.url = "github:NixOS/nixpkgs";
-        nixpkgs.url = "github:NixOS/nixpkgs";
+        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
         # home-manager for easier user config.
         home-manager = {
@@ -13,25 +12,31 @@
         };
     };    
 
-    outputs = { nixpkgs, ... }@inputs:
+    outputs = { self, nixpkgs, ... }@inputs:
         let
             # system = "x86_64-linux";
-            lib = inputs.nixos-pkgs.lib;
+            system = "aarch64-linux";
             pkgs = import nixpkgs {
-                # inherit system;
+                inherit system;
                 config.allowUnfree = true;
             };
 
-            modules = [
-                ./src/configuration.nix
-                ./src/hardware-configuration.nix
-            ];
+            newHomeUser = (userModules: inputs.home-manager.lib.homeManagerConfiguration {
+                inherit pkgs; 
+                modules = userModules; # add default modules with ++.
+            });
+
+            hosts = [ ./hosts/motherbase.nix ]; 
 
         in {
+            homeConfigurations = {
+                jalen = newHomeUser [ ./home/jalen.nix ];
+            };
+
             nixosConfigurations = {
-                motherbase = lib.nixosSystem [
-                    modules   
-                ];
+                motherbase = nixpkgs.lib.nixosSystem { 
+                    modules = hosts;   
+                };
             };
         };
 }

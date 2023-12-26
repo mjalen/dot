@@ -1,15 +1,40 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running `nixos-help`).
+{ lib, pkgs, ... }: {
 
-{ config, pkgs, ... }:
+  # hardware-configuration.nix
 
-{
-  imports = 
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+  boot.initrd.availableKernelModules = [ "xhci_pci" "usbhid" "sr_mod" ];
+  boot.initrd.kernelModules = [ "nvme" "usb_storage" "sd_mod" ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/a91b524e-36e4-45ed-9215-2a2cf3296503";
+      fsType = "ext4";
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/08F9-86E4";
+      fsType = "vfat";
+    };
+
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/bac1474b-2ad2-4226-9503-fdc28ee073ee"; }
     ];
-  
+
+  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+  # (the default) this is the recommended approach. When using systemd-networkd it's
+  # still possible to use this option, but it's recommended to use it in conjunction
+  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  networking.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp0s5.useDHCP = lib.mkDefault true;
+
+  nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+  hardware.parallels.enable = true;
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "prl-tools" ];
+
+  # Configuration.nix
+  networking.hostName = "motherbase"; # Define your hostname.
+
   nix.settings = {
     experimental-features = "nix-command flakes";
   };
@@ -18,7 +43,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "motherbase"; # Define your hostname.
   
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -45,19 +69,6 @@
     WLR_NO_HARDWARE_CURSORS = "1";
   };
 
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;     
-  };
-
-  
-
-  # Configure keymap in X11
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e,caps:escape";
-
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
@@ -66,26 +77,18 @@
   hardware.pulseaudio.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
+  services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.jalen = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-    packages = with pkgs; [
-      firefox
-      tree
-    ];
+    description = "Jalen Moore";
+    extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    kitty
-    vim 
-    wget
-    git
-  ];
+  environment.systemPackages = with pkgs; [ git ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -111,12 +114,5 @@
   # accidentally delete configuration.nix.
   # system.copySystemConfiguration = true;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.05"; # Did you read the comment?
-
+  system.stateVersion = "23.05"; 
 }
