@@ -6,7 +6,9 @@
     programs.git.userName = lib.mkDefault "mjalen";
     programs.git.userEmail = "ajalenboi@gmail.com";
 
-    # home.packages = with pkgs; [];
+    home.packages = with pkgs; [
+        ranger
+    ];
 
     programs.neovim.enable = lib.mkDefault true;
     programs.neovim.vimAlias = lib.mkDefault true;

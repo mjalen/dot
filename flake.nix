@@ -29,6 +29,9 @@
             hosts = [ ./hosts/motherbase.nix ]; 
 
         in {
+
+            # remember $ nix build .#homeConfigurations.<user>.activationPackage 
+            # and $ result/activate
             homeConfigurations = {
                 jalen = newHomeUser [ ./home/jalen.nix ];
             };
