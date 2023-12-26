@@ -1,5 +1,9 @@
 { 
-    description = "Bare-bones, incomplete Framework 13 flake. Using github:kjhoerr/dotfiles";
+    description = ''
+      Jalen Moore's Nix configuration. 
+      Currently targets two platforms: Framework 13 AMD 7640 and Parallels VM.
+      Slowly stealing from github:kjhoerr/dotfiles
+    '';
 
     inputs = {
         # nixpkgs.
@@ -21,12 +25,20 @@
                 config.allowUnfree = true;
             };
 
-            newHomeUser = (userModules: inputs.home-manager.lib.homeManagerConfiguration {
-                inherit pkgs; 
-                modules = userModules; # add default modules with ++.
-            });
+	    # modules that are auto-added to users (via home-manager).
+            userSecurity = [ ./home/mod/gpg.nix ]; 
 
+            newHomeUser = userModules: inputs.home-manager.lib.homeManagerConfiguration {
+                inherit pkgs; 
+                modules = (
+		  userModules ++
+		  userSecurity
+		);
+            };
+
+	    # system modules (NixOS)
             hosts = [ ./hosts/motherbase.nix ]; 
+	    security = [ ./services/ssh.nix ];
 
         in {
 
@@ -37,9 +49,9 @@
             };
 
             nixosConfigurations = {
-                motherbase = nixpkgs.lib.nixosSystem { 
-                    modules = hosts;   
-                };
+		motherbase = nixpkgs.lib.nixosSystem {
+	            modules = hosts ++ security;
+		};
             };
         };
 }

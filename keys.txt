@@ -1,0 +1,7 @@
+[keyboxd]
+---------
+sec   ed25519/B5BAE6761C9A6394 2023-12-26 [SC]
+      Key fingerprint = 8680 C74E 2D3D 76AA 9D27  A6D1 B5BA E676 1C9A 6394
+uid                 [ultimate] mjalen (parallels git key) <ajalenboi@gmail.com>
+ssb   cv25519/66EB89AA39DA1D70 2023-12-26 [E]
+

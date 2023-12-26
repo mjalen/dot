@@ -5,17 +5,28 @@
     home.packages = with pkgs; [
         ranger
         neofetch
+	pinentry
+	pinentry-curses
+	openssh
     ];
 
     programs.git = {
         enable = true;
-        userName = mjalen; 
+	package = pkgs.gitAndTools.gitFull;
+        userName = "mjalen"; 
         userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+	/*signing = {
+		key = "B5BAE6761C9A6394";
+		signByDefault = true;
+	};*/
+	extraConfig = {
+		color.ui = "always";
+	};
     };
 
     programs.neovim = {
-        enable = lib.mkDefault true;
-        vimAlias = lib.mkDefault true;
+        enable = true;
+        vimAlias = true;
     };
 
     home.stateVersion = "23.05";

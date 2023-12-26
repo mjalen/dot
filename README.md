@@ -17,3 +17,5 @@ $ result/activate
 Perhaps it would be nice to auto-delete the `result` directory that is created from this process.
 
 - For now, I will be building from my GitHub repo. The reason for this is to force myself to commit my changes often (Otherwise I would forget and would have a very out-dated configuration here).
+
+- Do not forget to update flake.lock! `$ nix flake update`.
