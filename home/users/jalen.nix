@@ -11,7 +11,7 @@ let
 		firefox
 		brightnessctl
 		acpi
-		ungoogled-chromium
+		# ungoogled-chromium
 		victor-mono
 
 		hyprpaper
@@ -22,6 +22,7 @@ in
     imports = [
 	../wm/hyprland.nix
 	../applications/vscodium.nix
+	../applications/chromium.nix
     ];
 
     home = {

@@ -48,6 +48,7 @@
                 "camelCaseMotion.enable" = true;
                 "easymotion" = true;
             };
+            "explorer.confirmDelete" = false;
         };
     };
 

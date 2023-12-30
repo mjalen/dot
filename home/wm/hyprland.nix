@@ -13,7 +13,7 @@ let
 
 			"$mod" = "SUPER";
 			bind = [
-				"$mod, F, exec, firefox"
+				"$mod Shift, B, exec, chromium"
 				"$mod, Return, exec, kitty"
 				", F7, exec, brightnessctl set 10%-"
 				", F8, exec, brightnessctl set 10%+"
