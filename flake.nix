@@ -1,8 +1,12 @@
+/* 
+Good references:
+	gvolpe/nix-config
+	kjhoerr/dotfiles
+*/
+
 { 
     description = ''
       Jalen Moore's Nix configuration. 
-      Currently targets two platforms: Framework 13 AMD 7640 and Parallels VM.
-      Slowly stealing from github:kjhoerr/dotfiles
     '';
 
     inputs = {
@@ -14,44 +18,24 @@
             url = "github:nix-community/home-manager";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+
+	# impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
+	impermanence = {
+		url = "github:nix-community/impermanence";
+	};
     };    
 
-    outputs = { self, nixpkgs, ... }@inputs:
+    outputs = { nixpkgs, home-manager, ... }@inputs:
         let
-            # system = "x86_64-linux"; # For when the framework comes in!
-            system = "aarch64-linux"; # parallels vm.
+            system = "x86_64-linux";
             pkgs = import nixpkgs {
                 inherit system;
                 config.allowUnfree = true;
             };
 
-	    # modules that are auto-added to users (via home-manager).
-            userSecurity = [ ./home/mod/gpg.nix ]; 
-
-            newHomeUser = userModules: inputs.home-manager.lib.homeManagerConfiguration {
-                inherit pkgs; 
-                modules = (
-		  userModules ++
-		  userSecurity
-		);
-            };
-
-	    # system modules (NixOS)
-            hosts = [ ./hosts/motherbase.nix ]; 
-	    security = [ ./services/ssh.nix ];
-
         in {
-
-            # remember $ nix build .#homeConfigurations.<user>.activationPackage 
-            # and $ result/activate
-            homeConfigurations = {
-                jalen = newHomeUser [ ./home/jalen.nix ];
-            };
-
-            nixosConfigurations = {
-		motherbase = nixpkgs.lib.nixosSystem {
-	            modules = hosts ++ security;
-		};
-            };
+	    # I am separating these configs out, so when I edit I don't get confused where changes will end up (since the builds for these are separate).
+	    homeConfigurations = import ./home/home-conf.nix { inherit inputs system pkgs; };
+	    nixosConfigurations = import ./systems/nixos-conf.nix { inherit inputs system pkgs; };
         };
 }
