@@ -61,10 +61,11 @@ with inputs;
     /* openssh.authorizedKeys.keyFiles = [
 	"/nix/persist/home/jalen/.ssh/github.pub"
     ]; */
-    openssh.authorizedKeys.keys = [
+    /* openssh.authorizedKeys.keys = [
     	# framework github pub key
     	"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFB+TOridG2HiKTfPn3H7oNfuRRWUOQY6Dhma2q8t/3K ajalenboi@gmail.com"
-    ];
+    ]; */
+
     # eventually want to add hashedPasswordFile
     hashedPasswordFile = "/nix/persist/psk/jalen";
   };

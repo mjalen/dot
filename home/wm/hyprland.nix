@@ -1,7 +1,8 @@
 { inputs, lib, pkgs, ... }: 
 with inputs;
-{
-	wayland.windowManager.hyprland = {
+
+let
+	hyperlandSettings = {
 		enable = true;
 		settings = {
 			monitor = "eDP-1,2256x1504@60,0x0,1";
@@ -25,4 +26,8 @@ with inputs;
 			);
 		};
 	};	
+
+in
+{
+	wayland.windowManager.hyprland = hyperlandSettings;
 }
