@@ -16,57 +16,34 @@ let
 
 		hyprpaper
 
-		# big ol' vscodium blurb.
-		(vscode-with-extensions.override {
-			vscode = vscodium;
-			vscodeExtensions = with vscode-extensions; [
-				bbenoist.nix
-				ms-vscode-remote.remote-ssh
-				vscodevim.vim
-			];
-		})
 	];
 in
 {
     imports = [
 	../wm/hyprland.nix
-	../mod/gpg.nix
+	../applications/vscodium.nix
     ];
 
     home = {
-	username = "jalen";
-   	homeDirectory = "/home/jalen";
-	stateVersion = "23.11";
-	inherit packages;
+		username = "jalen";
+ 	  	homeDirectory = "/home/jalen";
+		stateVersion = "23.11";
+		inherit packages;
     };
 
     programs = {
-	home-manager.enable = true;
-	git = {
-        	enable = true;
-		package = pkgs.gitAndTools.gitFull;
-        	userName = "mjalen"; 
-        	userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
-		/*signing = {
-			key = "B5BAE6761C9A6394";
-			signByDefault = true;
-		};*/
-		extraConfig = {
-			color.ui = "always";
+		git = {
+			enable = true;
+			package = pkgs.gitAndTools.gitFull;
+				userName = "mjalen"; 
+				userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+			extraConfig = {
+				color.ui = "always";
+			};
 		};
-    	};
-	neovim = {
-       		enable = true;
-        	vimAlias = true;
-    	};
-    };
-
-    /*home.persistence."/nix/persist/home/jalen" = {
-	allowOther = true; # required. relies on host/motherbase.nix#programs.fuse.userAllowOthers
-	directories = [
-		"Documents"	
-		".ssh"
-	];
-    };*/
-
+		neovim = {
+				enable = true;
+				vimAlias = true;
+		};
+	};
 }
