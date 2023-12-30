@@ -23,6 +23,12 @@ Good references:
 	impermanence = {
 		url = "github:nix-community/impermanence";
 	};
+
+	# vscode server
+	vscode-server = {
+		url = "github:nix-community/nixos-vscode-server";
+		inputs.nixpkgs.follows = "nixpkgs";
+	};
     };    
 
     outputs = { nixpkgs, home-manager, ... }@inputs:

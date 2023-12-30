@@ -9,7 +9,7 @@ let
 	valhallaModules = [
 		./conf/valhalla.nix
 		./hardware/valhalla.nix
-		../services/ssh.nix
+		./services/ssh.nix
 		impermanence.nixosModules.impermanence
 	];
 in {

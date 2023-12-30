@@ -7,10 +7,16 @@ let
 		settings = {
 			monitor = "eDP-1,2256x1504@60,0x0,1";
 
+			exec-once = [
+				"hyprpaper"
+			];
+
 			"$mod" = "SUPER";
 			bind = [
 				"$mod, F, exec, firefox"
 				"$mod, Return, exec, kitty"
+				", F7, exec, brightnessctl set 10%-"
+				", F8, exec, brightnessctl set 10%+"
 			] ++ (
 				builtins.concatLists (builtins.genList (
 					x: let 
@@ -30,4 +36,9 @@ let
 in
 {
 	wayland.windowManager.hyprland = hyperlandSettings;
+
+	xdg.configFile."hypr/hyprpaper.conf".text = ''
+preload = ~/Pictures/trooper.jpg
+wallpaper = eDP-1,~/Pictures/trooper.jpg
+	'';
 }
