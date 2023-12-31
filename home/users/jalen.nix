@@ -8,11 +8,14 @@ let
 		pinentry-curses
 		openssh
 		kitty
-		firefox
 		brightnessctl
 		acpi
-		# ungoogled-chromium
+		killall
+
 		victor-mono
+		font-awesome
+
+		pamixer
 
 		hyprpaper
 
@@ -20,9 +23,17 @@ let
 in
 {
     imports = [
-	../wm/hyprland.nix
-	../applications/vscodium.nix
-	../applications/chromium.nix
+		# GUI 
+		../wm/hyprland.nix
+		../wm/waybar.nix
+		../wm/tofi.nix
+
+		# Apps
+		../applications/vscodium.nix
+		../applications/firefox.nix 
+
+		# Other
+		../utilities/mako.nix # notification daemon
     ];
 
     home = {
@@ -33,6 +44,13 @@ in
     };
 
     programs = {
+		bash = {
+			enable = true;
+			shellAliases = {
+				"get-audio" = "pamixer --get-volume-human";
+				"build-home" = "nix build .#homeConfigurations.jalen.activationPackage && result/activate"; # convenience for a common cmd string.
+			};
+		};
 		git = {
 			enable = true;
 			package = pkgs.gitAndTools.gitFull;

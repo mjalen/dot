@@ -19,24 +19,30 @@ Good references:
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
-	# impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
-	impermanence = {
-		url = "github:nix-community/impermanence";
-	};
+	    # impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
+	    impermanence = {
+		    url = "github:nix-community/impermanence";
+	    };
 
-	# vscode server
-	vscode-server = {
-		url = "github:nix-community/nixos-vscode-server";
-		inputs.nixpkgs.follows = "nixpkgs";
-	};
+        # nur
+        nur = {
+            url = "github:nix-community/NUR";
+        };
+
+	    # vscode server
+	    vscode-server = {
+	    	url = "github:nix-community/nixos-vscode-server";
+	    	inputs.nixpkgs.follows = "nixpkgs";
+	    };
     };    
 
-    outputs = { nixpkgs, home-manager, ... }@inputs:
+    outputs = { nixpkgs, home-manager, nur, ... }@inputs:
         let
             system = "x86_64-linux";
             pkgs = import nixpkgs {
                 inherit system;
                 config.allowUnfree = true;
+                overlays = [ nur.overlay ];
             };
 
         in {
