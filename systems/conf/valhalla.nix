@@ -49,7 +49,6 @@ with inputs;
 	};
   };
 
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
   users.users.jalen = {
@@ -58,25 +57,19 @@ with inputs;
     home = "/home/jalen";
     extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
 
-    /* openssh.authorizedKeys.keyFiles = [
-	"/nix/persist/home/jalen/.ssh/github.pub"
-    ]; */
-    /* openssh.authorizedKeys.keys = [
-    	# framework github pub key
-    	"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFB+TOridG2HiKTfPn3H7oNfuRRWUOQY6Dhma2q8t/3K ajalenboi@gmail.com"
-    ]; */
-
     # eventually want to add hashedPasswordFile
     hashedPasswordFile = "/nix/persist/psk/jalen";
   };
 
   users.users.root.hashedPasswordFile = "/nix/persist/psk/root";
 
-  # users.users.root.initialHashedPassword = "$y$j9T$MGafuHlTpjb7L.zur1vsn.$Hmk5kOeaNWUqSs1LK49ej0kmt..1wbrsn612jF9tO1.";
-  # users.users.jalen.initialHashedPassword = "$y$j9T$MGafuHlTpjb7L.zur1vsn.$Hmk5kOeaNWUqSs1LK49ej0kmt..1wbrsn612jF9tO1.";
-
   # hyprland is the GUI of choice
   programs.hyprland.enable = true;
+
+  # hyprland requires /tmp/hypr to start, so create this
+  systemd.tmpfiles.rules = [
+    "d /tmp/hypr 0755 jalen users -" # cleanup is done on reboot through root wipe.
+  ];
 
   system.stateVersion = "23.11"; 
   nix.settings.experimental-features = "nix-command flakes";

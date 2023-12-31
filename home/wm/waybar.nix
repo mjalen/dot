@@ -66,6 +66,7 @@
                 font-family: Victor Mono, FontAwesome, monospace;
                 font-size: 13px;
             }
+            
         '';
     };
 

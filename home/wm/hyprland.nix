@@ -25,8 +25,8 @@ let
 				"$mod, Return, exec, kitty"
 				"$mod Shift, R, exec, killall -SIGUSR1 waybar" # expand to reload more stuffs.
 				"$mod Shift, Escape, exec, hyprctl dispatch exit"
-				", F7, exec, brightnessctl set 10%-"
-				", F8, exec, brightnessctl set 10%+"
+				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
+				", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
 				", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
 				", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
 				", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"

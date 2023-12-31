@@ -29,14 +29,14 @@ Good references:
             url = "github:nix-community/NUR";
         };
 
-	    # vscode server
+	    # vscode server. not really sure if I need this. I believe it is for remote ssh which I do not currently use (but will in the future).
 	    vscode-server = {
 	    	url = "github:nix-community/nixos-vscode-server";
 	    	inputs.nixpkgs.follows = "nixpkgs";
 	    };
     };    
 
-    outputs = { nixpkgs, home-manager, nur, ... }@inputs:
+    outputs = { nixpkgs, nur, ... }@inputs:
         let
             system = "x86_64-linux";
             pkgs = import nixpkgs {
@@ -44,10 +44,10 @@ Good references:
                 config.allowUnfree = true;
                 overlays = [ nur.overlay ];
             };
-
-        in {
-	    # I am separating these configs out, so when I edit I don't get confused where changes will end up (since the builds for these are separate).
-	    homeConfigurations = import ./home/home-conf.nix { inherit inputs system pkgs; };
-	    nixosConfigurations = import ./systems/nixos-conf.nix { inherit inputs system pkgs; };
+        in 
+        {
+            # separate so I do not have to constantly build NixOS config.
+            homeConfigurations = import ./home/home-conf.nix { inherit inputs system pkgs; };
+            nixosConfigurations = import ./systems/nixos-conf.nix { inherit inputs system pkgs; };
         };
 }

@@ -1,17 +1,23 @@
-{ libs, pkgs, ... }: {
+{ libs, pkgs, ... }: 
+
+let
+    hashStr = builtins.hashString "sha256" "test2";
+in
+{
 
     # firefox stuffs
 
     programs.firefox = {
         enable = true;
         profiles = {
-            default = {
+            "${hashStr}" = {
+                isDefault = true;
                 extensions = with pkgs.nur.repos.rycee.firefox-addons; [
                     ublock-origin
                     sponsorblock
                     old-reddit-redirect
                 ];
-                search.order = [ "DuckDuckGo" ];
+                search.default = "DuckDuckGo";
                 settings = {
                     "identity.fxaccounts.enabled" = false;
                     "extensions.pocket.enabled" = false;
