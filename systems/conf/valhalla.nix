@@ -55,7 +55,7 @@ with inputs;
     isNormalUser = true;
     description = "Jalen Moore";
     home = "/home/jalen";
-    extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "networkmanager" "lxd" ]; # Enable ‘sudo’ for the user.
 
     # eventually want to add hashedPasswordFile
     hashedPasswordFile = "/nix/persist/psk/jalen";

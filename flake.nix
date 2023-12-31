@@ -13,6 +13,12 @@ Good references:
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+        # anyrun program launcher
+        anyrun = {
+            url = "github:Kirottu/anyrun";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+
         # home-manager for easier user config.
         home-manager = {
             url = "github:nix-community/home-manager";
@@ -36,11 +42,12 @@ Good references:
 	    };
     };    
 
-    outputs = { nixpkgs, nur, ... }@inputs:
+    outputs = { nixpkgs, nur, anyrun, ... }@inputs:
         let
             system = "x86_64-linux";
             pkgs = import nixpkgs {
                 inherit system;
+                inherit anyrun;
                 config.allowUnfree = true;
                 overlays = [ nur.overlay ];
             };

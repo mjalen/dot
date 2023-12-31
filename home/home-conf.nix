@@ -5,6 +5,7 @@ with inputs;
 let
 	imports = [
 		impermanence.nixosModules.home-manager.impermanence
+		# anyrun.homeManagerModules.default
 		./users/jalen.nix
 	];
 

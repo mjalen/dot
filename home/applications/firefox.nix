@@ -1,14 +1,5 @@
 { lib, pkgs, ... }: 
 
-let
-    /*drv = derivation {
-        name = "rnd-stuff";
-        builder = "${pkgs.bash}/bin/bash";
-        args = [ "-c" "rm /home/jalen/.mozilla/default/search.json.mozlz4"];
-        system = pkgs.system;
-    };*/
-    # rndStr = toString (builtins.readFile rnd);
-in
 {
     # firefox stuffs
 

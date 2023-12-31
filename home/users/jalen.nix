@@ -2,7 +2,6 @@
 
 let
 	packages = with pkgs; [
-		bash
 		ranger
 		neofetch
 		pinentry
@@ -11,8 +10,6 @@ let
 		kitty
 		brightnessctl
 		acpi
-		killall
-		comma
 
 		victor-mono
 		font-awesome
@@ -28,7 +25,6 @@ in
 		# GUI 
 		../wm/hyprland.nix
 		../wm/waybar.nix
-		../wm/tofi.nix
 
 		# Apps
 		../applications/vscodium.nix
