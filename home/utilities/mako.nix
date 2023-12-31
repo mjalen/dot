@@ -4,7 +4,7 @@
 
     services.mako = {
         enable = true;
-        font = "Victor Mono 10";
+        font = "Victor Mono 13";
         sort = "-time";
     };
 

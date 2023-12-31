@@ -1,23 +1,27 @@
-{ libs, pkgs, ... }: 
+{ lib, pkgs, ... }: 
 
 let
-    hashStr = builtins.hashString "sha256" "test2";
+    /*drv = derivation {
+        name = "rnd-stuff";
+        builder = "${pkgs.bash}/bin/bash";
+        args = [ "-c" "rm /home/jalen/.mozilla/default/search.json.mozlz4"];
+        system = pkgs.system;
+    };*/
+    # rndStr = toString (builtins.readFile rnd);
 in
 {
-
     # firefox stuffs
 
     programs.firefox = {
         enable = true;
         profiles = {
-            "${hashStr}" = {
+            default = {
                 isDefault = true;
                 extensions = with pkgs.nur.repos.rycee.firefox-addons; [
                     ublock-origin
                     sponsorblock
                     old-reddit-redirect
                 ];
-                search.default = "DuckDuckGo";
                 settings = {
                     "identity.fxaccounts.enabled" = false;
                     "extensions.pocket.enabled" = false;

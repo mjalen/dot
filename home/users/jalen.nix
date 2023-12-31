@@ -2,6 +2,7 @@
 
 let
 	packages = with pkgs; [
+		bash
 		ranger
 		neofetch
 		pinentry
@@ -11,6 +12,7 @@ let
 		brightnessctl
 		acpi
 		killall
+		comma
 
 		victor-mono
 		font-awesome
