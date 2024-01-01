@@ -1,4 +1,4 @@
-{ inputs, system, pkgs, ...}:
+{ inputs, pkgs, ...}:
 
 with inputs; 
 
@@ -16,7 +16,7 @@ let
 	];
 in {
 	valhalla = nixosSystem {
-		inherit lib pkgs system;
+		inherit pkgs;
 		specialArgs = { inherit inputs; };
 		modules = valhallaModules;
 	};

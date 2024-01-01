@@ -10,9 +10,15 @@
                 output = [ "eDP-1" ];
 
                 "hyprland/workspaces" = {
-                    "format" = "<sub>{id}</sub>\n{windows}";
+                    "format" = "<sub>{id}</sub>";
                     "on-scroll-up" = "hyprctl dispatch workspace e+1";
                     "on-scroll-down" = "hyprctl dispatch workspace e-1";
+                };
+
+                "clock" = {
+                    "interval" = 60;
+                    "format" = "{:%H:%M}";
+                    "max-length" = 25;
                 };
 
                 "battery" = {
@@ -57,7 +63,7 @@
                 };
 
                 modules-left = [ "hyprland/workspaces" ];
-                # modules-center = [ "sway/window" "custom/hello-from-waybar" ];
+                modules-center = [ "clock" ];
                 modules-right = [ "pulseaudio" "battery" "temperature" ];
             };
         };

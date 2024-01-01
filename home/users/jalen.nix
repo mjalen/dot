@@ -1,4 +1,4 @@
-{ lib, pkgs, ...}: 
+{ inputs, pkgs, ...}: 
 
 let
 	packages = with pkgs; [
@@ -25,6 +25,7 @@ in
 		# GUI 
 		../wm/hyprland.nix
 		../wm/waybar.nix
+		../wm/anyrun.nix
 
 		# Apps
 		../applications/vscodium.nix
@@ -48,6 +49,9 @@ in
 				"get-audio" = "pamixer --get-volume-human";
 				"build-home" = "nix build .#homeConfigurations.jalen.activationPackage && result/activate"; # convenience for a common cmd string.
 			};
+			bashrcExtra = ''
+
+			'';
 		};
 		git = {
 			enable = true;
@@ -62,5 +66,6 @@ in
 				enable = true;
 				vimAlias = true;
 		};
+		pywal.enable = true;
 	};
 }

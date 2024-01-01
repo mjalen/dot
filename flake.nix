@@ -9,9 +9,25 @@ Good references:
       Jalen Moore's Nix configuration. 
     '';
 
+    outputs = inputs:
+        let
+            system = "x86_64-linux";
+            pkgs = import inputs.nixpkgs {
+                inherit system;
+                config.allowUnfree = true;
+                overlays = [ inputs.nur.overlay ];
+            };
+        in {
+            nixosConfigurations = import ./systems { inherit inputs pkgs; };
+            homeConfigurations = import ./home { inherit inputs pkgs; };
+        };
+
     inputs = {
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+        # flake-parts
+        parts.url = "github:hercules-ci/flake-parts";
 
         # anyrun program launcher
         anyrun = {
@@ -42,7 +58,8 @@ Good references:
 	    };
     };    
 
-    outputs = { nixpkgs, nur, anyrun, ... }@inputs:
+
+    /*outputs = { nixpkgs, nur, anyrun, ... }@inputs:
         let
             system = "x86_64-linux";
             pkgs = import nixpkgs {
@@ -54,7 +71,6 @@ Good references:
         in 
         {
             # separate so I do not have to constantly build NixOS config.
-            homeConfigurations = import ./home/home-conf.nix { inherit inputs system pkgs; };
-            nixosConfigurations = import ./systems/nixos-conf.nix { inherit inputs system pkgs; };
-        };
+            
+        };*/
 }
