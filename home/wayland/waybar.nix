@@ -67,13 +67,73 @@
                 modules-right = [ "pulseaudio" "battery" "temperature" ];
             };
         };
-        /*style = ''
+        style = ''
             * {
-                font-family: Victor Mono, FontAwesome, monospace;
-                font-size: 13px;
+                border: none;
+                border-radius: 0;
+                font-family: Victor Mono Bold, FontAwesome Bold, monospace;
+                font-size: 18px;
+                min-height: 30px;
             }
-        '';*/
-    };
 
+            window#waybar {
+                background: rgba(25, 25, 25, 0.75);
+                border-bottom: 0px solid rgba(100, 114, 125, 0.5);
+                color: white;
+            }
+
+            tooltip {
+                background: transparent;
+                border: 1px solid rgba(100, 114, 125, 0.5);
+            }
+
+            tooltip label {
+                color: white;
+            }
+
+            #workspaces button {
+                padding: 0 5px;
+                background: transparent;
+                color: white;
+                border-bottom: 3px solid transparent;
+            }
+
+            #workspaces button.focused {
+                background: #64727D;
+                border-bottom: 3px solid white;
+            }
+
+            #clock {
+                background-color: transparent;
+            }
+
+            #battery {
+                background-color: #ffffff;
+                color: black;
+            }
+
+            #battery.charging {
+                color: white;
+                background-color: #26A65B;
+            }
+
+            @keyframes blink {
+                to {
+                    background-color: #ffffff;
+                    color: black;
+                }
+            }
+
+            #battery.warning:not(.charging) {
+                background: #f53c3c;
+                color: white;
+                animation-name: blink;
+                animation-duration: 0.5s;
+                animation-timing-function: linear;
+                animation-iteration-count: infinite;
+                animation-direction: alternate;
+            } 
+        '';
+    };
 
 }

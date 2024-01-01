@@ -9,27 +9,52 @@ let
 		settings = {
 			monitor = "eDP-1,2256x1504@60,0x0,1";
 
+			general = {
+				border_size = 3;
+			};
+
+			decoration = {
+				rounding = 10;
+			};
+
 			exec-once = [
 				"mkdir /tmp/hypr"
-				"wal -i ${wallpaper} -n"
+				#"wal -i ${wallpaper} -n"
 				"hyprpaper"
 				"waybar"
 			];
 
+			misc = {
+				enable_swallow = true;
+				swallow_regex = "^(kitty)$";
+			};
+
 			"$mod" = "SUPER";
+
+			input.kb_options = "ctrl:nocaps";
 
 			bindm = [
 				"$mod, mouse:272, movewindow"
 				"$mod Shift, mouse:272, resizewindow"
 			];
 			bind = [
-				"$mod, Space, exec, tofi-run"
+				# Applications
+				# "$mod, Space, exec, tofi-run"
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
-				"$mod Shift, R, exec, killall -SIGUSR1 waybar" # expand to reload more stuffs.
+
+				# Actions 
+				"$mod, Q, exec, hyprctl dispatch killactive"
+				"$mod, F, exec, hyprctl dispatch togglefloating"
+				"$mod, Tab, cyclenext"
+				"$mod, Tab, bringactivetotop"
 				"$mod Shift, Escape, exec, hyprctl dispatch exit"
+
+				# Brightness
 				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
 				", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
+
+				# Audio
 				", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
 				", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
 				", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"

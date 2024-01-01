@@ -1,15 +1,17 @@
 { inputs, pkgs, ...}: 
 
 let
+    current-theme = import ../../../themes/dark;
 	packages = with pkgs; [
 		ranger
+		gobble
 		neofetch
 		pinentry
 		pinentry-curses
 		openssh
-		kitty
 		brightnessctl
 		acpi
+		gimp
 
 		victor-mono
 		font-awesome
@@ -23,16 +25,18 @@ in
 {
     imports = [
 		# GUI 
-		../wm/hyprland.nix
-		../wm/waybar.nix
-		../wm/anyrun.nix
+		../../wayland/hyprland.nix
+		../../wayland/waybar.nix
+		# ../wayland/anyrun.nix
 
 		# Apps
-		../applications/vscodium.nix
-		../applications/firefox.nix 
+		../../applications/vscodium.nix
+		../../applications/firefox.nix 
+		../../applications/tmux.nix
+		((import ../../applications/kitty.nix) current-theme) 
 
 		# Other
-		../utilities/mako.nix # notification daemon
+		../../utilities/mako.nix # notification daemon
     ];
 
     home = {
@@ -49,9 +53,9 @@ in
 				"get-audio" = "pamixer --get-volume-human";
 				"build-home" = "nix build .#homeConfigurations.jalen.activationPackage && result/activate"; # convenience for a common cmd string.
 			};
-			bashrcExtra = ''
+			/*bashrcExtra = ''
 
-			'';
+			'';*/
 		};
 		git = {
 			enable = true;
@@ -66,6 +70,6 @@ in
 				enable = true;
 				vimAlias = true;
 		};
-		pywal.enable = true;
+		# pywal.enable = true;
 	};
 }

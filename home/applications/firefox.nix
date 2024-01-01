@@ -12,13 +12,14 @@
                     ublock-origin
                     sponsorblock
                     old-reddit-redirect
+		    darkreader
                 ];
                 settings = {
                     "identity.fxaccounts.enabled" = false;
                     "extensions.pocket.enabled" = false;
                     "extensions.autoDisableScopes" = 0;
                     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-                    "extensions.activeThemeID" = "light-theme@mozilla.org";
+                    # "extensions.activeThemeID" = "light-theme@mozilla.org";
                     "extensions.getAddons.cache.enabled" = false;
                 };
                 userChrome = ''
