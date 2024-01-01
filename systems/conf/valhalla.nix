@@ -45,6 +45,7 @@ with inputs;
 			".ssh"
 			".gnupg"
 			"Pictures"
+			"Music"
 		];
 	};
   };

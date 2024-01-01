@@ -7,7 +7,7 @@ let
 	];
 
 	homeImports = {
-		jalen = [./users/jalen.nix] ++ sharedModules;
+		jalen = [./users/jalen ] ++ sharedModules;
 	};
 
 	inherit (inputs.home-manager.lib) homeManagerConfiguration;
