@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }: 
+{ self, inputs, lib, pkgs, ... }: 
 
 {
     # firefox stuffs
@@ -8,7 +8,7 @@
         profiles = {
             default = {
                 isDefault = true;
-                extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+                extensions = with pkgs.nur.overlay.repos.rycee.firefox-addons; [
                     ublock-origin
                     sponsorblock
                     old-reddit-redirect

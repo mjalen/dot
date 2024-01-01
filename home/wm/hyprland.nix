@@ -1,7 +1,9 @@
-{ inputs, lib, pkgs, ... }: 
+{ self, inputs, lib, pkgs, ... }: 
 with inputs;
 
 let
+	wallpaper = "~/Pictures/trooper.jpg";
+
 	hyperlandSettings = {
 		enable = true;
 		settings = {
@@ -9,6 +11,7 @@ let
 
 			exec-once = [
 				"mkdir /tmp/hypr"
+				"wal -i ${wallpaper} -n"
 				"hyprpaper"
 				"waybar"
 			];
@@ -51,7 +54,7 @@ in
 	wayland.windowManager.hyprland = hyperlandSettings;
 
 	xdg.configFile."hypr/hyprpaper.conf".text = ''
-preload = ~/Pictures/trooper.jpg
-wallpaper = eDP-1,~/Pictures/trooper.jpg
+		preload = ${wallpaper} 
+		wallpaper = eDP-1,${wallpaper}
 	'';
 }

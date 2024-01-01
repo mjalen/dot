@@ -1,4 +1,4 @@
-{ lib, pkgs, ...}: 
+{ self, lib, pkgs, ...}: 
 
 let
 	packages = with pkgs; [
@@ -48,6 +48,9 @@ in
 				"get-audio" = "pamixer --get-volume-human";
 				"build-home" = "nix build .#homeConfigurations.jalen.activationPackage && result/activate"; # convenience for a common cmd string.
 			};
+			bashrcExtra = ''
+
+			'';
 		};
 		git = {
 			enable = true;
@@ -62,5 +65,6 @@ in
 				enable = true;
 				vimAlias = true;
 		};
+		pywal.enable = true;
 	};
 }

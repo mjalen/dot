@@ -13,6 +13,9 @@ Good references:
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+        # flake-parts
+        parts.url = "github:hercules-ci/flake-parts";
+
         # anyrun program launcher
         anyrun = {
             url = "github:Kirottu/anyrun";
@@ -42,7 +45,23 @@ Good references:
 	    };
     };    
 
-    outputs = { nixpkgs, nur, anyrun, ... }@inputs:
+    outputs = inputs:
+        let
+            pkgs = import inputs.nixpkgs {
+                config.allowUnfree = true;
+                overlays = [ inputs.nur.overlay ];
+            };
+        in inputs.parts.lib.mkFlake { inherit inputs; } {
+                systems = [ "x86_64-linux" ];
+
+                imports = [
+                    ./home
+                    ./systems
+                ];
+
+            };
+
+    /*outputs = { nixpkgs, nur, anyrun, ... }@inputs:
         let
             system = "x86_64-linux";
             pkgs = import nixpkgs {
@@ -54,7 +73,6 @@ Good references:
         in 
         {
             # separate so I do not have to constantly build NixOS config.
-            homeConfigurations = import ./home/home-conf.nix { inherit inputs system pkgs; };
-            nixosConfigurations = import ./systems/nixos-conf.nix { inherit inputs system pkgs; };
-        };
+            
+        };*/
 }

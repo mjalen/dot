@@ -1,12 +1,12 @@
-inputs: { lib, pkgs, ... }:
+{ self, lib, pkgs, ... }:
 
 {
     programs.anyrun = {
         enable = true;
         config = {
-            plugins = [
+            /*plugins = [
                 inputs.anyrun.packages.${pkgs.system}.applications
-            ];
+            ];*/
 
             width = { fraction = 0.3; };
             # position = "top";
