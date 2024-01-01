@@ -1,17 +1,17 @@
-{ self, lib, pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
     programs.anyrun = {
         enable = true;
         config = {
-            /*plugins = [
-                inputs.anyrun.packages.${pkgs.system}.applications
-            ];*/
+            plugins = with inputs.anyrun.packages.${pkgs.system}; [
+                applications
+            ];
 
-            width = { fraction = 0.3; };
-            # position = "top";
-            hideIcons = false;
-            layer = "overlay";
+            width.fraction = 0.3;
+            y.absolute = 15;
+            hidePluginInfo = true;
+            closeOnClick = true;
         };
     };
 }

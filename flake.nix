@@ -9,6 +9,19 @@ Good references:
       Jalen Moore's Nix configuration. 
     '';
 
+    outputs = inputs:
+        let
+            system = "x86_64-linux";
+            pkgs = import inputs.nixpkgs {
+                inherit system;
+                config.allowUnfree = true;
+                overlays = [ inputs.nur.overlay ];
+            };
+        in {
+            nixosConfigurations = import ./systems { inherit inputs pkgs; };
+            homeConfigurations = import ./home { inherit inputs pkgs; };
+        };
+
     inputs = {
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -45,21 +58,6 @@ Good references:
 	    };
     };    
 
-    outputs = inputs:
-        let
-            pkgs = import inputs.nixpkgs {
-                config.allowUnfree = true;
-                overlays = [ inputs.nur.overlay ];
-            };
-        in inputs.parts.lib.mkFlake { inherit inputs; } {
-                systems = [ "x86_64-linux" ];
-
-                imports = [
-                    ./home
-                    ./systems
-                ];
-
-            };
 
     /*outputs = { nixpkgs, nur, anyrun, ... }@inputs:
         let

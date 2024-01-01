@@ -1,4 +1,4 @@
-{ self, lib, pkgs, ...}: 
+{ inputs, pkgs, ...}: 
 
 let
 	packages = with pkgs; [
@@ -25,6 +25,7 @@ in
 		# GUI 
 		../wm/hyprland.nix
 		../wm/waybar.nix
+		../wm/anyrun.nix
 
 		# Apps
 		../applications/vscodium.nix

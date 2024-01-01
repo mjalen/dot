@@ -1,4 +1,4 @@
-{ self, system, inputs, pkgs, ...}:
+{ inputs, pkgs, ...}:
 
 with inputs; 
 
@@ -15,13 +15,9 @@ let
 		impermanence.nixosModules.impermanence
 	];
 in {
-	flake = {
-		nixosConfigurations = {
-			valhalla = nixosSystem {
-				inherit lib pkgs system;
-				specialArgs = { inherit inputs; };
-				modules = valhallaModules;
-			};
-		};
+	valhalla = nixosSystem {
+		inherit pkgs;
+		specialArgs = { inherit inputs; };
+		modules = valhallaModules;
 	};
 }
