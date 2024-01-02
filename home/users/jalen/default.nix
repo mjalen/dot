@@ -1,7 +1,7 @@
 { inputs, pkgs, ...}: 
 
 let
-    current-theme = import ../../../themes/dark;
+    current-theme = (import ../../../themes/oxocarbon).dark;
 	packages = with pkgs; [
 		ranger
 		gobble
@@ -13,6 +13,10 @@ let
 		acpi
 		gimp
 
+		# screenshot double wammy ;)
+		slurp
+		grim
+
 		victor-mono
 		font-awesome
 
@@ -21,19 +25,23 @@ let
 		hyprpaper
 
 	];
+
+    withTheme = module: ((import module) current-theme);
 in
 {
     imports = [
 		# GUI 
 		../../wayland/hyprland.nix
-		../../wayland/waybar.nix
+		# ((import ../../wayland/waybar.nix) current-theme)
+		(withTheme ../../wayland/waybar.nix)
 		# ../wayland/anyrun.nix
 
 		# Apps
 		../../applications/vscodium.nix
 		../../applications/firefox.nix 
 		../../applications/tmux.nix
-		((import ../../applications/kitty.nix) current-theme) 
+		../../applications/nvim
+		(withTheme ../../applications/kitty.nix) 
 
 		# Other
 		../../utilities/mako.nix # notification daemon
@@ -66,10 +74,5 @@ in
 				color.ui = "always";
 			};
 		};
-		neovim = {
-				enable = true;
-				vimAlias = true;
-		};
-		# pywal.enable = true;
 	};
 }

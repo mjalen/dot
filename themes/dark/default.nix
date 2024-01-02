@@ -44,6 +44,8 @@ in
     inherit cyan1 cyan2;
     inherit white1 white2;
 
+    blackAsDec = "18, 21, 26"; # for use in css rgb().
+
     # by base16
     base16 = {
         color0 = black1;
