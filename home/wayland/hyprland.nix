@@ -2,7 +2,7 @@
 with inputs;
 
 let
-	wallpaper = "~/Pictures/trooper.jpg";
+	wallpaper = "~/Pictures/mountain.jpg";
 
 	hyperlandSettings = {
 		enable = true;
@@ -29,6 +29,10 @@ let
 				swallow_regex = "^(kitty)$";
 			};
 
+			animation = [
+				"windows, 1, 1, default, popin"
+			];
+
 			"$mod" = "SUPER";
 
 			input.kb_options = "ctrl:nocaps";
@@ -43,12 +47,22 @@ let
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
 
+				# Move window
+				"$mod, H, exec, hyprctl dispatch movewindow l"
+				"$mod, J, exec, hyprctl dispatch movewindow d"
+				"$mod, K, exec, hyprctl dispatch movewindow u"
+				"$mod, L, exec, hyprctl dispatch movewindow r"
+
 				# Actions 
 				"$mod, Q, exec, hyprctl dispatch killactive"
 				"$mod, F, exec, hyprctl dispatch togglefloating"
 				"$mod, Tab, cyclenext"
 				"$mod, Tab, bringactivetotop"
 				"$mod Shift, Escape, exec, hyprctl dispatch exit"
+
+				# Screenshots
+				", Print, exec, slurp | grim -g - ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+				"$mod, Print, exec, grim ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
 
 				# Brightness
 				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"

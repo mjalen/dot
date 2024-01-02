@@ -19,7 +19,7 @@
                     "extensions.pocket.enabled" = false;
                     "extensions.autoDisableScopes" = 0;
                     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-                    # "extensions.activeThemeID" = "light-theme@mozilla.org";
+		    "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
                     "extensions.getAddons.cache.enabled" = false;
                 };
                 userChrome = ''

@@ -2,6 +2,11 @@
 
 with inputs;
 {
+  imports = [
+	inputs.nixos-hardware.nixosModules.framework-13-7040-amd
+  ];
+
+  services.fwupd.enable = true;
 
   # Configuration.nix
   networking.hostName = "valhalla"; # Define your hostname.

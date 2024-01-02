@@ -26,8 +26,11 @@ Good references:
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+	# hardware
+	nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
         # flake-parts
-        parts.url = "github:hercules-ci/flake-parts";
+        # parts.url = "github:hercules-ci/flake-parts";
 
         # anyrun program launcher
         anyrun = {
@@ -57,20 +60,4 @@ Good references:
 	    	inputs.nixpkgs.follows = "nixpkgs";
 	    };
     };    
-
-
-    /*outputs = { nixpkgs, nur, anyrun, ... }@inputs:
-        let
-            system = "x86_64-linux";
-            pkgs = import nixpkgs {
-                inherit system;
-                inherit anyrun;
-                config.allowUnfree = true;
-                overlays = [ nur.overlay ];
-            };
-        in 
-        {
-            # separate so I do not have to constantly build NixOS config.
-            
-        };*/
 }

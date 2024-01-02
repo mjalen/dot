@@ -1,4 +1,7 @@
-{ lib, pkgs, ... }: {
+current-theme: { lib, pkgs, ... }: 
+
+with current-theme;
+{
 
     programs.waybar = {
         enable = true;
@@ -10,7 +13,7 @@
                 output = [ "eDP-1" ];
 
                 "hyprland/workspaces" = {
-                    "format" = "<sub>{id}</sub>";
+                    "format" = "<sub>{icon}</sub>";
                     "on-scroll-up" = "hyprctl dispatch workspace e+1";
                     "on-scroll-down" = "hyprctl dispatch workspace e-1";
                 };
@@ -35,19 +38,19 @@
                 };
 
                 "network" = {
-                    "format-wifi" = "{essid} ({signalStrength}%) ";
-                    "format-ethernet" = "{ipaddr}/{cidr} ";
-                    "tooltip-format" = "{ifname} via {gwaddr} ";
-                    "format-linked" = "{ifname} (No IP) ";
-                    "format-disconnected" = "Disconnected ⚠";
+                    "format-wifi" = " ({signalStrength}%)";
+                    "format-ethernet" = " {ipaddr}/{cidr}";
+                    "tooltip-format" = " {ifname} via {gwaddr}";
+                    "format-linked" = " {ifname} (No IP)";
+                    "format-disconnected" = "⚠ Disconnected";
                     "format-alt" = "{ifname}: {ipaddr}/{cidr}";
                 };
 
                 "pulseaudio" = {
-                    "format" = "{volume}% {icon} {format_source}";
-                    "format-bluetooth" = "{volume}% {icon} {format_source}";
-                    "format-bluetooth-muted" = " {icon} {format_source}";
-                    "format-muted" = " {format_source}";
+                    "format" = "{icon} {volume}%";
+                    "format-bluetooth" = "{icon}{volume}% ";
+                    "format-bluetooth-muted" = "{icon} ";
+                    "format-muted" = " ";
                     "format-source" = "{volume}% ";
                     "format-source-muted" = "";
                     "format-icons" = {
@@ -64,26 +67,25 @@
 
                 modules-left = [ "hyprland/workspaces" ];
                 modules-center = [ "clock" ];
-                modules-right = [ "pulseaudio" "battery" "temperature" ];
+                modules-right = [ "pulseaudio" "network" "battery" "clock" ];
             };
         };
         style = ''
             * {
-                border: none;
-                border-radius: 0;
+                border: 4px;
                 font-family: Victor Mono Bold, FontAwesome Bold, monospace;
                 font-size: 18px;
-                min-height: 30px;
+		min-height: 30px;
             }
 
             window#waybar {
-                background: rgba(25, 25, 25, 0.75);
+				background: rgba(${blackAsDec}, 0.9);
                 border-bottom: 0px solid rgba(100, 114, 125, 0.5);
-                color: white;
+                color: ${base05};
             }
 
             tooltip {
-                background: transparent;
+                background: rgba(${blackAsDec}, 0.9);
                 border: 1px solid rgba(100, 114, 125, 0.5);
             }
 
@@ -92,47 +94,62 @@
             }
 
             #workspaces button {
-                padding: 0 5px;
-                background: transparent;
-                color: white;
-                border-bottom: 3px solid transparent;
+                background-color: transparent;
+                color: ${base05};
+				padding: 0 0.75em;
+				margin: 0.25em;
+                border-top: 3px solid ${base05};
             }
 
+			# workspaces button.active {
+				color: ${base0B};
+			}
+
             #workspaces button.focused {
-                background: #64727D;
-                border-bottom: 3px solid white;
+                background: ${base04};
+                border-bottom: 3px solid ${base0D};
             }
 
             #clock {
+	    	padding: 0 0.75em;
                 background-color: transparent;
             }
 
             #battery {
-                background-color: #ffffff;
-                color: black;
+				padding: 0 0.75em;
+                background-color: ${base0B};
+                color: ${base00};
             }
 
             #battery.charging {
-                color: white;
-                background-color: #26A65B;
+                color: ${base00};
+                background-color: ${base0D};
             }
 
             @keyframes blink {
                 to {
-                    background-color: #ffffff;
-                    color: black;
+                    background-color: ${base05};
+                    color: ${base00};
                 }
             }
 
             #battery.warning:not(.charging) {
-                background: #f53c3c;
-                color: white;
+                background: ${base0C};
+                color: ${base05};
                 animation-name: blink;
                 animation-duration: 0.5s;
                 animation-timing-function: linear;
                 animation-iteration-count: infinite;
                 animation-direction: alternate;
             } 
+
+			#network {
+				padding: 0 0.75em;
+			}
+
+			#network.disconnected {
+				background-color: ${base08};	
+			}
         '';
     };
 
