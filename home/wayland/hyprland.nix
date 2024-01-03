@@ -3,8 +3,13 @@ with inputs;
 
 let
 	wallpaper = "~/Pictures/mountain.jpg";
+in
+{
+	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
+		"d /tmp/hypr 0755 jalen users - -"
+	];
 
-	hyperlandSettings = {
+	wayland.windowManager.hyprland = {
 		enable = true;
 		settings = {
 			monitor = "eDP-1,2256x1504@60,0x0,1";
@@ -14,16 +19,16 @@ let
 			};
 
 			decoration = {
-				rounding = 10;
+				rounding = 7;
 			};
 
 			exec-once = [
-				"mkdir /tmp/hypr"
-				#"wal -i ${wallpaper} -n"
 				"hyprpaper"
 				"waybar"
 			];
 
+			# Window swallowing... which half works.
+			# It depends on the program. Image viewers like feh seem to swallow. 
 			misc = {
 				enable_swallow = true;
 				swallow_regex = "^(kitty)$";
@@ -33,14 +38,18 @@ let
 				"windows, 1, 1, default, popin"
 			];
 
-			"$mod" = "SUPER";
-
+			# remap capslock to ctrl
 			input.kb_options = "ctrl:nocaps";
 
+			"$mod" = "SUPER";
+
+			# mouse bindings 
 			bindm = [
 				"$mod, mouse:272, movewindow"
 				"$mod Shift, mouse:272, resizewindow"
 			];
+
+			# key bindings
 			bind = [
 				# Applications
 				# "$mod, Space, exec, tofi-run"
@@ -86,11 +95,7 @@ let
 				) 10)
 			);
 		};
-	};	
-
-in
-{
-	wayland.windowManager.hyprland = hyperlandSettings;
+	};
 
 	xdg.configFile."hypr/hyprpaper.conf".text = ''
 		preload = ${wallpaper} 

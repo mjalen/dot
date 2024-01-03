@@ -10,6 +10,12 @@ with current-theme;
             window_margin_width = 10;
             cursor_shape = "block";
 
+			font_size = 12;
+			font_family = "Victor Mono";
+			bold_font = "auto";
+			italic_font = "auto";
+		    bold_italic_font = "auto"; 
+
 		    background_opacity = "0.95";
             background_blur = 10;
 

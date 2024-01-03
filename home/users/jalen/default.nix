@@ -3,7 +3,6 @@
 let
     current-theme = (import ../../../themes/oxocarbon).dark;
 	packages = with pkgs; [
-		ranger
 		gobble
 		neofetch
 		pinentry
@@ -37,6 +36,7 @@ in
 		# ../wayland/anyrun.nix
 
 		# Apps
+		../../applications/ranger.nix
 		../../applications/vscodium.nix
 		../../applications/firefox.nix 
 		../../applications/tmux.nix
