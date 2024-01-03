@@ -77,6 +77,16 @@ with inputs;
     "d /tmp/hypr 0755 jalen users -" # cleanup is done on reboot through root wipe.
   ];
 
+  # Font rendering
+  fonts = {
+	fontconfig = {
+		antialias = true;
+		cache32Bit = true;
+		hinting.enable = true;
+		hinting.autohint = true;
+	};
+  };
+
   system.stateVersion = "23.11"; 
   nix.settings.experimental-features = "nix-command flakes";
 }

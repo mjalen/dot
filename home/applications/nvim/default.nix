@@ -5,6 +5,11 @@
 		"L+ /home/jalen/.config/nvim/fnl - - - - /home/jalen/Documents/dot/home/applications/nvim/conf/fnl"
 	];
 
+	# change editor
+	programs.bash.bashrcExtra = ''
+		export EDITOR=vim
+	'';
+
 	programs.neovim = {
 		enable = true;
 		viAlias = true;
@@ -23,6 +28,7 @@
 
 			# line
 			lualine-nvim
+			indent-blankline-nvim
 			
 			# language server
 			nvim-lspconfig

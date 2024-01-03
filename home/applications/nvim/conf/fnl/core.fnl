@@ -12,7 +12,7 @@
 
 ;; Import external config.
 (require :keybinds)
-(require :lsp)
+; (require :lsp)
 
 ;; General Settings.
 (let [o vim.o]
@@ -27,7 +27,7 @@
   (set o.wildmenu true)
   (set o.wrap true)
   (set o.autoread true)
-  (set o.dir "~/tmp")
+  ;(set o.dir "~/tmp")
   (set o.hidden true)
   (set o.cc 125))
 
@@ -40,10 +40,14 @@
   (let [actions (require "telescope.actions")]
     (telescope.setup 
       {:defaults 
-       {:mappings 
+	   {:mappings 
         {:i 
          {"<esc>" actions.close}}}}))
   (telescope.load_extension "file_browser"))
+
+;; Indent Blankline
+(let [indent (require :ibl)]
+  (indent.setup))
 
 ;; Aesthetics
 ; lualine
