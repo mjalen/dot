@@ -1,11 +1,9 @@
-current-theme: { inputs, pkgs, ... }:
+{ inputs, config, pkgs, ... }:
 
-with current-theme;
 {
     programs.kitty = {
         enable = true;
-        # font = "Victor Mono"; 
-        settings = {
+        settings = with config.valhalla.theme; {
             enable_audio_bell = false;
             window_margin_width = 10;
             cursor_shape = "block";

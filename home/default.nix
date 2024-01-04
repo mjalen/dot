@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }: 
+{ self, inputs, pkgs, ... }: 
 
 let
 	sharedModules = [
@@ -7,14 +7,14 @@ let
 	];
 
 	homeImports = {
-		jalen = [./users/jalen ] ++ sharedModules;
+		jalen = [ ./users/jalen ] ++ sharedModules;
 	};
 
 	inherit (inputs.home-manager.lib) homeManagerConfiguration;
 in {
 	jalen = homeManagerConfiguration {
 		inherit pkgs;
-		extraSpecialArgs = { inherit inputs; };
+		extraSpecialArgs = { inherit inputs self; };
 		modules = homeImports.jalen;
 	}; 
 }

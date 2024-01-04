@@ -1,7 +1,6 @@
-{ inputs, pkgs, ...}: 
+{ config, inputs, pkgs, ...}: 
 
 let
-    current-theme = (import ../../../themes/oxocarbon).dark;
 	packages = with pkgs; [
 		gobble
 		neofetch
@@ -16,32 +15,36 @@ let
 		slurp
 		grim
 
+		# TODO add fonts to fonts.fonts
 		victor-mono
 		font-awesome
 
+		# pulseaudio mixer.
 		pamixer
 
+		# move to wayland/hyprland.nix
 		hyprpaper
-
 	];
 
-    withTheme = module: ((import module) current-theme);
 in
+
 {
+	# fuck these .. are ugly
     imports = [
+		# Import theme (accessed via config.valhalla.theme)
+		../../../themes/oxocarbon/dark.nix
+
 		# GUI 
 		../../wayland/hyprland.nix
-		# ((import ../../wayland/waybar.nix) current-theme)
-		(withTheme ../../wayland/waybar.nix)
-		# ../wayland/anyrun.nix
+		../../wayland/waybar.nix
 
 		# Apps
 		../../applications/ranger.nix
 		../../applications/vscodium.nix
-		../../applications/firefox.nix 
+		../../applications/firefox 
 		../../applications/tmux.nix
 		../../applications/nvim
-		(withTheme ../../applications/kitty.nix) 
+		../../applications/kitty.nix
 
 		# Other
 		../../utilities/mako.nix # notification daemon
@@ -58,8 +61,7 @@ in
 		bash = {
 			enable = true;
 			shellAliases = {
-				"get-audio" = "pamixer --get-volume-human";
-				"build-home" = "nix build .#homeConfigurations.jalen.activationPackage && result/activate"; # convenience for a common cmd string.
+				"build-home" = "nix build ~/Documents/dot#homeConfigurations.jalen.activationPackage && ~/Documents/dot/result/activate"; # convenience for a common cmd string.
 			};
 			/*bashrcExtra = ''
 
@@ -68,11 +70,12 @@ in
 		git = {
 			enable = true;
 			package = pkgs.gitAndTools.gitFull;
-				userName = "mjalen"; 
-				userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+			userName = "mjalen"; 
+			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
 			extraConfig = {
 				color.ui = "always";
 			};
 		};
 	};
 }
+

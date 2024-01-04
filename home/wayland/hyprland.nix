@@ -2,7 +2,7 @@
 with inputs;
 
 let
-	wallpaper = "~/Pictures/mountain.jpg";
+	wallpaper = "~/Pictures/gloom_troop.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.

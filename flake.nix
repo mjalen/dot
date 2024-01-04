@@ -1,15 +1,22 @@
-/* 
-Good references:
-	gvolpe/nix-config
-	kjhoerr/dotfiles
+/*
+             __
+            ( o`-
+            /  \
+            |  |
+             ^^ BP
+
+	 NixOS Config 
+		by Jalen Moore
+
+	references:
+	 - gvolpe/nix-config
+	 - kjhoerr/dotfiles
 */
 
 { 
-    description = ''
-      Jalen Moore's Nix configuration. 
-    '';
+    description = ''Jalen Moore's Nix configuration.'';
 
-    outputs = inputs:
+    outputs = { self, ... } @ inputs:
         let
             system = "x86_64-linux";
             pkgs = import inputs.nixpkgs {
@@ -18,19 +25,16 @@ Good references:
                 overlays = [ inputs.nur.overlay ];
             };
         in {
-            nixosConfigurations = import ./systems { inherit inputs pkgs; };
-            homeConfigurations = import ./home { inherit inputs pkgs; };
+            nixosConfigurations = import ./systems { inherit inputs pkgs self; };
+            homeConfigurations = import ./home { inherit inputs pkgs self; };
         };
 
     inputs = {
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-	# hardware
-	nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-
-        # flake-parts
-        # parts.url = "github:hercules-ci/flake-parts";
+		# hardware (for framework 13 - AMD 7040)
+		nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
         # anyrun program launcher
         anyrun = {
@@ -53,11 +57,5 @@ Good references:
         nur = {
             url = "github:nix-community/NUR";
         };
-
-	    # vscode server. not really sure if I need this. I believe it is for remote ssh which I do not currently use (but will in the future).
-	    vscode-server = {
-	    	url = "github:nix-community/nixos-vscode-server";
-	    	inputs.nixpkgs.follows = "nixpkgs";
-	    };
     };    
 }

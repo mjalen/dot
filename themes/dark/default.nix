@@ -1,3 +1,5 @@
+# TODO Fix this theme to properly match base16
+
 let
     # Individual colors. 
 

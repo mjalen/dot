@@ -1,9 +1,9 @@
-current-theme: { lib, pkgs, ... }: 
+{ inputs, config, pkgs, ... }: 
 
-with current-theme;
+with inputs.theme;
 {
 
-    programs.waybar = {
+    programs.waybar = with config.valhalla.theme; {
         enable = true;
         settings = {
             mainBar = {
@@ -67,7 +67,7 @@ with current-theme;
 
                 modules-left = [ "hyprland/workspaces" ];
                 modules-center = [ "clock" ];
-                modules-right = [ "pulseaudio" "network" "battery" "clock" ];
+                modules-right = [ "pulseaudio" "network" "battery" ];
             };
         };
         style = ''
