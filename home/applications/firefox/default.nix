@@ -20,6 +20,9 @@
                     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 					"extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
                     "extensions.getAddons.cache.enabled" = false;
+					"media.rdd-ffmpeg.enabled" = true;
+					"media.ffmpeg.vaapi.enabled" = true;
+					"media.navigator.mediadatadecoder_vpx_enabled" = true;
                 };
                 userChrome = builtins.readFile ./userChrome.css;
             };

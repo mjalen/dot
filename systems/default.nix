@@ -7,11 +7,11 @@ let
 	inherit (pkgs) lib;	
 
 	valhallaModules = [
-		./conf/valhalla.nix
+		./conf/valhalla
 		./hardware/valhalla.nix
 		./services/ssh.nix
 		
-		# ./services/lxc.nix # unpriviledged containers. (as opposed to nixos-containers)
+		# load from inputs
 		impermanence.nixosModules.impermanence
 	];
 in {

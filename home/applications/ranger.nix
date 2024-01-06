@@ -9,7 +9,7 @@
 	'';
 
 	programs.bash.bashrcExtra = ''
-		export VISUAL=ed
+		export VISUAL=vim
 		export PAGER=more
 	'';
 }

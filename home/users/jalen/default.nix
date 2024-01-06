@@ -11,6 +11,9 @@ let
 		acpi
 		gimp
 
+		# math stuff
+		mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+
 		# screenshot double wammy ;)
 		slurp
 		grim
@@ -35,7 +38,7 @@ in
 		../../../themes/oxocarbon/dark.nix
 
 		# GUI 
-		../../wayland/hyprland.nix
+		../../wayland/hyprland
 		../../wayland/waybar.nix
 
 		# Apps
@@ -44,9 +47,13 @@ in
 		../../applications/firefox 
 		../../applications/tmux.nix
 		../../applications/nvim
-		../../applications/kitty.nix
+		../../applications/emacs
+		../../applications/kitty
+		../../applications/ncmpcpp.nix
 
 		# Other
+		# ../../utilities/mpd.nix
+		../../utilities/tex.nix
 		../../utilities/mako.nix # notification daemon
     ];
 
@@ -57,11 +64,21 @@ in
 		inherit packages;
     };
 
+	dconf.settings = { # add to home-manager
+		"org/virt-manager/virt-manager/connections" = {
+			autoconnect = [ "qemu:///system" ];
+			uris = [ "qemu:///system" ];
+		};
+	};
+
+
     programs = {
 		bash = {
 			enable = true;
 			shellAliases = {
-				"build-home" = "nix build ~/Documents/dot#homeConfigurations.jalen.activationPackage && ~/Documents/dot/result/activate"; # convenience for a common cmd string.
+				"build-home" = let
+					hm = config.home.homeDirectory;
+				in "nix build ${hm}/Documents/dot#homeConfigurations.jalen.activationPackage && ${hm}/Documents/dot/result/activate"; # convenience for a common cmd string.
 			};
 			/*bashrcExtra = ''
 

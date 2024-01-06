@@ -1,8 +1,13 @@
-{ inputs, lib, pkgs, ... }: {
+{ config, inputs, lib, pkgs, ... }: 
+
+let
+	hm = config.home.homeDirectory;
+in
+{
 
 	# This symlink is required for my fnl config to work 
 	systemd.user.tmpfiles.rules = [
-		"L+ /home/jalen/.config/nvim/fnl - - - - /home/jalen/Documents/dot/home/applications/nvim/conf/fnl"
+		"L+ ${hm}/.config/nvim/fnl - - - - ${hm}/Documents/dot/home/applications/nvim/conf/fnl"
 	];
 
 	# change editor
@@ -77,6 +82,7 @@
 			typescript
 			markdown
 			nix
+			rust
 
 			# other	
 			nvim-web-devicons

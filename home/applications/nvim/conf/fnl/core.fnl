@@ -79,8 +79,9 @@
 ; Tree-sitter
 (let [treesitter (require "nvim-treesitter.configs")]
   (treesitter.setup 
-    {"ensure_installed" [:c :cpp :vue :javascript :html :css 
-                         :vim :lua :fennel :glsl :diff :commonlisp 
-                         :latex :typescript :markdown]
-     "sync_install" false
+    ;{"ensure_installed" [:c :cpp :vue :javascript :html :css 
+    ;                     :vim :lua :fennel :glsl :diff :commonlisp 
+    ;                     :latex :typescript :markdown]
+    ; "sync_install" false
+	{"auto_install" false
      "highlight" {:enable 1}}))

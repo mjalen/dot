@@ -1,6 +1,6 @@
 { lib, pkgs, ... }: {
 
-    # home.packages = with pkgs; [ mako ];
+    # home.packages = with pkgs; [  ];
 
     services.mako = {
         enable = true;

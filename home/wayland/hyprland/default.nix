@@ -1,8 +1,12 @@
-{ self, inputs, lib, pkgs, ... }: 
+{ self, config, inputs, lib, pkgs, ... }: 
 with inputs;
 
 let
-	wallpaper = "~/Pictures/gloom_troop.jpg";
+	hm = config.home.homeDirectory;
+	workspace-binds = import ./workspace-binds.nix;
+in
+let
+	wallpaper = "${hm}/Pictures/gloom_troop.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
@@ -70,8 +74,8 @@ in
 				"$mod Shift, Escape, exec, hyprctl dispatch exit"
 
 				# Screenshots
-				", Print, exec, slurp | grim -g - ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
-				"$mod, Print, exec, grim ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+				", Print, exec, slurp | grim -g - ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+				"$mod, Print, exec, grim ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
 
 				# Brightness
 				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
@@ -81,19 +85,7 @@ in
 				", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
 				", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
 				", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"
-			] ++ (
-				builtins.concatLists (builtins.genList (
-					x: let 
-						ws = let
-							c = (x+1) / 10;
-						     in
-						     	builtins.toString (x + 1 - (c * 10));
-					   in [
-						"$mod, ${ws}, workspace, ${toString (x+1)}"
-						"$mod SHIFT, ${ws}, movetoworkspace, ${toString (x+1)}"
-					   ]
-				) 10)
-			);
+			] ++ workspace-binds;
 		};
 	};
 
