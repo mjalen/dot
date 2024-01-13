@@ -6,15 +6,21 @@ let
 		inputs.anyrun.homeManagerModules.default
 	];
 
+	# is this the best solution? No. But I'm trying it out.
 	homeImports = {
-		jalen = [ ./users/jalen ] ++ sharedModules;
+		users = [ ./users ] ++ sharedModules ++ [
+			{
+				valhalla.users.enable = true;
+				valhalla.users.users = [ "jalen" ];
+			}
+		];
 	};
 
 	inherit (inputs.home-manager.lib) homeManagerConfiguration;
 in {
-	jalen = homeManagerConfiguration {
+	users = homeManagerConfiguration {
 		inherit pkgs;
 		extraSpecialArgs = { inherit inputs self; };
-		modules = homeImports.jalen;
+		modules = homeImports.users;
 	}; 
 }
