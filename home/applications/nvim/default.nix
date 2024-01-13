@@ -27,13 +27,18 @@ in
 			${builtins.readFile conf/init.lua}
 		'';
 
-		plugins = with pkgs.vimPlugins; with nvim-treesitter-parsers; [
+		plugins = 
+			with pkgs.vimPlugins; 
+			with nvim-treesitter-parsers; 
+			# with pkgs.nur.repos.m15a.vimExtraPlugins; # Having problems with deprecation here. 
+		[
 			# for fennel
 			hotpot-nvim
 
 			# line
 			lualine-nvim
 			indent-blankline-nvim
+			# incline-nvim
 			
 			# language server
 			nvim-lspconfig

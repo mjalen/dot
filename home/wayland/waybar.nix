@@ -18,6 +18,17 @@ with inputs.theme;
                     "on-scroll-down" = "hyprctl dispatch workspace e-1";
                 };
 
+				"hyprland/window" = {
+					"format" = "{title}";
+					"rewrite" = {
+						"(.*) — Mozilla Firefox" = "&#xf269; $1";
+						"(.*) - Spotify" = "&#xf1bc; $1";
+						"(.*) - bash" = "&#xf120 [$1]";
+						# "(.*) - ";
+					};
+					"separate-outputs" = true;
+				};
+
                 "clock" = {
                     "interval" = 60;
                     "format" = "{:%H:%M}";
@@ -38,18 +49,18 @@ with inputs.theme;
                 };
 
                 "network" = {
-                    "format-wifi" = " ({signalStrength}%)";
-                    "format-ethernet" = " {ipaddr}/{cidr}";
-                    "tooltip-format" = " {ifname} via {gwaddr}";
-                    "format-linked" = " {ifname} (No IP)";
-                    "format-disconnected" = "⚠ Disconnected";
+                    "format-wifi" = "";
+                    "format-ethernet" = "";
+                    "tooltip-format" = " {ifname} via {gwaddr}\nStrength of {signalStrength}%";
+                    "format-linked" = " ";
+                    "format-disconnected" = "⚠";
                     "format-alt" = "{ifname}: {ipaddr}/{cidr}";
                 };
 
                 "pulseaudio" = {
                     "format" = "{icon} {volume}%";
                     "format-bluetooth" = "{icon}{volume}% ";
-                    "format-bluetooth-muted" = "{icon} ";
+                    "format-bluetooth-muted" = " ";
                     "format-muted" = " ";
                     "format-source" = "{volume}% ";
                     "format-source-muted" = "";
@@ -65,65 +76,134 @@ with inputs.theme;
                     # "on-click" = "pavucontrol";
                 };
 
-                modules-left = [ "hyprland/workspaces" ];
-                modules-center = [ "clock" ];
-                modules-right = [ "pulseaudio" "network" "battery" ];
+				"mpd" = {
+					"format" = "{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})";
+					#"format-disconnected" = "Disconnected ";
+					"format-stopped" = "";
+					"interval" = 10;
+					"tooltip-format" = "<img src='/tmp/mpd_art'/>";
+					"tooltip-format-disconnected" = "Display art here....";
+				};
+
+				/*"image#album-art" = {
+					"path" = "/tmp/mpd_art";
+					"size" = 32;
+					"interval" = 5;
+					"on-click" = "mpc toggle";
+				};*/
+
+                modules-left = [ "mpd" ];
+				modules-center = [ ];
+                modules-right = [ "hyprland/window" "pulseaudio" "network" "battery" "clock" ];
             };
         };
-        style = ''
-            * {
-                border: 4px;
-                font-family: Victor Mono Bold, FontAwesome Bold, monospace;
-                font-size: 18px;
-		min-height: 30px;
-            }
 
+        style = 
+		let 
+			marginUD = "0.40em";	
+			marginLR = "0.40em";
+			opacity = "0.9";
+			padUD = "0.40em";
+			padLR = "0.85em";
+			radius = "15px";
+
+			stdBack = ''
+				background-color: rgba(${blackAsDec}, ${opacity});
+			'';
+			moduleCSS = ''
+				padding: ${padUD} ${padLR};
+				margin: ${marginUD} ${marginLR};
+				border-radius: ${radius};
+				border: 1em;
+				box-shadow: 0.2em 0.3em 0 rgba(${blackAsDec}, 0.3);
+			'';
+		in ''
             window#waybar {
-				background: rgba(${blackAsDec}, 0.9);
-                border-bottom: 0px solid rgba(100, 114, 125, 0.5);
+				font-family: Victor Mono, FontAwesome, monospace;
+				font-size: 18px;
+				padding: 0 0.7em;
+				background: rgba(${blackAsDec}, 0.0);
                 color: ${base05};
             }
 
+			#window {
+				font-style: italic;
+                color: ${base05};
+				${moduleCSS}
+				${stdBack}
+			}
+
+			window#waybar.empty #window  {
+				background: transparent;
+				box-shadow: -0.3em 0.4em 0 rgba(${blackAsDec}, 0.0);
+			}
+
             tooltip {
-                background: rgba(${blackAsDec}, 0.9);
-                border: 1px solid rgba(100, 114, 125, 0.5);
+                background: rgba(${blackAsDec}, 1.0);
+                border: 1px solid rgba(100, 114, 125, 0.9);
             }
 
-            tooltip label {
-                color: white;
+            tooltip mpd {
+				background-color: rgba(${blackAsDec}, 1.0);
+				background-image: url("/tmp/mpd_art");
             }
 
             #workspaces button {
-                background-color: transparent;
+                background-color: rgba(${blackAsDec}, 0.9);
                 color: ${base05};
-				padding: 0 0.75em;
-				margin: 0.25em;
                 border-top: 3px solid ${base05};
+				${moduleCSS}
+				${stdBack}
             }
 
-			# workspaces button.active {
+			#workspaces button.active {
 				color: ${base0B};
+				${moduleCSS}
+				${stdBack}
 			}
 
             #workspaces button.focused {
+				color: ${base00};
                 background: ${base04};
                 border-bottom: 3px solid ${base0D};
+				${moduleCSS}
+				${stdBack}
             }
+
+			#mpd {
+				font-style: italic;
+				${moduleCSS}
+				${stdBack}
+			}
+
+			#mpd.stopped {
+				background-color: transparent;
+			}
 
             #clock {
-	    	padding: 0 0.75em;
-                background-color: transparent;
+				font-weight: bold; 
+				${moduleCSS}
+				${stdBack}
             }
 
+			#pulseaudio {
+				font-weight: bold;
+				${moduleCSS}
+				${stdBack}
+			}
+
             #battery {
-				padding: 0 0.75em;
+				font-weight: bold;
                 background-color: ${base0B};
                 color: ${base00};
+				${moduleCSS}
             }
 
             #battery.charging {
+				font-weight: bold;
                 color: ${base00};
                 background-color: ${base0D};
+				${moduleCSS}
             }
 
             @keyframes blink {
@@ -141,14 +221,20 @@ with inputs.theme;
                 animation-timing-function: linear;
                 animation-iteration-count: infinite;
                 animation-direction: alternate;
+				${moduleCSS}
             } 
 
 			#network {
-				padding: 0 0.75em;
+				font-weight: bold;
+				${moduleCSS}
+				${stdBack}
 			}
 
 			#network.disconnected {
+				font-weight: bold;
+				color: ${base00};
 				background-color: ${base08};	
+				${moduleCSS}
 			}
         '';
     };

@@ -4,9 +4,7 @@ with inputs;
 let
 	hm = config.home.homeDirectory;
 	workspace-binds = import ./workspace-binds.nix;
-in
-let
-	wallpaper = "${hm}/Pictures/gloom_troop.jpg";
+	wallpaper = "${hm}/Pictures/red-leaves.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
@@ -28,6 +26,8 @@ in
 
 			exec-once = [
 				"hyprpaper"
+				#config.programs.bash.shellAliases."notify-mpd"
+				#"notify-mpd" # custom alias that listens to mpd and notifies with new songs.
 				"waybar"
 			];
 

@@ -30,6 +30,10 @@ in
 	# net manager
 	networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
+	# bluetooth
+	hardware.bluetooth.enable = true;
+	hardware.bluetooth.powerOnBoot = true;
+
 	services.automatic-timezoned.enable = true;  
 
 	# Enable sound.

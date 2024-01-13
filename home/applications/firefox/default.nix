@@ -1,5 +1,6 @@
-{ inputs, pkgs, ... }: 
+{ config, pkgs, ... }: 
 
+with config.valhalla.theme;
 {
     # firefox stuffs
     programs.firefox = {
@@ -23,6 +24,18 @@
 					"media.rdd-ffmpeg.enabled" = true;
 					"media.ffmpeg.vaapi.enabled" = true;
 					"media.navigator.mediadatadecoder_vpx_enabled" = true;
+					"gfx.webrender.all" = true;
+
+					"browser.startup.blankWindow" = true;
+					"browser.sessionstore.resume_session_once" = true;
+
+					# Why would I want this?
+					"toolkit.telemetry.archive.enabled" = false;
+					"toolkit.telemetry.enabled" = false;
+					"toolkit.telemetry.rejected" = true;
+					"toolkit.telemetry.server" = "<clear value>";
+					"toolkit.telemetry.unified" = false;
+					"toolkit.telemetry.unifiedIsOptIn" = false;
                 };
                 userChrome = builtins.readFile ./userChrome.css;
             };

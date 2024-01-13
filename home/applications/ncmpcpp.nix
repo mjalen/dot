@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-	imports = [ ../utilities/mpd.nix ];
+	imports = [ ../utilities/mpd ];
 	programs.ncmpcpp = {
 		enable = true;
 		mpdMusicDir = config.services.mpd.musicDirectory;
@@ -11,11 +11,12 @@
 			visualizer_data_source = "/tmp/mpd.fifo";
 			visualizer_output_name = "my_fifo";
 			visualizer_in_stereo = "yes";
-			visualizer_type = "spectrum";
+			visualizer_type = "wave";
 			visualizer_look = "+|";
 			# Fix libnotify install (for some reason notify-send is not in PATH).
+			# art-path="$(${config.programs.bash.shellAliases."mpd-art-path"})"
 			/*execute_on_song_change = ''
-				nix-shell -p libnotify --run "notify-send `Now Playing` `$(mpc --format '%title% \n%artist% - %album%' current)`"
+				notify-send `Now Playing` "$(mpc --format '%title% \n%artist% - %album%' current)"
 			'';*/
 		};
 	};

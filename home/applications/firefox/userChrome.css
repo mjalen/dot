@@ -1,3 +1,12 @@
+/*
+ * WARNING: This is not a COMPLETE userChrome.css file.
+ *			This file will not work without my custom nix theme variables.
+ *			This file can _only_ be parsed via nix using builtins.readFile.
+ *			The true userChrome.css is created and symlinked into my profile directory.
+ *			
+ * Use at your own risk....
+ */
+
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 #TabsToolbar .titlebar-spacer[type="post-tabs"] {
@@ -46,3 +55,26 @@ toolbox#navigator-toolbox > toolbar#nav-bar.browser-toolbar{ animation: none; }
 #navigator-toolbox:hover #TabsToolbar{ animation: slidein ease-out 48ms 1 }
 #TabsToolbar > .titlebar-buttonbox-container{ visibility: visible }
 #navigator-toolbox:not(:-moz-lwtheme){ background-color: -moz-dialog }
+
+/*@-moz-document url("about:newtab"), url("about:home") {
+	body { background: transparent !important;}
+}*/
+
+window, #toolbar-menubar, #TabsToolbar, #PersonalToolbar, #navigator-toolbox,#sidebar-box, .titlebar-spacer,
+#nav-bar, .tab-background[selected="true"], {
+	background-color: rgba(${blackAsDec}, 0.4) !important;
+	-moz-appearance: none !important;
+	background-image: none !important;
+}
+
+/*window, #nav-bar{
+	background-color: rgba(${blackAsDec}, 0.3) !important;
+	-moz-appearance: none !important;
+	background-image: none !important;
+}
+
+.tab-background[selected="true"] {
+	background: rgba(${blackAsDec, 0.3) !important;
+	-moz-appearance: none !important;
+	background-image: none !important;
+}*/
