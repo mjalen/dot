@@ -1,7 +1,13 @@
 { config, inputs, pkgs, ...}: 
 
 let
+	uniqueScripts = (import ../../scripts) { inherit config pkgs; };
+
 	packages = with pkgs; [
+		# my scripts
+		uniqueScripts
+
+		# misc
 		gobble
 		neofetch
 		pinentry
@@ -39,6 +45,7 @@ let
 
 		# move to wayland/hyprland.nix
 		hyprpaper
+
 	];
 
 in
@@ -47,7 +54,7 @@ in
 	# fuck these .. are ugly
     imports = [
 		# Import theme (accessed via config.valhalla.theme)
-		../../../themes/oxocarbon/dark.nix
+		../../../themes/oxocarbon
 
 		# GUI 
 		../../wayland/hyprland
@@ -55,13 +62,13 @@ in
 
 		# Apps
 		../../applications/ranger.nix
-		../../applications/vscodium.nix
 		../../applications/firefox 
 		../../applications/tmux.nix
-		../../applications/nvim
-		../../applications/emacs
 		../../applications/kitty
 		../../applications/ncmpcpp.nix
+
+		# Editors
+		../../applications/nvim
 
 		# Other
 		# ../../utilities/mpd.nix
@@ -87,31 +94,6 @@ in
     programs = {
 		bash = {
 			enable = true;
-			shellAliases = {
-				"build-home" = let
-					hm = config.home.homeDirectory;
-				in "nix build ${hm}/Documents/dot#homeConfigurations.jalen.activationPackage && ${hm}/Documents/dot/result/activate"; # convenience for a common cmd string.
-
-				# currently this script has a bug for albums/artsists with '/' in their name.
-				"mpd-art-path" = let
-					md = config.services.mpd.musicDirectory;	
-				in ''cover="${md}/$(mpc current -f '%artist% - %album%')/cover"; \
-					coverPNG="$(echo $cover).png"; \
-					coverJPG="$(echo $cover).jpg"; \
-					if [[ -e $coverPNG ]]; then \
-						echo $coverPNG; \
-					else \
-						echo $coverJPG; \
-					fi
-				'';
-
-				"notify-mpd" = ''
-					while "true"; do
-						notify-send `Now Playing` "$(mpc current --wait -f '%artist%\n%title%')" -i "$(mpd-art-path)" -t 3000
-						cp "$(mpd-art-path)" /tmp/mpd_art
-					done
-				'';
-			};
 			/*bashrcExtra = ''
 
 			'';*/

@@ -11,8 +11,6 @@
 	];
 
 	valhalla.theme = {
-		blackAsDec = "22, 22, 22";
-
 		# black
 		base00 = "#161616";
 		base01 = "#262626"; 

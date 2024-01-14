@@ -2,12 +2,26 @@
 
 let
 	hm = config.home.homeDirectory;
+
+	# copy nvim configuration to store.
+	nvim-config = pkgs.stdenv.mkDerivation {
+		name = "nvim config";
+		src = ./conf;
+		buildInputs = with pkgs; [ coreutils ];
+		
+		buildPhase = "";
+		
+		installPhase = ''
+			mkdir -p $out
+			cp -r * $out/.
+		'';
+	};
 in
 {
-
 	# This symlink is required for my fnl config to work 
+	# I am symlinking my xdg config to the copied config files.
 	systemd.user.tmpfiles.rules = [
-		"L+ ${hm}/.config/nvim/fnl - - - - ${hm}/Documents/dot/home/applications/nvim/conf/fnl"
+		"L+ ${hm}/.config/nvim/ - - - - ${nvim-config}"
 	];
 
 	# change editor
@@ -22,10 +36,6 @@ in
 
 		# my neovim config is done nearly exclusively in Fennel
 		# so there is a simple lua script to use as a gateway.
-		extraConfig = ''
-			lua << EOF
-			${builtins.readFile conf/init.lua}
-		'';
 
 		plugins = 
 			with pkgs.vimPlugins; 

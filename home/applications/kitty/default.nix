@@ -3,7 +3,7 @@
 {
     programs.kitty = {
         enable = true;
-        settings = with config.valhalla.theme; {
+        settings = with config.valhalla.theme.dark; {
             enable_audio_bell = false;
             window_margin_width = 10;
             cursor_shape = "block";

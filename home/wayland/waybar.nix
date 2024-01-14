@@ -3,7 +3,7 @@
 with inputs.theme;
 {
 
-    programs.waybar = with config.valhalla.theme; {
+    programs.waybar = with config.valhalla.theme.dark; {
         enable = true;
         settings = {
             mainBar = {
@@ -98,7 +98,7 @@ with inputs.theme;
             };
         };
 
-        style = 
+        style = with config.valhalla.theme; 
 		let 
 			marginUD = "0.40em";	
 			marginLR = "0.40em";
@@ -108,21 +108,21 @@ with inputs.theme;
 			radius = "15px";
 
 			stdBack = ''
-				background-color: rgba(${blackAsDec}, ${opacity});
+				background-color: ${toRGBA base00 opacity};
 			'';
 			moduleCSS = ''
 				padding: ${padUD} ${padLR};
 				margin: ${marginUD} ${marginLR};
 				border-radius: ${radius};
 				border: 1em;
-				box-shadow: 0.2em 0.3em 0 rgba(${blackAsDec}, 0.3);
+				box-shadow: 0.2em 0.3em 0 ${toRGBA base00 0.0};
 			'';
 		in ''
             window#waybar {
 				font-family: Victor Mono, FontAwesome, monospace;
 				font-size: 18px;
 				padding: 0 0.7em;
-				background: rgba(${blackAsDec}, 0.0);
+				background: ${config};
                 color: ${base05};
             }
 
@@ -135,21 +135,21 @@ with inputs.theme;
 
 			window#waybar.empty #window  {
 				background: transparent;
-				box-shadow: -0.3em 0.4em 0 rgba(${blackAsDec}, 0.0);
+				box-shadow: -0.3em 0.4em 0 ${toRGBA base00 0.0};
 			}
 
             tooltip {
-                background: rgba(${blackAsDec}, 1.0);
+                background: ${toRGBA base00 1.0};
                 border: 1px solid rgba(100, 114, 125, 0.9);
             }
 
             tooltip mpd {
-				background-color: rgba(${blackAsDec}, 1.0);
+				background-color: ${toRGBA base00 1.0};
 				background-image: url("/tmp/mpd_art");
             }
 
             #workspaces button {
-                background-color: rgba(${blackAsDec}, 0.9);
+                background-color: ${toRGBA base00 0.9};
                 color: ${base05};
                 border-top: 3px solid ${base05};
 				${moduleCSS}

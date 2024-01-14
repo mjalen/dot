@@ -1,14 +1,11 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-
 let
 	cfg = config.valhalla.theme;
-in
-{
-	options.valhalla.theme = {
-		blackAsDec = mkOption { type = types.str; };
-
+	template = {
+		scheme = mkOption { type = types.str; };
+		author = mkOption { type = types.str; };
 		base00 = mkOption { type = types.str; };
 		base01 = mkOption { type = types.str; };
 		base02 = mkOption { type = types.str; };
@@ -25,7 +22,18 @@ in
 		base0D = mkOption { type = types.str; };
 		base0E = mkOption { type = types.str; };
 		base0F = mkOption { type = types.str; };
-	
 	};
-	
+in
+{
+	options.valhalla.theme.light = template; 
+	options.valhalla.theme.dark = template;
+
+
+	config.valhalla.theme.toRGB = with builtins; (
+		rgb: "rgb(${substring 0 2 rgb}, ${substring 2 2 rgb}, ${substring 4 2 rgb})"
+	);
+	config.valhalla.theme.toRGBA = with builtins; (
+		rgb: a: "rgba(${substring 0 2 rgb}, ${substring 2 2 rgb}, ${substring 4 2 rgb}, ${a})"
+	);
+
 }
