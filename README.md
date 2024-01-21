@@ -76,44 +76,22 @@ cd /mnt/persist
 git clone https://github.com/mjalen/dot
 
 cd /mnt/persist/dot
-blkid | grep "/dev/<hard-drive>1" # note the PARTUUID
-blkid | grep "/dev/<usb>2" # note the PARTUUID
-blkid | grep "/dev/<usb>1" # note the 8 digit UUID (NOT A PARTUUID!)
-blkid | grep "/dev/mapper/crypted" # note the UUID (NOT A PARTUUID!)
+blkid | grep "/dev/<hard-drive>1" # note the PARTUUID as <encryptedPARTUUID>
+blkid | grep "/dev/<usb>2" # note the PARTUUID as <headerPARTUUID>
+blkid | grep "/dev/<usb>1" # note the 8 digit UUID as <bootUUID>
+blkid | grep "/dev/mapper/crypted" # note the UUID as <unencryptedUUID>
 ```
 
-In the hardware file `/mnt/persist/dot/systems/hardware/valhalla.nix`, replace the btrfs partition UUID:
+In the hardware file `/mnt/persist/dot/systems/config.nix`, update the PARTUUIDs and UUIDs are they are labeled.
 
 ``` nix
-# line 7 ... 
-let 
-    primary_btrfs = "/dev/disk/by-uuid/<dev-mapper-crypted-uuid>";
-in 
-# ... 
-```
-
-Replace the encrypted drive and header PARTUUIDs:
-
-``` nix
-# line 27 ...
-boot.initrd.luks.devices = {
-    crypted = {
-        device = "/dev/disk/by-partuuid/<hard-drive-1-part-uuid>";
-        header = "/dev/disk/by-partuuid/<usb-2-part-uuid>";
-        allowDiscards = true;
-        preLVM = true;
-    };
-};
-# ...
-```
-
-Replace the boot UUID:
-
-``` nix
-# line 49 ...
-fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/<usb-1-uuid>";
-    fsType = "vfat";
+# line 8 ...
+valhalla.hardware = {
+    enabled = true;
+    encryptedPARTUUID = "..."; # insert the corresponding values as strings.
+    headerPARTUUID = "..."; # copy _only_ the hex ids and _not_ the full disk path.
+    bootUUID = "...";
+    unencryptedUUID = "...";
 };
 # ...
 ```
