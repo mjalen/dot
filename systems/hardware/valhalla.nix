@@ -14,10 +14,10 @@ in
 
     options.valhalla.hardware = {
 		enabled = mkOption { type = types.bool; };
-		encryptedPARTUUID = mkOption { type = types.string; };
-		unencryptedUUID = mkOption { type = types.string; }; # 534cebad-1be2-4bdb-982d-835da3f6240a
-		bootUUID = mkOption { type = types.string; };
-		headerPARTUUID = mkOption { type = types.string; };
+		encryptedPARTUUID = mkOption { type = types.str; };
+		unencryptedUUID = mkOption { type = types.str; }; # 534cebad-1be2-4bdb-982d-835da3f6240a
+		bootUUID = mkOption { type = types.str; };
+		headerPARTUUID = mkOption { type = types.str; };
     };
 
 	config = mkIf cfg.enabled { 
