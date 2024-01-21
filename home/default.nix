@@ -3,7 +3,6 @@
 let
 	sharedModules = [
 		inputs.impermanence.nixosModules.home-manager.impermanence
-		inputs.anyrun.homeManagerModules.default
 	];
 
 	homeImports = {

@@ -4,7 +4,7 @@ with inputs;
 let
 	hm = config.home.homeDirectory;
 	workspace-binds = import ./workspace-binds.nix;
-	wallpaper = "${hm}/Pictures/red-leaves.jpg";
+	wallpaper = "${hm}/Pictures/beach.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
@@ -36,6 +36,7 @@ in
 			misc = {
 				enable_swallow = true;
 				swallow_regex = "^(kitty)$";
+				disable_hyprland_logo = true; # sorry hypr-chan :(
 			};
 
 			animation = [

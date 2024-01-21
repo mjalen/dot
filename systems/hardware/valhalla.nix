@@ -3,63 +3,80 @@
 # to /etc/nixos/configuration.nix instead.
 { config, lib, pkgs, modulesPath, ... }:
 
+let
+	primary_btrfs = "/dev/disk/by-uuid/534cebad-1be2-4bdb-982d-835da3f6240a";
+in
 {
   imports =
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" ];
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/244dbecc-4bc1-446c-a8c7-087f674c1c05";
+    { device = primary_btrfs;
       fsType = "btrfs";
       options = [ "subvol=root" ];
-      neededForBoot = true;
     };
 
-  boot.initrd.luks.devices."root".device = "/dev/disk/by-uuid/0daec931-f957-4601-a462-e2b5180dedbc";
+  # boot.initrd.luks.devices."crypted".device = "/dev/nvme0n1p1";
+  # luks boot info
+  boot.initrd.luks.devices = {
+	crypted = {
+		device = "/dev/disk/by-partuuid/9c41d5e1-8b1f-42cb-8bdc-8edd51973791";
+		header = "/dev/disk/by-partuuid/23a9e2b8-d901-411a-a5f9-ea893072a5f4";
+		allowDiscards = true;
+		preLVM = true;
+	};
+  };
 
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-          mkdir /btrfs_tmp
-	  mount /dev/disk/by-uuid/244dbecc-4bc1-446c-a8c7-087f674c1c05 /btrfs_tmp
-          if [[ -e /btrfs_tmp/root ]]; then
-              mkdir -p /btrfs_tmp/old_roots
-              timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
-              mv /btrfs_tmp/root "/btrfs_tmp/old_roots/$timestamp"
-          fi
-
-          delete_subvolume_recursively() {
-              IFS=$'\n'
-              for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
-                  delete_subvolume_recursively "/btrfs_tmp/$i"
-              done
-              btrfs subvolume delete "$1"
-          }
-
-          for i in $(find /btrfs_tmp/old_roots/ -maxdepth 1 -mtime +30); do
-              delete_subvolume_recursively "$i"
-          done
-
-          btrfs subvolume create /btrfs_tmp/root
-          umount /btrfs_tmp
-        '';
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/D7BC-BC12";
-      fsType = "vfat";
+  fileSystems."/persist" =
+    { device = primary_btrfs;
+      fsType = "btrfs";
+      neededForBoot = true;
+      options = [ "subvol=persist" ];
     };
 
   fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/244dbecc-4bc1-446c-a8c7-087f674c1c05";
+    { device = primary_btrfs;
       fsType = "btrfs";
-      options = [ "defaults" "compress-force=zstd" "noatime" "ssd" "subvol=nix" ];
-      neededForBoot = true;
+      options = [ "subvol=nix" ];
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/9119-329E";
+      fsType = "vfat";
     };
 
   swapDevices = [ ];
+
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    mkdir /btrfs_tmp
+    mount ${primary_btrfs} /btrfs_tmp
+    if [[ -e /btrfs_tmp/root ]]; then
+        mkdir -p /btrfs_tmp/backups
+        timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
+        mv /btrfs_tmp/root "/btrfs_tmp/backups/$timestamp"
+    fi
+
+    delete_subvolume_recursively() {
+        IFS=$'\n'
+        for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
+            delete_subvolume_recursively "/btrfs_tmp/$i"
+        done
+        btrfs subvolume delete "$1"
+    }
+
+    for i in $(find /btrfs_tmp/backups/ -maxdepth 1 -mtime +30); do
+        delete_subvolume_recursively "$i"
+    done
+
+    btrfs subvolume create /btrfs_tmp/root
+    umount /btrfs_tmp
+  '';
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
