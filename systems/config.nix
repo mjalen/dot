@@ -5,6 +5,8 @@
 		./services/ssh.nix
 	];
 
+	# DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!
+	# See installation guide in README on how to derive the UUIDs.
 	valhalla.hardware = {
 		enabled = true;
 		encryptedPARTUUID = "9c41d5e1-8b1f-42cb-8bdc-8edd51973791";

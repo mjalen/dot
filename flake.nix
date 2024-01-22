@@ -7,10 +7,6 @@
 
 	 NixOS Config 
 		by Jalen Moore
-
-	references:
-	 - gvolpe/nix-config
-	 - kjhoerr/dotfiles
 */
 
 { 
@@ -35,19 +31,19 @@
         # nixpkgs.
         nixpkgs.url = "github:NixOS/nixpkgs";
 
-	# hardware (for framework 13 - AMD 7040)
-	nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+		# hardware (for framework 13 - AMD 7040)
+		nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-        # home-manager for easier user config.
-        home-manager = {
-            url = "github:nix-community/home-manager";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
+		# home-manager for easier user config.
+		home-manager = {
+			url = "github:nix-community/home-manager";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 
-	# impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
-	impermanence = {
-	    url = "github:nix-community/impermanence";
-	};
+		# impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
+		impermanence = {
+			url = "github:nix-community/impermanence";
+		};
 
         # nur
         nur = {
