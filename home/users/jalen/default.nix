@@ -19,9 +19,10 @@ let
 		libnotify
 		mpc-cli
 		ripgrep
+		discord
+		glow
+		zathura
 
-		# spotify 
-		# spotify
 
 		# math stuff
 		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
@@ -105,6 +106,9 @@ in
 			extraConfig = {
 				color.ui = "always";
 			};
+		};
+		ssh = {
+			enable = true;
 		};
 	};
 }
