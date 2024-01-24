@@ -11,6 +11,7 @@ in
   imports = [
 	inputs.nixos-hardware.nixosModules.framework-13-7040-amd
 	./persist.nix	
+	./pipewire.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

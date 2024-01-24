@@ -85,3 +85,7 @@
     ; "sync_install" false
 	{"auto_install" false
      "highlight" {:enable 1}}))
+
+; glow 
+(let [glow (require "glow")]
+  (glow.setup))
