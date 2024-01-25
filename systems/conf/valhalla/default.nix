@@ -12,6 +12,7 @@ in
 	inputs.nixos-hardware.nixosModules.framework-13-7040-amd
 	./persist.nix	
 	./pipewire.nix
+	./virt-manager.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
