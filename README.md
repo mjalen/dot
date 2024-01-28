@@ -21,9 +21,10 @@ parted /dev/<hard-drive> -- mklabel gpt
 parted /dev/<hard-drive> -- mkpart primary 0% 100% # Reserve the entire hard drive for storage (not boot). 
 
 parted /dev/<usb> -- mklabel gpt
-parted /dev/<usb> -- mkpart ESP 1MB 512MB # boot partition
-parted /dev/<usb> -- mkpart primary1 512MB 544MB # where the luks header will reside
-parted /dev/<usb> -- mkpart primary2 544MB 100% # rest of the usb for storage. format as desired
+parted /dev/<usb> -- mkpart ESP 1MB 512MB            # boot partition
+parted /dev/<usb> -- mkpart primary1 512MB 544MB     # where the luks header will reside
+parted /dev/<usb> -- mkpart primary2 544MB 100%      # rest of the usb for storage. format as desired
+parted /dev/<usb> -- set 1 esp on
 ```
 
 The partition scheme should be setup now. To encrypt the hard-drive and extract the header to the usb drive, run:
@@ -37,7 +38,7 @@ Now we can format the necessary partitions.
 
 ``` sh
 mkfs.fat -F 32 -n boot /dev/<usb>1
-mkfs.btrfs /dev/<hard-drive>1
+mkfs.btrfs /dev/mapper/crypted
 ```
 
 Now we can create our btrfs subvolumes.
@@ -66,49 +67,47 @@ mount /dev/mapper/crypted -o compress-force=zstd,noatime,ssd,subvol=persist /mnt
 mount /dev/<usb>1 /mnt/boot
 ```
 
-Now, we must either generate a config with `nixos-generate-config --root /mnt` or use flakes. I have done this the more annoying way by generating and replacing the config with the flake later. The flake option is the better one, but from here on out I am writting _untested_ instructions. I know it is non-standard, but I clone this repo to `/mnt/persist/dot` so I make sure any changes I make are not lost. This is a bit goofy, but I believe this is slightly "simpler" than generating a new hardware configuration:
-
-*NOTE*: The following instructions have not been tested for re-producibilty. They are simply a _theoretically_ easier method of achieving my setup.
+We do NOT need to run `nixos-generate-config --root /mnt`. We will use the config provided by this repo/flake by editing the UUIDS for each block device. This sounds scary but I have added module options to simplify this process. This is a bit goofy, but I believe this is slightly "simpler" than generating a new hardware configuration and manually changing everything to appear like the flake system hardware configuration.
 
 ``` sh
-nix-shell -p git # only if git is not present
+nix-shell -p git # only if git is not present. The live iso has git pre-installed.
 cd /mnt/persist
-git clone https://github.com/mjalen/dot
+git clone https://github.com/mjalen/dot # this is read-only for https, you will not be able to push 
 
 cd /mnt/persist/dot
-blkid | grep "/dev/<hard-drive>1" # note the PARTUUID as <encryptedPARTUUID>
-blkid | grep "/dev/<usb>2" # note the PARTUUID as <headerPARTUUID>
-blkid | grep "/dev/<usb>1" # note the 8 digit UUID as <bootUUID>
-blkid | grep "/dev/mapper/crypted" # note the UUID as <unencryptedUUID>
+lsblk --output NAME,UUID,PARTUUID
 ```
 
-In the hardware file `/mnt/persist/dot/systems/config.nix`, update the PARTUUIDs and UUIDs are they are labeled.
+In the hardware file `/mnt/persist/dot/systems/config.nix`, update the PARTUUIDs and UUIDs.
 
 ``` nix
 # line 8 ...
 valhalla.hardware = {
     enabled = true;
-    encryptedPARTUUID = "..."; # insert the corresponding values as strings.
-    headerPARTUUID = "..."; # copy _only_ the hex ids and _not_ the full disk path.
-    bootUUID = "...";
-    unencryptedUUID = "...";
+    encryptedPARTUUID = "..."; # /dev/<hard-drive>1 -> PARTUUID 
+    headerPARTUUID = "..."; # /dev/<usb>2 -> PARTUUID
+    bootUUID = "..."; # /dev/<usb>1 -> UUID
+    unencryptedUUID = "..."; # /dev/mapper/crypted -> UUID
 };
 # ...
 ```
 
-The last thing that is needed are user passwords. Simply run `mkdir -p /mnt/persist/psk` followed by
+The last thing that is needed are user passwords, so we don't have to redefine them on each reboot.
 
 ``` sh
+mkdir -p /mnt/persist/psk
 cd /mnt/persist/psk
 mkpasswd > root
-mkpasswd > jalen # or whatever your user is named (if you edited the flake)
+mkpasswd > jalen # only change the name if you edited the user configuration
 ```
 
-Then assuming flakes have been enabled (instructions TODO), from the flake directory `/mnt/persist/dot` run
+Then, from the flake directory `/mnt/persist/dot` (or where-ever you cloned this repo) run
 
 ``` sh
-nixos-install --flake . --impure
+nixos-install --impure --flake .#valhalla 
 ```
+
+This command should take a while because the operating system is installing. The command will ask to define a root password at the end; We declared one in a file and through the flake, so it really doesn't matter what you enter here. To complete setup, it is safer to run `umount /mnt/boot` before `reboot`.
 
 ## Tasks 
 
@@ -118,6 +117,11 @@ nixos-install --flake . --impure
 - [ ] Remove hard-coded relative file/directory paths. Add configue options to define paths such as `/nix/persist`.
 - [ ] Add install instructions to README.md. (Depends on root `default.nix`)
 - [ ] Over-all file organization and make it consistent.
+
+### Documentation
+
+- [ ] Add luks header backup guide.
+- [ ] Add usb recovery guide using the luks header backup to access the encrypted btrfs block device and recreated the usb boot drive. 
 
 ### Aesthetic
 
