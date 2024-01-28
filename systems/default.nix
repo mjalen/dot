@@ -7,9 +7,12 @@ let
 	inherit (pkgs) lib;	
 
 	valhallaModules = [
-		./conf/valhalla
-		./hardware/valhalla.nix
-		./services/ssh.nix
+		# ./conf/valhalla
+		# ./hardware/valhalla.nix
+		# ./services/ssh.nix
+
+		# moved to a config file so it is (hopefully) easier to install on new systems with some quick tweaks.
+		./config.nix 
 		
 		# load from inputs
 		impermanence.nixosModules.impermanence

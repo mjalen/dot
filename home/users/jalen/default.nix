@@ -8,7 +8,7 @@ let
 		uniqueScripts
 
 		# misc
-		gobble
+		# gobble
 		neofetch
 		pinentry
 		pinentry-curses
@@ -19,12 +19,13 @@ let
 		libnotify
 		mpc-cli
 		ripgrep
+		discord
+		glow
+		zathura
 
-		# spotify 
-		spotify
 
 		# math stuff
-		mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
 
 		# screenshot double wammy ;)
 		slurp
@@ -41,11 +42,10 @@ let
 		pamixer
 
 		# youtube
-		youtube-tui
+		# youtube-tui
 
 		# move to wayland/hyprland.nix
 		hyprpaper
-
 	];
 
 in
@@ -72,7 +72,7 @@ in
 
 		# Other
 		# ../../utilities/mpd.nix
-		../../utilities/tex.nix
+		# ../../utilities/tex.nix
 		../../utilities/mako.nix # notification daemon
     ];
 
@@ -106,6 +106,9 @@ in
 			extraConfig = {
 				color.ui = "always";
 			};
+		};
+		ssh = {
+			enable = true;
 		};
 	};
 }

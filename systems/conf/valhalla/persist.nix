@@ -39,6 +39,7 @@ in
 			files = [
 				"/etc/nix/id_rsa"
 				"/etc/machine-id"
+				"/etc/systemd/resolved.conf" # using nextdns
 			];
 			users.jalen = {
 				directories = [

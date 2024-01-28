@@ -79,8 +79,12 @@ in
 			# TODO lisp
 			# add Olical/aniseed and conjure
 
+			# glow
+			glow-nvim
+
 			# tree sitter
 			nvim-treesitter
+			cmp-treesitter
 			c
 			cpp
 			vue
@@ -96,6 +100,7 @@ in
 			latex
 			typescript
 			markdown
+			markdown_inline
 			nix
 			rust
 
