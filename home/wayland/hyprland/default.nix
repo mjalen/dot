@@ -4,7 +4,7 @@ with inputs;
 let
 	hm = config.home.homeDirectory;
 	workspace-binds = import ./workspace-binds.nix;
-	wallpaper = "${hm}/Pictures/beach.jpg";
+	wallpaper = "${hm}/Pictures/black-beach.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
