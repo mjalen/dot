@@ -78,7 +78,7 @@ cd /mnt/persist/dot
 lsblk --output NAME,UUID,PARTUUID
 ```
 
-In the hardware file `/mnt/persist/dot/systems/config.nix`, update the PARTUUIDs and UUIDs.
+In the hardware file `/mnt/persist/dot/systems/valhalla/default.nix`, update the PARTUUIDs and UUIDs.
 
 ``` nix
 # line 8 ...
