@@ -11,6 +11,8 @@ in
 		"d /tmp/hypr 0755 jalen users - -"
 	];
 
+	home.packages = with pkgs; [ hyprpaper ];
+
 	wayland.windowManager.hyprland = {
 		enable = true;
 		settings = {
@@ -60,6 +62,7 @@ in
 				# "$mod, Space, exec, tofi-run"
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
+				"$mod, E, exec, emacsclient -c"
 
 				# Move window
 				"$mod, H, exec, hyprctl dispatch movewindow l"

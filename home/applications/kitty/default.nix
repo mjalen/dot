@@ -17,6 +17,8 @@
 		    background_opacity = "0.95";
             background_blur = 10;
 
+			confirm_os_window_close = 0;
+
             # color map 
 
 			# Base16 {{scheme-name}} - kitty color config

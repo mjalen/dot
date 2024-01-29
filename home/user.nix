@@ -1,7 +1,8 @@
 { config, inputs, pkgs, ...}: 
 
 let
-	uniqueScripts = (import ../../scripts) { inherit config pkgs; };
+	username = "jalen";
+	uniqueScripts = (import ./scripts) { inherit config pkgs; };
 
 	packages = with pkgs; [
 		# my scripts
@@ -23,7 +24,6 @@ let
 		glow
 		zathura
 
-
 		# math stuff
 		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
 
@@ -40,12 +40,6 @@ let
 
 		# pulseaudio mixer.
 		pamixer
-
-		# youtube
-		# youtube-tui
-
-		# move to wayland/hyprland.nix
-		hyprpaper
 	];
 
 in
@@ -54,33 +48,32 @@ in
 	# fuck these .. are ugly
     imports = [
 		# Import theme (accessed via config.valhalla.theme)
-		../../../themes/oxocarbon/dark.nix
+		../themes/oxocarbon/dark.nix
 
 		# GUI 
-		../../wayland/hyprland
-		../../wayland/waybar.nix
+		./wayland/hyprland
+		./wayland/waybar.nix
 
 		# Apps
-		../../applications/ranger.nix
-		../../applications/firefox 
-		../../applications/tmux.nix
-		../../applications/kitty
-		../../applications/ncmpcpp.nix
+		./applications/ranger.nix
+		./applications/firefox 
+		./applications/tmux.nix
+		./applications/kitty
+		./applications/ncmpcpp.nix
+		./applications/emacs
 
 		# Editors
-		../../applications/nvim
+		./applications/nvim
 
 		# Other
-		# ../../utilities/mpd.nix
-		# ../../utilities/tex.nix
-		../../utilities/mako.nix # notification daemon
+		./utilities/mako.nix # notification daemon
     ];
 
     home = {
-		username = "jalen";
- 	  	homeDirectory = "/home/jalen";
-		stateVersion = "23.11";
+		inherit username;
 		inherit packages;
+ 	  	homeDirectory = "/home/${username}";
+		stateVersion = "23.11";
     };
 
 	dconf.settings = { # add to home-manager
@@ -90,14 +83,16 @@ in
 		};
 	};
 
-
     programs = {
 		bash = {
 			enable = true;
-			/*bashrcExtra = ''
-
-			'';*/
+			bashrcExtra = ''
+				if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+				  exec tmux attach
+				fi
+			'';
 		};
+		ssh.enable = true;
 		git = {
 			enable = true;
 			package = pkgs.gitAndTools.gitFull;
@@ -106,9 +101,6 @@ in
 			extraConfig = {
 				color.ui = "always";
 			};
-		};
-		ssh = {
-			enable = true;
 		};
 	};
 }

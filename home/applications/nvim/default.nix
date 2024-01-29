@@ -57,9 +57,11 @@ in
 			nvim-cmp
 
 			# TODO LaTeX
-			# vimtex
+			vimtex
+			nabla-nvim
 
-			# TODO snippets
+			# tmux 
+			(lib.mkIf config.programs.tmux.enable vim-tmux-navigator)
 
 			# telescope
 			plenary-nvim

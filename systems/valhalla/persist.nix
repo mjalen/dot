@@ -50,6 +50,8 @@ in
 					"Pictures"
 					"Music"
 					"VMs"
+					".emacs.d" # I don't want to sit forever while emacs installs everything.
+							   # TODO create an emacs package manifest
 				];
 			};
 		};
