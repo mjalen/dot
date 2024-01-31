@@ -8,8 +8,6 @@ let
 
 	valhallaModules = [
 		./valhalla 
-		
-		# load from inputs
 		impermanence.nixosModules.impermanence
 	];
 in {

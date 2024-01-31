@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 { inputs, lib, pkgs, ... }:
 
 let
@@ -9,10 +5,10 @@ let
 in
 {
   imports = [
-	inputs.nixos-hardware.nixosModules.framework-13-7040-amd
-	./persist.nix	
-	./pipewire.nix
-	./virt-manager.nix
+	  inputs.nixos-hardware.nixosModules.framework-13-7040-amd
+	  ./persist.nix	
+	  ./pipewire.nix
+	  ./virt-manager.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -27,34 +23,27 @@ in
 
   # enable persistence
   valhalla.persist = {
-	enable = true;
-	inherit persistDir;
+	  enable = true;
+	  inherit persistDir;
   };
 
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
   # hyprland is the GUI of choice
   programs.hyprland.enable = true;
 
   # hyprland requires /tmp/hypr to start, so create this
   systemd.tmpfiles.rules = [
-	"d /tmp/hypr 0755 jalen users -" # cleanup is done on reboot through root wipe.
+	  "d /tmp/hypr 0755 jalen users -" # cleanup is done on reboot through root wipe.
   ];
 
   # users
   users.mutableUsers = false;
   users.users.root.hashedPasswordFile = "${persistDir}/psk/root";
   users.users.jalen = {
-	isNormalUser = true;
- 	home = "/home/jalen";
-	extraGroups = [ "wheel" "networkmanager" ];
- 	hashedPasswordFile = "${persistDir}/psk/jalen";
-	# packages = with pkgs; [ git vim wget ];
+	  isNormalUser = true;
+ 	  home = "/home/jalen";
+	  extraGroups = [ "wheel" "networkmanager" ];
+ 	  hashedPasswordFile = "${persistDir}/psk/jalen";
+	  # packages = with pkgs; [ git vim wget ];
   };
 
   # Enable sound.
@@ -68,4 +57,3 @@ in
   system.stateVersion = "23.11"; # Did you read the comment?
   nix.settings.experimental-features = "nix-command flakes";
 }
-

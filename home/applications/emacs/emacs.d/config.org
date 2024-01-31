@@ -31,7 +31,7 @@ Get rid of it, we don't need it!
 (setq delete-by-moving-to-trash t)
 #+end_src
 
-** Lines
+** TODO Lines
 
 #+begin_src emacs-lisp
 (global-display-line-numbers-mode)
@@ -99,13 +99,8 @@ Theme needs to be loaded before I add nano-faces.
 ** Fonts
 
 #+begin_src emacs-lisp
-   ;(set-face-attribute 'default nil :family "Victor Mono" :height 120)
-   ;(set-face-attribute 'variable-pitch-text nil :family "Victor Mono" :height 120 :slant 'italic :weight 'normal)
-  (custom-theme-set-faces
-   'user
-   '(variable-pitch ((t (:family "Victor Mono" :height 140))))
-   '(fixed-pitch ((t ( :family "Victor Mono" :height 120))))) 
-
+  (add-to-list 'default-frame-alist '(font . "Victor Mono-12"))
+  (set-frame-font "Victor Mono-12")
  #+end_src
 
 ** Indent Guides
@@ -121,6 +116,16 @@ Theme needs to be loaded before I add nano-faces.
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
  #+end_src
 
+* Dashboard
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-display-icons-p t)
+    ;(setq dashboard-banner-logo-png "/Users/jalen/.emacs.d/images/drip.jpeg")
+    (setq dashboard-icon-type 'nerd-icons))
+#+end_src
 * General.el
 
 #+begin_src emacs-lisp
@@ -159,7 +164,35 @@ Theme needs to be loaded before I add nano-faces.
 #+end_src
 
 * Tools
-** Org
+** Language Servers
+
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :commands lsp) ; problematic
+
+  (use-package lsp-latex)
+
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    :config
+    (setq lsp-ui-sideline-show-diagnostics 1
+          lsp-ui-sideline-show-hover 1
+          lsp-ui-doc-enable 1
+          lsp-ui-peek-enable 1)) ; problematic
+
+  (use-package helm-lsp :commands helm-lsp-workspace-symbol) ; problematic
+
+  (use-package dap-mode) ; problematic
+
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config (setq which-key-idle-delay 0.2)) 
+#+end_src
+
+** TODO Org
 
 My org mode configuration, so I can live and breathe org. 
 
@@ -190,10 +223,6 @@ My org mode configuration, so I can live and breathe org.
     :custom
     (org-superstar-remove-leading-stars t)
     (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
-
-  (use-package org-bullets
-    :config
-    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
   (use-package org-modern
     :hook
@@ -239,7 +268,9 @@ My org mode configuration, so I can live and breathe org.
      :mode "\\.nix\\'")
 #+end_src
 
-** Vterm
+** TODO Vterm
+
+- [ ] Figure out why CMAKE is not loading.
 
 #+begin_src emacs-lisp
   (use-package vterm

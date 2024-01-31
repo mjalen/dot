@@ -1,14 +1,3 @@
-/*
-             __
-            ( o`-
-            /  \
-            |  |
-             ^^ BP
-
-	 NixOS Config 
-		by Jalen Moore
-*/
-
 { 
   description = ''Jalen Moore's Nix configuration.'';
 
