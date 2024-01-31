@@ -4,7 +4,7 @@ with inputs;
 let
 	hm = config.home.homeDirectory;
 	workspace-binds = import ./workspace-binds.nix;
-	wallpaper = "${hm}/Pictures/black-beach.jpg";
+	wallpaper = "${hm}/Pictures/nier-arch.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
@@ -59,7 +59,6 @@ in
 			# key bindings
 			bind = [
 				# Applications
-				# "$mod, Space, exec, tofi-run"
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
 				"$mod, E, exec, emacsclient -c"

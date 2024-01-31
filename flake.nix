@@ -10,26 +10,26 @@
 */
 
 { 
-    description = ''Jalen Moore's Nix configuration.'';
+  description = ''Jalen Moore's Nix configuration.'';
 
-    outputs = { self, ... } @ inputs:
-        let
-            system = "x86_64-linux";
-            pkgs = import inputs.nixpkgs {
-                inherit system;
-                config.allowUnfree = true;
-                overlays = [ 
-					inputs.nur.overlay
-				];
-            };
-        in {
-            nixosConfigurations = import ./systems { inherit inputs pkgs self; };
-            homeConfigurations = import ./home { inherit inputs pkgs self; };
-        };
+  outputs = { self, ... } @ inputs:
+    let
+      system = "x86_64-linux";
+      pkgs = import inputs.nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+        overlays = [ 
+          inputs.nur.overlay
+        ];
+      };
+    in {
+      nixosConfigurations = import ./systems { inherit inputs pkgs self; };
+      homeConfigurations = import ./home { inherit inputs pkgs self; };
+    };
 
-    inputs = {
-        # nixpkgs.
-        nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs = {
+    # nixpkgs.
+    nixpkgs.url = "github:NixOS/nixpkgs";
 
 		# hardware (for framework 13 - AMD 7040)
 		nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -45,9 +45,9 @@
 			url = "github:nix-community/impermanence";
 		};
 
-        # nur
-        nur = {
-            url = "github:nix-community/NUR";
-        };
-    };    
+    # nur
+    nur = {
+      url = "github:nix-community/NUR";
+    };
+  };    
 }

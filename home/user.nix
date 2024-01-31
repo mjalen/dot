@@ -23,9 +23,14 @@ let
 		discord
 		glow
 		zathura
+    imagemagick
 
 		# math stuff
 		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+
+		# notes and markup
+		logseq
+		zotero
 
 		# screenshot double wammy ;)
 		slurp
@@ -70,38 +75,38 @@ in
     ];
 
     home = {
-		inherit username;
-		inherit packages;
- 	  	homeDirectory = "/home/${username}";
-		stateVersion = "23.11";
+        inherit username;
+        inherit packages;
+        homeDirectory = "/home/${username}";
+        stateVersion = "23.11";
     };
 
-	dconf.settings = { # add to home-manager
-		"org/virt-manager/virt-manager/connections" = {
-			autoconnect = [ "qemu:///system" ];
-			uris = [ "qemu:///system" ];
-		};
-	};
+    dconf.settings = { # add to home-manager
+        "org/virt-manager/virt-manager/connections" = {
+        autoconnect = [ "qemu:///system" ];
+        uris = [ "qemu:///system" ];
+        };
+    };
 
     programs = {
-		bash = {
-			enable = true;
-			bashrcExtra = ''
-				if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-				  exec tmux attach
-				fi
+		  bash = {
+			  enable = true;
+			  bashrcExtra = ''
+        #    if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+        #    exec tmux attach
+        #    fi
 			'';
-		};
-		ssh.enable = true;
-		git = {
-			enable = true;
-			package = pkgs.gitAndTools.gitFull;
-			userName = "mjalen"; 
-			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
-			extraConfig = {
-				color.ui = "always";
-			};
-		};
-	};
+		  };
+		  ssh.enable = true;
+		  git = {
+			  enable = true;
+			  package = pkgs.gitAndTools.gitFull;
+			  userName = "mjalen"; 
+			  userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+			  extraConfig = {
+				  color.ui = "always";
+			  };
+		  };
+	  };
 }
 

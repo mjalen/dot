@@ -15,6 +15,8 @@ in
 		package = pkgs.emacs29-pgtk;
 	};
 
+  home.packages = with pkgs; [ cmake texliveFull ]; # may be good to add this to user instead perhaps?
+
 	systemd.user.tmpfiles.rules = [
 		# "d ${hm}/.emacs.d 0755 jalen users - -" # Create emacs directory.
 		# link config files.
