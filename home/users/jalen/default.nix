@@ -22,9 +22,10 @@ let
 		discord
 		glow
 		zathura
-
+    imagemagick
 
 		# math stuff
+    # I need a new bndl file.
 		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
 
 		# screenshot double wammy ;)
@@ -32,6 +33,7 @@ let
 		grim
 
 		# botware
+    spotify
 		zoom-us
 
 		# TODO add fonts to fonts.fonts
@@ -40,9 +42,6 @@ let
 
 		# pulseaudio mixer.
 		pamixer
-
-		# youtube
-		# youtube-tui
 
 		# move to wayland/hyprland.nix
 		hyprpaper
