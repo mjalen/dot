@@ -3,6 +3,7 @@
 
 My personal emacs configuration.
 
+* Table of Contents                                                     :TOC:
 * Misc
 ** Functions
 
@@ -215,6 +216,14 @@ My org mode configuration, so I can live and breathe org.
   		org-image-actual-width '(300)))
 
   (use-package org-appear :hook (org-mode . org-appear.mode))
+
+  (use-package toc-org
+    :config
+    (add-hook 'org-mode-hook 'toc-org-mode)
+
+    ;; enable in markdown, too
+    (add-hook 'markdown-mode-hook 'toc-org-mode)
+    (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
 
   (use-package org-fragtog
     :after org
