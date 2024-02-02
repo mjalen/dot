@@ -2,7 +2,7 @@
 #+author: Jalen Moore
 
 #+caption: The most recent screenshot of my system.
-[[./docs/screenies/20240113_0032_screenshot.png]]
+[[./docs/screenies/current.png]]
 
 * Preamble
 
@@ -131,10 +131,17 @@ This command should take a while because the operating system is installing. The
 * Tasks
 ** Priority
 
-- [ ] Add root `default.nix`, so that the configuration can be used as a module for new NixOS installs.
-- [ ] Remove hard-coded relative file/directory paths. Add configue options to define paths such as `/nix/persist`.
-- [ ] Add install instructions to README.md. (Depends on root `default.nix`)
+- [X] Add install instructions to README.md. (Depends on root `default.nix`)
 - [ ] Over-all file organization and make it consistent.
+
+** Org Implementation
+
+Because /Emacs/ is truly the best operating system. Why not configure my NixOS install within Emacs? Is this practical? *NO*. Is it necessary? *YES IT IS!*
+
+- [ ] Condense all configuration files to a single ~.org~ file (currently ~Config.org~). 
+  - [ ] Organize and trim code.
+  - [ ] Given this opportunity, document my configuration choices in the *literate programming* style.
+- [ ] Possibly merge the ~README.org~ and ~Config.org~, unless it becomes too long.
 
 ** Documentation
 
