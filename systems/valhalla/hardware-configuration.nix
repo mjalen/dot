@@ -1,3 +1,9 @@
+# Hardware
+
+# My configuration for the Framework 13 laptop. Do not edit directly. Refer to [[installation]] for changing PARTUUIDs and UUIDS. 
+
+
+# [[file:../../Config.org::*Hardware][Hardware:1]]
 { config, lib, pkgs, modulesPath, ... }:
 
 with lib;
@@ -89,3 +95,4 @@ in
 		hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 	};
 }
+# Hardware:1 ends here

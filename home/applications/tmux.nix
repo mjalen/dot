@@ -1,3 +1,7 @@
+# Terminal Multiplexer
+
+
+# [[file:../../Config.org::*Terminal Multiplexer][Terminal Multiplexer:1]]
 { inputs, pkgs, ... }: {
 	programs.tmux = {
 		enable = true;
@@ -29,3 +33,4 @@
 		'';
 	};
 }
+# Terminal Multiplexer:1 ends here

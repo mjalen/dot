@@ -1,3 +1,9 @@
+# Configuration
+
+# Configuration analogous to the standard configuration generated during NixOS installation.
+
+
+# [[file:../../Config.org::*Configuration][Configuration:1]]
 { inputs, lib, pkgs, ... }:
 
 let
@@ -57,3 +63,4 @@ in
   system.stateVersion = "23.11"; # Did you read the comment?
   nix.settings.experimental-features = "nix-command flakes";
 }
+# Configuration:1 ends here

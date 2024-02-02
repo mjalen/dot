@@ -1,3 +1,9 @@
+# Default
+
+# During <<installation>>, change the PARTUUID and UUID values below.
+
+
+# [[file:../../Config.org::*Default][Default:1]]
 { config, inputs, lib, pkgs, ... }: {
 	imports = [
 		./hardware-configuration.nix
@@ -15,3 +21,4 @@
 		unencryptedUUID = "69ff994b-9f9d-4014-870f-964273c7944e";
 	};
 }
+# Default:1 ends here

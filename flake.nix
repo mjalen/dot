@@ -1,3 +1,9 @@
+# Flake
+
+# The flake file for the entire configuration.
+
+
+# [[file:Config.org::*Flake][Flake:1]]
 { 
   description = ''Jalen Moore's Nix configuration.'';
 
@@ -40,3 +46,4 @@
     };
   };    
 }
+# Flake:1 ends here

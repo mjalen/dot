@@ -1,3 +1,9 @@
+# Emacs 
+
+# Truly a long configuration just to act as a bootloader ;)
+
+
+# [[file:../../../Config.org::*Emacs][Emacs:1]]
 { config, pkgs, ... }:
 
 let
@@ -24,3 +30,4 @@ in
 		"L+ ${hm}/.emacs.d/init.el - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/init.el"
 	];
 }
+# Emacs:1 ends here

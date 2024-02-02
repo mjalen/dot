@@ -1,3 +1,7 @@
+# Default
+
+
+# [[file:../../../Config.org::*Default][Default:1]]
 { self, config, inputs, lib, pkgs, ... }: 
 with inputs;
 
@@ -100,3 +104,4 @@ in
 		wallpaper = eDP-1,${wallpaper}
 	'';
 }
+# Default:1 ends here

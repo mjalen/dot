@@ -1,3 +1,9 @@
+# Bridge
+
+# Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration.
+
+
+# [[file:../Config.org::*Bridge][Bridge:1]]
 { self, inputs, pkgs, ... }: 
 
 let
@@ -17,3 +23,4 @@ in {
 		modules = homeImports.jalen;
 	}; 
 }
+# Bridge:1 ends here

@@ -133,6 +133,8 @@ This command should take a while because the operating system is installing. The
 
 - [X] Add install instructions to README.md. (Depends on root `default.nix`)
 - [ ] Over-all file organization and make it consistent.
+- [ ] Reduce RAM consumption. My current screenie has nearly ~8GB~ of RAM usage! I am not running /that/ much right? 
+  - Note: I do believe nix does use more RAM than typical OSes, but I doubt by this much!
 
 ** Org Implementation
 

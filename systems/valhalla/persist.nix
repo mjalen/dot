@@ -1,3 +1,7 @@
+# Impermanence
+
+
+# [[file:../../Config.org::*Impermanence][Impermanence:1]]
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -57,3 +61,4 @@ in
 		};
 	};
 }
+# Impermanence:1 ends here

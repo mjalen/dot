@@ -1,3 +1,7 @@
+# Jalen
+
+
+# [[file:../Config.org::*Jalen][Jalen:1]]
 { config, inputs, pkgs, ...}: 
 
 let
@@ -52,7 +56,7 @@ in
 
 {
 	# fuck these .. are ugly
-    imports = [
+  imports = [
 		# Import theme (accessed via config.valhalla.theme)
 		../themes/oxocarbon/dark.nix
 
@@ -73,41 +77,41 @@ in
 
 		# Other
 		./utilities/mako.nix # notification daemon
-    ];
+  ];
 
-    home = {
-        inherit username;
-        inherit packages;
-        homeDirectory = "/home/${username}";
-        stateVersion = "23.11";
+  home = {
+    inherit username;
+    inherit packages;
+    homeDirectory = "/home/${username}";
+    stateVersion = "23.11";
+  };
+
+  dconf.settings = { # add to home-manager
+    "org/virt-manager/virt-manager/connections" = {
+      autoconnect = [ "qemu:///system" ];
+      uris = [ "qemu:///system" ];
     };
+  };
 
-    dconf.settings = { # add to home-manager
-        "org/virt-manager/virt-manager/connections" = {
-        autoconnect = [ "qemu:///system" ];
-        uris = [ "qemu:///system" ];
-        };
-    };
-
-    programs = {
-		  bash = {
-			  enable = true;
-			  bashrcExtra = ''
+  programs = {
+		bash = {
+			enable = true;
+			bashrcExtra = ''
         #    if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
         #    exec tmux attach
         #    fi
 			'';
-		  };
-		  ssh.enable = true;
-		  git = {
-			  enable = true;
-			  package = pkgs.gitAndTools.gitFull;
-			  userName = "mjalen"; 
-			  userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
-			  extraConfig = {
-				  color.ui = "always";
-			  };
-		  };
-	  };
+		};
+		ssh.enable = true;
+		git = {
+			enable = true;
+			package = pkgs.gitAndTools.gitFull;
+			userName = "mjalen"; 
+			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+			extraConfig = {
+				color.ui = "always";
+			};
+		};
+	};
 }
-
+# Jalen:1 ends here

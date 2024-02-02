@@ -1,25 +1,31 @@
+# Kitty
+
+# The terminal emulator of choice.
+
+
+# [[file:../../../Config.org::*Kitty][Kitty:1]]
 { inputs, config, pkgs, ... }:
 
 {
-    programs.kitty = {
-        enable = true;
-        settings = with config.valhalla.theme; {
-            enable_audio_bell = false;
-            window_margin_width = 10;
-            cursor_shape = "block";
+  programs.kitty = {
+    enable = true;
+    settings = with config.valhalla.theme; {
+      enable_audio_bell = false;
+      window_margin_width = 10;
+      cursor_shape = "block";
 
 			font_size = 12;
 			font_family = "Victor Mono";
 			bold_font = "auto";
 			italic_font = "auto";
-		    bold_italic_font = "auto"; 
+		  bold_italic_font = "auto"; 
 
-		    background_opacity = "0.95";
-            background_blur = 10;
+		  background_opacity = "0.95";
+      background_blur = 10;
 
 			confirm_os_window_close = 0;
 
-            # color map 
+      # color map 
 
 			# Base16 {{scheme-name}} - kitty color config
 			# Scheme by {{scheme-author}}
@@ -56,6 +62,7 @@
 			color13 = base06; #{{base06-hex}}
 			color14 = base0F; #{{base0F-hex}}
 			color15 = base07;
-        };
-    }; 
+    };
+  }; 
 }
+# Kitty:1 ends here

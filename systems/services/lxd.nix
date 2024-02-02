@@ -1,3 +1,9 @@
+# LXD
+
+# Currently this LXD configuration does not work and is not used.
+
+
+# [[file:../../Config.org::*LXD][LXD:1]]
 { lib, pkgs, ... }: {
   # https://srid.ca/lxc-nixos
   virtualisation.lxd.enable = true;
@@ -48,3 +54,4 @@
         lxc.network.flags = up
     '';*/
 }
+# LXD:1 ends here
