@@ -4,6 +4,29 @@
 My personal emacs configuration.
 
 * Table of Contents                                                     :TOC:
+- [[#misc][Misc]]
+  - [[#functions][Functions]]
+  - [[#ui-clutter][UI Clutter]]
+  - [[#garbage-collection][Garbage Collection]]
+  - [[#lines][Lines]]
+- [[#evil-mode][EVIL Mode]]
+- [[#theme][Theme]]
+  - [[#base16-themes][Base16 Themes]]
+  - [[#modeline][Modeline]]
+  - [[#fonts][Fonts]]
+  - [[#indent-guides][Indent Guides]]
+- [[#dashboard][Dashboard]]
+- [[#generalel][General.el]]
+- [[#helm][Helm]]
+  - [[#configuration][Configuration]]
+  - [[#keybindings][Keybindings]]
+- [[#tools][Tools]]
+  - [[#language-servers][Language Servers]]
+  - [[#org][Org]]
+  - [[#latex][LaTeX]]
+  - [[#nix][Nix]]
+  - [[#vterm][Vterm]]
+
 * Misc
 ** Functions
 
@@ -194,7 +217,6 @@ Theme needs to be loaded before I add nano-faces.
 #+end_src
 
 ** TODO Org
-
 *** Default
 
 My org mode configuration, so I can live and breathe org. 
