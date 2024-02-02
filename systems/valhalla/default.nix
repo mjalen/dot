@@ -1,8 +1,8 @@
 { config, inputs, lib, pkgs, ... }: {
 	imports = [
-		./hardware/valhalla.nix
-		./conf/valhalla
-		./services/ssh.nix
+		./hardware-configuration.nix
+		./configuration.nix
+		../services/ssh.nix
 	];
 
 	# DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!
