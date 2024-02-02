@@ -5,13 +5,13 @@ My personal emacs configuration.
 
 * Table of Contents                                                     :TOC:
 - [[#misc][Misc]]
-  - [[#functions][Functions]]
+  - [[#helper-functions][Helper Functions]]
   - [[#ui-clutter][UI Clutter]]
   - [[#garbage-collection][Garbage Collection]]
   - [[#lines][Lines]]
 - [[#evil-mode][EVIL Mode]]
 - [[#theme][Theme]]
-  - [[#base16-themes][Base16 Themes]]
+  - [[#baseline][Baseline]]
   - [[#modeline][Modeline]]
   - [[#fonts][Fonts]]
   - [[#indent-guides][Indent Guides]]
@@ -25,10 +25,13 @@ My personal emacs configuration.
   - [[#org][Org]]
   - [[#latex][LaTeX]]
   - [[#nix][Nix]]
-  - [[#vterm][Vterm]]
+  - [[#term][Term]]
+  - [[#flycheck][Flycheck]]
 
 * Misc
-** Functions
+** Helper Functions
+
+Different functions to do common tasks.
 
 #+begin_src emacs-lisp
 (defun mjalen/remove_line_numbers ()
@@ -80,17 +83,13 @@ Get rid of it, we don't need it!
 #+end_src
 
 * Theme
-** Base16 Themes
+** Baseline
 
-Theme needs to be loaded before I add nano-faces.
+I *had* to switch over to the ~modus-vivendi~ theme. It may be ugly, but my eyes feel much better.
 
 #+begin_src emacs-lisp
-    (use-package base16-theme
-        :demand t
-        :config
-        (load-theme 'base16-oxocarbon-dark t))
+  (load-theme 'modus-vivendi t)
 
-  ; opacity 
   (set-frame-parameter nil 'alpha-background 90)
   (add-to-list 'default-frame-alist '(alpha-background . 90))
 #+end_src
@@ -100,24 +99,24 @@ Theme needs to be loaded before I add nano-faces.
 - [ ] Edit modeline to have the info I want (git branch, mode, line:col, maybe a language icon?)
 
 #+begin_src emacs-lisp
-  (use-package nano-modeline
-    :custom
-    (mode-line-format nil)
-    :config
-    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
-    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
-    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
-    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
-    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
-    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
-    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
-    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
-    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
-    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
-    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
-    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
-    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode)
-    (nano-modeline-text-mode t))
+  ;; (use-package nano-modeline
+  ;;   :custom
+  ;;   (mode-line-format nil)
+  ;;   :config
+  ;;   (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
+  ;;   (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
+  ;;   (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
+  ;;   (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
+  ;;   (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+  ;;   (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+  ;;   (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
+  ;;   (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
+  ;;   (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
+  ;;   (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
+  ;;   (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
+  ;;   (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
+  ;;   (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode)
+  ;;   (nano-modeline-text-mode t))
 #+end_src
 
 ** Fonts
@@ -223,28 +222,32 @@ My org mode configuration, so I can live and breathe org.
 
 #+begin_src emacs-lisp
   (use-package org
+    :hook
+    ((org-mode . variable-pitch-mode)
+     (org-mode . visual-line-mode)
+     (org-mode . mjalen/remove_line_numbers))
     :custom
     (org-hide-emphasis-markers t)
     (line-spacing 2)
     (org-highlight-latex-and-related '(latex script entitles))
     (org-list-allow-alphabetical t)
+    (org-startup-indented t)
+    (org-pretty-entities t)
+    (org-use-sub-superscripts "{}")
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-image-actual-width '(300))
     :config 
-    (setq org-ellipsis " ▾")
-    (setq-default org-startup-indented t
-  		org-pretty-entities t
-  		org-use-sub-superscripts "{}"
-  		org-hide-emphasis-markers t
-  		org-startup-with-inline-images t
-  		org-image-actual-width '(300)))
+    (setq org-ellipsis " ▾"))
 
-  (use-package org-appear :hook (org-mode . org-appear.mode))
+  (use-package org-appear :hook (org-mode . org-appear-mode))
 
   (use-package toc-org
+    :hook
+    ((org-mode . toc-org-mode)
+     (markdown-mode . toc-org-mode))
     :config
-    (add-hook 'org-mode-hook 'toc-org-mode)
-
     ;; enable in markdown, too
-    (add-hook 'markdown-mode-hook 'toc-org-mode)
     (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
 
   (use-package org-fragtog
@@ -275,10 +278,6 @@ My org mode configuration, so I can live and breathe org.
     (org-modern-table nil))
 
   (use-package markdown-mode)
-
-  (add-hook 'org-mode-hook 'variable-pitch-mode)
-  (add-hook 'org-mode-hook 'visual-line-mode)
-  (add-hook 'org-mode-hook 'mjalen/remove_line_numbers)
 #+end_src
 
 *** Roam
@@ -337,19 +336,15 @@ My org mode configuration, so I can live and breathe org.
      :mode "\\.nix\\'")
 #+end_src
 
-** TODO Vterm
-
-- [ ] Figure out why CMAKE is not loading.
+** TODO Term
 
 #+begin_src emacs-lisp
-  (use-package vterm
-      :commands (vterm)
-      :ensure t
-      :init
-      (unless (file-exists-p (concat (file-name-directory (locate-library "vterm"))
-                                     "vterm-module.so"))
-        (message "Set vterm to install.")
-        (setq vterm-install t)))    
+  (add-hook 'term-mode-hook 'mjalen/remove_line_numbers)
+#+end_src
 
-  (add-hook 'vterm-mode-hook 'mjalen/remove_line_numbers)
+** Flycheck
+
+#+begin_src emacs-lisp
+  (use-package flycheck)
+  (global-flycheck-mode)
 #+end_src
