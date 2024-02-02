@@ -1,0 +1,1585 @@
+#+PROPERTY: header-args+ :comments both
+#+PROPERTY: header-args+ :mkdirp yes
+#+PROPERTY: header-args+ :tangle "<filename>"
+#+title: Nix Configuration
+#+author: Jalen Moore
+
+* Notes
+
+When combining all the config to one file, use:
+
+#+begin_src nix
+  let
+    concatAttr = list: foldl' (a: b: a // b) {} list;
+  in
+
+  concatAttr [
+    
+    # block 1
+    (let
+      # ...
+    in {
+
+    })
+
+    # block 2
+    (let
+      # ...
+    in {
+
+    })
+
+    # etc...
+    # Each block must return an attrset.
+  ]
+#+end_src
+
+* Flake
+
+The flake file for the entire configuration.
+
+#+begin_src nix :tangle ./flake.nix
+  { 
+    description = ''Jalen Moore's Nix configuration.'';
+
+    outputs = { self, ... } @ inputs:
+      let
+        system = "x86_64-linux";
+        pkgs = import inputs.nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays = [ 
+            inputs.nur.overlay
+          ];
+        };
+      in {
+        nixosConfigurations = import ./systems { inherit inputs pkgs self; };
+        homeConfigurations = import ./home { inherit inputs pkgs self; };
+      };
+
+    inputs = {
+      # nixpkgs.
+      nixpkgs.url = "github:NixOS/nixpkgs";
+
+  		# hardware (for framework 13 - AMD 7040)
+  		nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+  		# home-manager for easier user config.
+  		home-manager = {
+  			url = "github:nix-community/home-manager";
+  			inputs.nixpkgs.follows = "nixpkgs";
+  		};
+
+  		# impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
+  		impermanence = {
+  			url = "github:nix-community/impermanence";
+  		};
+
+      # nur
+      nur = {
+        url = "github:nix-community/NUR";
+      };
+    };    
+  }
+#+end_src
+
+* NixOS Configuration
+** Bridge 
+
+The following is the bridge file between the flake and the host configurations. This file returns the NixOS system for each host. Currently there is only one host:
+
+- *valhalla*: Host for my Framework 13 AMD laptop.
+
+#+begin_src nix :tangle ./systems/default.nix
+  { inputs, pkgs, ...}:
+
+  with inputs; 
+
+  let 
+  	inherit (nixpkgs.lib) nixosSystem;
+  	inherit (pkgs) lib;	
+
+  	valhallaModules = [
+  		./valhalla 
+  		impermanence.nixosModules.impermanence
+  	];
+  in {
+  	valhalla = nixosSystem {
+  		inherit pkgs;
+  		specialArgs = { inherit inputs; };
+  		modules = valhallaModules;
+  	};
+  }
+#+end_src
+
+** Services
+*** Info
+Describes different services for the NixOS system. Only add services here if they rely directly on the NixOS system and nixpkgs.
+
+*** SSH
+
+#+begin_src nix :tangle ./systems/services/ssh.nix
+  { lib, pkgs, ... }: {
+  	services.openssh = {
+  		enable = true;
+  		settings = {
+  			PasswordAuthentication = false;
+  			KbdInteractiveAuthentication = false;
+  		};
+  	};
+  }
+#+end_src
+
+*** LXD
+
+Currently this LXD configuration does not work and is not used.
+
+#+begin_src nix :tangle ./systems/services/lxd.nix
+  { lib, pkgs, ... }: {
+    # https://srid.ca/lxc-nixos
+    virtualisation.lxd.enable = true;
+
+    virtualisation.lxd.preseed ={
+      networks = [
+        {
+          name = "lxdbr0";
+          type = "bridge";
+          config = {
+            "ipv4.address" = "10.0.100.1/24";
+            "ipv4.nat" = "true";
+          };
+        }
+      ];
+      profiles = [
+        {
+          name = "default";
+          devices = {
+            eth0 = {
+              name = "eth0";
+              network = "lxdbr0";
+              type = "nic";
+            };
+            root = {
+              path = "/";
+              pool = "default";
+              size = "35GiB";
+              type = "disk";
+            };
+          };
+        }
+      ];
+      storage_pools = [
+        {
+          name = "default";
+          driver = "dir";
+          config = {
+            source = "/var/lib/lxd/storage-pools/default";
+          };
+        }
+      ];
+    }; 
+    /*virtualisation.lxc.systemConfig = ''
+          security.nesting = true
+          lxc.network.type = veth
+          lxc.network.link = br0
+          lxc.network.flags = up
+      '';*/
+  }
+#+end_src
+
+** Valhalla
+*** Info
+
+My main host. Currently configured for the Framework 13 laptop with an AMD processor.
+
+*** Default
+
+During <<installation>>, change the PARTUUID and UUID values below.
+
+#+begin_src nix :tangle ./systems/valhalla/default.nix
+  { config, inputs, lib, pkgs, ... }: {
+  	imports = [
+  		./hardware-configuration.nix
+  		./configuration.nix
+  		../services/ssh.nix
+  	];
+
+  	# DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!
+  	# See installation guide in README on how to derive the UUIDs.
+  	valhalla.hardware = {
+  		enabled = true;
+  		encryptedPARTUUID = "d2ce0233-c9d7-406a-9847-107ad0f0e3f7";
+  		headerPARTUUID = "ab616024-7d8c-44e5-84da-e363e20781a6";
+  		bootUUID = "5251-7E3F";
+  		unencryptedUUID = "69ff994b-9f9d-4014-870f-964273c7944e";
+  	};
+  }
+#+end_src
+*** Configuration
+
+Configuration analogous to the standard configuration generated during NixOS installation.
+
+#+begin_src nix :tangle ./systems/valhalla/configuration.nix
+  { inputs, lib, pkgs, ... }:
+
+  let
+  	persistDir = "/persist";
+  in
+  {
+    imports = [
+  	  inputs.nixos-hardware.nixosModules.framework-13-7040-amd
+  	  ./persist.nix	
+  	  ./pipewire.nix
+  	  ./virt-manager.nix
+    ];
+
+    # Use the systemd-boot EFI boot loader.
+    boot.loader.systemd-boot.enable = true;
+    boot.loader.efi.canTouchEfiVariables = true;
+
+    networking.hostName = "valhalla"; # Define your hostname.
+    networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+
+    # Set your time zone.
+    services.automatic-timezoned.enable = true;
+
+    # enable persistence
+    valhalla.persist = {
+  	  enable = true;
+  	  inherit persistDir;
+    };
+
+    # hyprland is the GUI of choice
+    programs.hyprland.enable = true;
+
+    # hyprland requires /tmp/hypr to start, so create this
+    systemd.tmpfiles.rules = [
+  	  "d /tmp/hypr 0755 jalen users -" # cleanup is done on reboot through root wipe.
+    ];
+
+    # users
+    users.mutableUsers = false;
+    users.users.root.hashedPasswordFile = "${persistDir}/psk/root";
+    users.users.jalen = {
+  	  isNormalUser = true;
+   	  home = "/home/jalen";
+  	  extraGroups = [ "wheel" "networkmanager" ];
+   	  hashedPasswordFile = "${persistDir}/psk/jalen";
+  	  # packages = with pkgs; [ git vim wget ];
+    };
+
+    # Enable sound.
+    sound.enable = true;
+    hardware.pulseaudio.enable = true;
+
+    # List packages installed in system profile. To search, run:
+    # $ nix search wget
+    environment.systemPackages = with pkgs; [ vim wget git ];
+
+    system.stateVersion = "23.11"; # Did you read the comment?
+    nix.settings.experimental-features = "nix-command flakes";
+  }
+#+end_src
+
+*** Hardware
+
+My configuration for the Framework 13 laptop. Do not edit directly. Refer to [[installation]] for changing PARTUUIDs and UUIDS. 
+
+#+begin_src nix :tangle ./systems/valhalla/hardware-configuration.nix
+  { config, lib, pkgs, modulesPath, ... }:
+
+  with lib;
+  let
+  	cfg = config.valhalla.hardware;
+  in
+  {
+  	imports = [
+  		(modulesPath + "/installer/scan/not-detected.nix")
+  	];
+
+    options.valhalla.hardware = {
+  		enabled = mkOption { type = types.bool; };
+  		encryptedPARTUUID = mkOption { type = types.str; };
+  		unencryptedUUID = mkOption { type = types.str; }; # 534cebad-1be2-4bdb-982d-835da3f6240a
+  		bootUUID = mkOption { type = types.str; };
+  		headerPARTUUID = mkOption { type = types.str; };
+    };
+
+  	config = mkIf cfg.enabled { 
+  		boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
+  		boot.initrd.kernelModules = [ ];
+  		boot.kernelModules = [ "kvm-amd" ];
+  		boot.extraModulePackages = [ ];
+
+  		fileSystems."/" =
+  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
+  		    fsType = "btrfs";
+  		    options = [ "subvol=root" ];
+  		  };
+
+  		# luks boot info
+  		boot.initrd.luks.devices = {
+  			crypted = {
+  				device = "/dev/disk/by-partuuid/${cfg.encryptedPARTUUID}"; # 9c41d5e1-8b1f-42cb-8bdc-8edd51973791
+  				header = "/dev/disk/by-partuuid/${cfg.headerPARTUUID}"; # 23a9e2b8-d901-411a-a5f9-ea893072a5f4 
+  				allowDiscards = true;
+  				preLVM = true;
+  			};
+  		};
+
+  		fileSystems."/persist" =
+  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
+  		    fsType = "btrfs";
+  		    neededForBoot = true;
+  		    options = [ "subvol=persist" ];
+  		  };
+
+  		fileSystems."/nix" =
+  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
+  		    fsType = "btrfs";
+  		    options = [ "subvol=nix" ];
+  		  };
+
+  		fileSystems."/boot" =
+  		  { device = "/dev/disk/by-uuid/${cfg.bootUUID}";
+  		    fsType = "vfat";
+  		  };
+
+  		swapDevices = [ ];
+
+  		boot.initrd.postDeviceCommands = lib.mkAfter ''
+  			mkdir /btrfs_tmp
+  			mount /dev/disk/by-uuid/${cfg.unencryptedUUID} /btrfs_tmp
+  			if [[ -e /btrfs_tmp/root ]]; then
+  				mkdir -p /btrfs_tmp/backups
+  				timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
+  				mv /btrfs_tmp/root "/btrfs_tmp/backups/$timestamp"
+  			fi
+
+  			delete_subvolume_recursively() {
+  				IFS=$'\n'
+  				for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
+  					delete_subvolume_recursively "/btrfs_tmp/$i"
+  				done
+  				btrfs subvolume delete "$1"
+  			}
+
+  			for i in $(find /btrfs_tmp/backups/ -maxdepth 1 -mtime +30); do
+  				delete_subvolume_recursively "$i"
+  			done
+
+  			btrfs subvolume create /btrfs_tmp/root
+  			umount /btrfs_tmp
+  		'';
+
+  		networking.useDHCP = lib.mkDefault true;
+  		nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  		hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  	};
+  }
+#+end_src
+*** Impermanence
+
+#+begin_src nix :tangle ./systems/valhalla/persist.nix
+  { config, lib, pkgs, ... }:
+
+  with lib;
+
+  let
+  	cfg = config.valhalla.persist;
+  in
+  {
+  	options.valhalla.persist = {
+  		enable = mkOption {
+  			type = types.bool;
+  			default = false;
+  			description = ''
+  				Signal whether to persist files and directories on reboot.
+  			'';
+  		};
+  		persistDir = mkOption {
+  			type = types.str;
+  			default = "/nix/persist";
+  			description = ''
+  				String path for defining the persisting directory. All other persisting directories and files are stored here.
+  			'';
+  		};
+  	};
+
+  	config = mkIf cfg.enable {
+  		# persist
+  		environment.persistence."${cfg.persistDir}" = {
+  			hideMounts = true;
+  			directories = [
+  				"/var/log"
+  				"/var/lib/bluetooth"
+  				"/var/lib/nixos"
+  				"/var/lib/systemd/coredump"
+  				"/etc/ssh"
+  				"/etc/NetworkManager"
+  				"/etc/nixos"
+  			];
+  			files = [
+  				"/etc/nix/id_rsa"
+  				"/etc/machine-id"
+  				"/etc/systemd/resolved.conf" # using nextdns
+  			];
+  			users.jalen = {
+  				directories = [
+  					"Documents"
+  					".local/state/nix/profiles"
+  					".ssh"
+  					".gnupg"
+  					"Pictures"
+  					"Music"
+  					"VMs"
+  					".emacs.d" # I don't want to sit forever while emacs installs everything.
+  					# TODO create an emacs package manifest
+  				];
+  			};
+  		};
+  	};
+  }
+#+end_src
+
+*** TLP
+
+#+begin_src nix :tangle ./systems/valhalla/tlp.nix
+  { lib, pkgs, ... }: {
+  	services.tlp = {
+  		enable = true;
+  	};
+  }
+#+end_src
+
+*** Pipewire
+
+For microphones.
+
+#+begin_src nix :tangle ./systems/valhalla/pipewire.nix 
+  { config, lib, pkgs, ... }: {
+  	security.rtkit.enable = true;
+  	services.pipewire = {
+  		pulse.enable = true;
+  	};
+  }
+#+end_src
+
+*** Virt Manager
+
+#+begin_src nix :tangle ./systems/valhalla/virt-manager.nix
+  { config, lib, pkgs, ... }: {
+  	virtualisation.libvirtd.enable = true;
+  	programs.virt-manager.enable = true;
+  }
+#+end_src
+* TODO Home Configuration
+** Info
+
+This is where the bulk of the configuration lives.
+
+** Bridge
+
+Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration.
+
+#+begin_src nix :tangle ./home/default.nix
+  { self, inputs, pkgs, ... }: 
+
+  let
+  	sharedModules = [
+  		inputs.impermanence.nixosModules.home-manager.impermanence
+  	];
+
+  	homeImports = {
+  		jalen = [ ./user.nix ] ++ sharedModules;
+  	};
+
+  	inherit (inputs.home-manager.lib) homeManagerConfiguration;
+  in {
+  	jalen = homeManagerConfiguration {
+  		inherit pkgs;
+  		extraSpecialArgs = { inherit inputs self; };
+  		modules = homeImports.jalen;
+  	}; 
+  }
+#+end_src
+
+** Users
+*** Jalen
+
+#+begin_src nix :tangle ./home/user.nix
+  { config, inputs, pkgs, ...}: 
+
+  let
+  	username = "jalen";
+  	uniqueScripts = (import ./scripts) { inherit config pkgs; };
+
+  	packages = with pkgs; [
+  		# my scripts
+  		uniqueScripts
+
+  		# misc
+  		# gobble
+  		neofetch
+  		pinentry
+  		pinentry-curses
+  		openssh
+  		brightnessctl
+  		acpi
+  		gimp
+  		libnotify
+  		mpc-cli
+  		ripgrep
+  		discord
+  		glow
+  		zathura
+      imagemagick
+
+  		# math stuff
+  		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+
+  		# notes and markup
+  		logseq
+  		zotero
+
+  		# screenshot double wammy ;)
+  		slurp
+  		grim
+
+  		# botware
+      spotify
+  		zoom-us
+
+  		# TODO add fonts to fonts.fonts
+  		victor-mono
+  		font-awesome
+
+  		# pulseaudio mixer.
+  		pamixer
+  	];
+
+  in
+
+  {
+  	# fuck these .. are ugly
+    imports = [
+  		# Import theme (accessed via config.valhalla.theme)
+  		../themes/oxocarbon/dark.nix
+
+  		# GUI 
+  		./wayland/hyprland
+  		./wayland/waybar.nix
+
+  		# Apps
+  		./applications/ranger.nix
+  		./applications/firefox 
+  		./applications/tmux.nix
+  		./applications/kitty
+  		./applications/ncmpcpp.nix
+  		./applications/emacs
+
+  		# Editors
+  		./applications/nvim
+
+  		# Other
+  		./utilities/mako.nix # notification daemon
+    ];
+
+    home = {
+      inherit username;
+      inherit packages;
+      homeDirectory = "/home/${username}";
+      stateVersion = "23.11";
+    };
+
+    dconf.settings = { # add to home-manager
+      "org/virt-manager/virt-manager/connections" = {
+        autoconnect = [ "qemu:///system" ];
+        uris = [ "qemu:///system" ];
+      };
+    };
+
+    programs = {
+  		bash = {
+  			enable = true;
+  			bashrcExtra = ''
+          #    if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+          #    exec tmux attach
+          #    fi
+  			'';
+  		};
+  		ssh.enable = true;
+  		git = {
+  			enable = true;
+  			package = pkgs.gitAndTools.gitFull;
+  			userName = "mjalen"; 
+  			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+  			extraConfig = {
+  				color.ui = "always";
+  			};
+  		};
+  	};
+  }
+#+end_src
+
+** Applications
+*** Emacs 
+
+Truly a long configuration just to act as a bootloader ;)
+
+#+begin_src nix :tangle ./home/applications/emacs/default.nix
+  { config, pkgs, ... }:
+
+  let
+  	hm = config.home.homeDirectory;
+  in
+  {
+  	services.emacs = {
+  		enable = true;
+  		defaultEditor = true;
+  		package = pkgs.emacs29-pgtk;
+  	};
+
+  	programs.emacs = {
+  		enable = true;
+  		package = pkgs.emacs29-pgtk;
+  	};
+
+    home.packages = with pkgs; [ cmake texliveFull ]; # may be good to add this to user instead perhaps?
+
+  	systemd.user.tmpfiles.rules = [
+  		# "d ${hm}/.emacs.d 0755 jalen users - -" # Create emacs directory.
+  		# link config files.
+  		"L+ ${hm}/.emacs.d/config.org - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/config.org"
+  		"L+ ${hm}/.emacs.d/init.el - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/init.el"
+  	];
+  }
+
+#+end_src
+
+*** Firefox
+**** Default
+
+- <<userChrome injection>> The ~userChrome.css~ depends on this nix file. 
+
+#+begin_src nix :tangle ./home/applications/firefox/default.nix
+  { config, pkgs, ... }: 
+
+  with config.valhalla.theme;
+  {
+    # firefox stuffs
+    programs.firefox = {
+      enable = true;
+      profiles = {
+        default = {
+          isDefault = true;
+          extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+            ublock-origin
+            sponsorblock
+            old-reddit-redirect
+  		      darkreader
+          ];
+          settings = {
+            "identity.fxaccounts.enabled" = false;
+            "extensions.pocket.enabled" = false;
+            "extensions.autoDisableScopes" = 0;
+            "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+  					"extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+            "extensions.getAddons.cache.enabled" = false;
+  					"media.rdd-ffmpeg.enabled" = true;
+  					"media.ffmpeg.vaapi.enabled" = true;
+  					"media.navigator.mediadatadecoder_vpx_enabled" = true;
+  					"gfx.webrender.all" = true;
+
+  					"browser.startup.blankWindow" = true;
+  					"browser.sessionstore.resume_session_once" = true;
+
+  					# Why would I want this?
+  					"toolkit.telemetry.archive.enabled" = false;
+  					"toolkit.telemetry.enabled" = false;
+  					"toolkit.telemetry.rejected" = true;
+  					"toolkit.telemetry.server" = "<clear value>";
+  					"toolkit.telemetry.unified" = false;
+  					"toolkit.telemetry.unifiedIsOptIn" = false;
+          };
+          userChrome = builtins.readFile ./userChrome.css;
+        };
+      };
+    };
+  }
+#+end_src
+
+**** User Chrome
+
+*WARNING*  This is not a *complete* ~userChrome.css~ file. It depends on custom nix theme variables that are inserted here: [[userChrome injection]].
+
+#+begin_src css :tangle ./home/applications/firefox/userChrome.css
+  @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+  #TabsToolbar .titlebar-spacer[type="post-tabs"] {
+  	display: none !important;
+  }
+
+  #TabsToolbar > .titlebar-buttonbox-container {
+      display: none !important;
+  }
+
+  /* The following is stolen from github:MrOtherGuy/firefox-csshacks - tabs_on_bottom.css */
+  #titlebar {
+  	order: 2;
+  	-moz-appearance: none !important;
+  	--tabs-navbar-shadow-size: 0px;
+  	--uc-menubar-vertical-overlap: 19px;
+  }
+
+  #navigator-toolbox > div { display: contents }
+
+  .global-notificationbox,
+  #tab-notification-deck {
+  	order: 2;
+  }
+
+  #TabsToolbar .titlebar-spacer{ display: none; }
+  /* Also hide the toolbox bottom border which isn't at bottom with this setup */
+  #navigator-toolbox::after{ display: none !important; }
+
+  @media (-moz-gtk-csd-close-button){
+    .titlebar-button{
+      flex-direction: column;
+    }
+  }
+
+  /* At Activated Menubar */
+  :root:not([chromehidden~="menubar"], [sizemode="fullscreen"]) #toolbar-menubar:not([autohide="true"]) + #TabsToolbar > .titlebar-buttonbox-container {
+    display: block !important;
+  }
+  #toolbar-menubar:not([autohide="true"]) > .titlebar-buttonbox-container {
+    visibility: hidden;
+  }
+
+  /* These exist only for compatibility with autohide-tabstoolbar.css */
+  toolbox#navigator-toolbox > toolbar#nav-bar.browser-toolbar{ animation: none; }
+  #navigator-toolbox:hover #TabsToolbar{ animation: slidein ease-out 48ms 1 }
+  #TabsToolbar > .titlebar-buttonbox-container{ visibility: visible }
+  #navigator-toolbox:not(:-moz-lwtheme){ background-color: -moz-dialog }
+
+  window, #toolbar-menubar, #TabsToolbar, #PersonalToolbar, #navigator-toolbox,#sidebar-box, .titlebar-spacer,
+  #nav-bar, .tab-background[selected="true"], {
+  	background-color: rgba(${blackAsDec}, 0.4) !important;
+  	-moz-appearance: none !important;
+  	background-image: none !important;
+  }
+#+end_src
+
+*** Kitty
+
+The terminal emulator of choice.
+
+#+begin_src nix :tangle ./home/applications/kitty/default.nix
+  { inputs, config, pkgs, ... }:
+
+  {
+    programs.kitty = {
+      enable = true;
+      settings = with config.valhalla.theme; {
+        enable_audio_bell = false;
+        window_margin_width = 10;
+        cursor_shape = "block";
+
+  			font_size = 12;
+  			font_family = "Victor Mono";
+  			bold_font = "auto";
+  			italic_font = "auto";
+  		  bold_italic_font = "auto"; 
+
+  		  background_opacity = "0.95";
+        background_blur = 10;
+
+  			confirm_os_window_close = 0;
+
+        # color map 
+
+  			# Base16 {{scheme-name}} - kitty color config
+  			# Scheme by {{scheme-author}}
+  			background = base00; #{{base00-hex}}
+  			foreground = base05; #{{base05-hex}}
+  			selection_background = base05; #{{base05-hex}}
+  			selection_foreground = base00; #{{base00-hex}}
+  			url_color = base04; #{{base04-hex}}
+  			cursor = base05; #{{base05-hex}}
+  			active_border_color = base03; #{{base03-hex}}
+  			inactive_border_color = base01; #{{base01-hex}}
+  			active_tab_background = base00; #{{base00-hex}}
+  			active_tab_foreground = base05; #{{base05-hex}}
+  			inactive_tab_background = base01; #{{base01-hex}}
+  			inactive_tab_foreground = base04; #{{base04-hex}}
+  			tab_bar_background = base01; #{{base01-hex}}
+
+  			# normal
+  			color0 = base00; #{{base00-hex}}
+  			color1 = base08; #{{base08-hex}}
+  			color2 = base0B; #{{base0B-hex}}
+  			color3 = base0A; #{{base0A-hex}}
+  			color4 = base0D; #{{base0D-hex}}
+  			color5 = base0E; #{{base0E-hex}}
+  			color6 = base0C; #{{base0C-hex}}
+  			color7 = base05; #{{base05-hex}}
+
+  			# bright
+  			color8 = base03; #{{base03-hex}}
+  			color9 = base09; #{{base09-hex}}
+  			color10 = base01; #{{base01-hex}}
+  			color11 = base02; #{{base02-hex}}
+  			color12 = base04; #{{base04-hex}}
+  			color13 = base06; #{{base06-hex}}
+  			color14 = base0F; #{{base0F-hex}}
+  			color15 = base07;
+      };
+    }; 
+  }
+
+#+end_src
+
+*** Neovim
+
+Terminal editor, when Emacs fails. _It never fails!_
+
+#+begin_src nix :tangle ./home/applications/nvim/default.nix
+  { config, inputs, lib, pkgs, ... }: 
+
+  let
+  	hm = config.home.homeDirectory;
+
+  	# copy nvim configuration to store.
+  	nvim-config = pkgs.stdenv.mkDerivation {
+  		name = "nvim config";
+  		src = ./conf;
+  		buildInputs = with pkgs; [ coreutils ];
+  		
+  		buildPhase = "";
+  		
+  		installPhase = ''
+  			mkdir -p $out
+  			cp -r * $out/.
+  		'';
+  	};
+  in
+  {
+  	# This symlink is required for my fnl config to work 
+  	# I am symlinking my xdg config to the copied config files.
+  	systemd.user.tmpfiles.rules = [
+  		"L+ ${hm}/.config/nvim/ - - - - ${nvim-config}"
+  	];
+
+  	# change editor
+  	programs.bash.bashrcExtra = ''
+  		export EDITOR=vim
+  	'';
+
+  	programs.neovim = {
+  		enable = true;
+  		viAlias = true;
+  		vimAlias = true;
+
+  		# my neovim config is done nearly exclusively in Fennel
+  		# so there is a simple lua script to use as a gateway.
+
+  		plugins = 
+  			with pkgs.vimPlugins; 
+  			with nvim-treesitter-parsers; 
+  			# with pkgs.nur.repos.m15a.vimExtraPlugins; # Having problems with deprecation here. 
+  		  [
+  			  # for fennel
+  			  hotpot-nvim
+
+  			  # line
+  			  lualine-nvim
+  			  indent-blankline-nvim
+  			  # incline-nvim
+  			  
+  			  # language server
+  			  nvim-lspconfig
+  			  cmp-nvim-lsp
+  			  cmp-buffer
+  			  nvim-cmp
+
+  			  # TODO LaTeX
+  			  vimtex
+  			  nabla-nvim
+
+  			  # tmux 
+  			  (lib.mkIf config.programs.tmux.enable vim-tmux-navigator)
+
+  			  # telescope
+  			  plenary-nvim
+  			  telescope-nvim
+  			  telescope-file-browser-nvim
+
+  			  # toggle term
+  			  toggleterm-nvim
+
+  			  # theme
+  			  oxocarbon-nvim
+
+  			  # git
+  			  gitsigns-nvim
+  			  diffview-nvim
+
+  			  # TODO lisp
+  			  # add Olical/aniseed and conjure
+
+  			  # glow
+  			  glow-nvim
+
+  			  # tree sitter
+  			  nvim-treesitter
+  			  cmp-treesitter
+  			  c
+  			  cpp
+  			  vue
+  			  javascript
+  			  html
+  			  css
+  			  vim
+  			  lua
+  			  fennel
+  			  glsl
+  			  diff
+  			  commonlisp
+  			  latex
+  			  typescript
+  			  markdown
+  			  markdown_inline
+  			  nix
+  			  rust
+
+  			  # other	
+  			  nvim-web-devicons
+  		  ];
+  	};
+  }
+
+#+end_src
+
+*** Ranger
+
+#+begin_src nix :tangle ./home/applications/ranger.nix
+  { pkgs, ... }: 
+
+  {
+  	home.packages = with pkgs; [ ranger ];
+
+  	xdg.configFile."ranger/rc.conf".text = ''
+  		set preview_images true
+  		set preview_images_method kitty
+  	'';
+
+  	programs.bash.bashrcExtra = ''
+  		export VISUAL=vim
+  		export PAGER=more
+  	'';
+  }
+#+end_src
+
+*** Terminal Multiplexer
+
+#+begin_src nix :tangle ./home/applications/tmux.nix
+  { inputs, pkgs, ... }: {
+  	programs.tmux = {
+  		enable = true;
+  		keyMode = "vi";
+  		shortcut = "a";
+  		mouse = true;
+  		baseIndex = 1;
+
+  		extraConfig = ''
+  			new-session -n $HOST
+  			bind r source-file ~/.config/tmux/tmux.conf
+
+  			# statusbar
+  			set -g status-position bottom
+  			set -g status-justify left
+  			set -g status-style 'fg=color2'
+  			set -g status-left ' ' 
+  			set -g status-right '%Y-%m-%d %H:%M '
+  			set -g status-right-length 50
+  			set -g status-left-length 10
+
+  			setw -g window-status-current-style 'fg=color0 bg=color1 bold'
+  			setw -g window-status-current-format ' #I #W #F '
+
+  			setw -g window-status-style 'fg=colour2 dim'
+  			setw -g window-status-format ' #I #[fg=color7]#W #[fg=color2]#F '
+
+  			setw -g window-status-bell-style 'fg=color2 bg=color1 bold'
+  		'';
+  	};
+  }
+
+#+end_src
+
+*** VScodium
+
+#+begin_src nix :tangle ./home/applications/vscodium.nix
+  { lib, pkgs, ... }: {
+
+    # file to separate my vscodium configuration (vscodium is a telemetry-free vscode)
+    programs.vscode = {
+      enable = true;
+      package = pkgs.vscodium;
+      extensions = with pkgs.vscode-extensions; [
+        bbenoist.nix
+        ms-vscode-remote.remote-ssh
+        vscodevim.vim
+      ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+        { # theme of choice (light of course)
+          name = "night-owl";
+          publisher = "sdras";
+          version = "2.0.1";
+          sha256 = "sha256-AqfcVV9GYZ+GLgusXfij9z4WzrU9cCHp3sdZb0i6HzE=";
+        }
+        { # icons of choice
+          name = "fluent-icons";
+          publisher = "miguelsolorio";
+          version="0.0.18";
+          sha256 = "sha256-sE0A441QPwokBoLoCqtImDHmlAXd66fj8zsJR7Ci+Qs=";
+        }
+      ];
+
+      userSettings = {
+        "editor.fontFamily" = "Victor Mono, monospace";
+        "editor.cursorBlinking" = "phase";
+        "editor.cursorSmoothCaretAnimation" = "on";
+        "editor.cursorStyle" = "line-thin";
+        "editor.fontLigatures" = true;
+        "editor.wordWrap" = "bounded";
+        "editor.wordWrapColumn" = 150;
+        "files.autoSave" = "afterDelay";
+        "files.exclude" = {
+          "**/.classpath" = true;
+          "**/.factorypath" = true;
+          "**/.project" = true;
+          "**/.settings" = true;
+        };
+        "symbols.hidesExplorerArrows" = false;
+        "window.titleBarStyle" = "custom";
+        "workbench.colorTheme" = "Night Owl Light";
+        "workbench.productIconTheme" = "fluent-icons";
+        "workbench.sideBar.location" = "right";
+        "vim" = {
+          "autoSwitchInputMethod.enable" = true;
+          "camelCaseMotion.enable" = true;
+          "easymotion" = true;
+        };
+        "explorer.confirmDelete" = false;
+      };
+    };
+
+  }
+#+end_src
+
+** Scripts
+
+#+begin_src nix :tangle ./home/scripts/default.nix
+  { config, pkgs, ... }:
+
+  let
+  	build-home = 
+  		let
+  			hm = config.home.homeDirectory;
+  		in pkgs.writeShellScriptBin "build-home" ''
+  			nix build ${hm}/Documents/dot#homeConfigurations.jalen.activationPackage && \
+  			${hm}/Documents/dot/result/activate
+  		'';
+
+  	mpd-art-path =
+  		let
+  			md = config.services.mpd.musicDirectory;	
+  		in pkgs.writeShellScriptBin "mpd-art-path" ''
+  			cover="${md}/$(mpc current -f '%artist% - %album%')/cover"
+  			coverPNG="$(echo $cover).png"
+  			coverJPG="$(echo $cover).jpg"
+  			if [[ -e $coverPNG ]]; then
+  				echo $coverPNG
+  			else
+  				echo $coverJPG
+  			fi
+  		'';
+
+  	notify-mpd = pkgs.writeShellScriptBin "notify-mpd" ''
+  		while "true"; do
+  			notify-send `Now Playing` "$(mpc current --wait -f '%artist%\n%title%')" \
+  				-i "$(mpd-art-path)" -t 3000
+  			cp "$(mpd-art-path)" /tmp/mpd_art
+  		done
+  	'';
+
+  in pkgs.symlinkJoin {
+  	name = "scripts";
+  	paths = [
+  		build-home
+  		mpd-art-path
+  		notify-mpd
+  	];
+  }
+#+end_src
+
+** Services
+*** Mako
+
+Notification daemon.
+
+#+begin_src nix :tangle ./home/utilities/mako.nix
+  { config, lib, pkgs, ... }: 
+
+  with config.valhalla.theme;
+  {
+
+    # home.packages = with pkgs; [  ];
+
+    services.mako = {
+      enable = true;
+      font = "Victor Mono 13";
+      sort = "-time";
+  		textColor = base05;
+  		backgroundColor = base00;
+  		maxIconSize = 64;
+    };
+
+  }
+
+#+end_src
+
+*** MPD
+
+#+begin_src nix :tangle ./home/utilities/mpd/default.nix
+  { config, lib, pkgs, ... }:
+
+  with pkgs;
+  let
+  	hm = config.home.homeDirectory;
+  in
+  {
+  	services.mpd = {
+  		enable = true;
+  		network.startWhenNeeded = true;
+  		musicDirectory = "${hm}/Music"; # replace with proper non-hardcoded path
+  	};
+
+  	# create database file.
+  	systemd.user.tmpfiles.rules = [
+  		"f ${hm}/.config/mpd/database 0755 jalen users - -"
+  	];
+
+  	# I could not get mpd to generate this conf without writing it manually.
+  	xdg.configFile."mpd/mpd.conf".text = ''
+  		port "6600"
+  		db_file "${hm}/.config/mpd/database"
+  		music_directory "${hm}/Music"
+
+  		audio_output {
+  			type "pulse"
+  			name "pulse audio"
+  		}
+
+  		audio_output {
+  			type                    "fifo"
+  			name                    "my_fifo"
+  			path                    "/tmp/mpd.fifo"
+  			format                  "44100:16:2"
+  		}
+  	'';
+
+  }
+
+#+end_src
+
+*** TODO TexLive
+
+- [ ] Probably should move this elsewhere....
+
+#+begin_src nix :tangle ./home/utilities/tex.nix
+  { pkgs, ... }:
+
+  {
+  	home.packages = with pkgs; [ texliveFull ];
+  }
+
+#+end_src
+
+** Wayland
+
+*** Hyprland
+
+**** Default
+
+#+begin_src nix :tangle ./home/wayland/hyprland/default.nix
+  { self, config, inputs, lib, pkgs, ... }: 
+  with inputs;
+
+  let
+  	hm = config.home.homeDirectory;
+  	workspace-binds = import ./workspace-binds.nix;
+  	wallpaper = "${hm}/Pictures/nier-arch.jpg";
+  in
+  {
+  	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
+  		"d /tmp/hypr 0755 jalen users - -"
+  	];
+
+  	home.packages = with pkgs; [ hyprpaper ];
+
+  	wayland.windowManager.hyprland = {
+  		enable = true;
+  		settings = {
+  			monitor = "eDP-1,2256x1504@60,0x0,1";
+
+  			general = {
+  				border_size = 3;
+  			};
+
+  			decoration = {
+  				rounding = 7;
+  			};
+
+  			exec-once = [
+  				"hyprpaper"
+  				#config.programs.bash.shellAliases."notify-mpd"
+  				#"notify-mpd" # custom alias that listens to mpd and notifies with new songs.
+  				"waybar"
+  			];
+
+  			# Window swallowing... which half works.
+  			# It depends on the program. Image viewers like feh seem to swallow. 
+  			misc = {
+  				enable_swallow = true;
+  				swallow_regex = "^(kitty)$";
+  				disable_hyprland_logo = true; # sorry hypr-chan :(
+  			};
+
+  			animation = [
+  				"windows, 1, 1, default, popin"
+  			];
+
+  			# remap capslock to ctrl
+  			input.kb_options = "ctrl:nocaps";
+
+  			"$mod" = "SUPER";
+
+  			# mouse bindings 
+  			bindm = [
+  				"$mod, mouse:272, movewindow"
+  				"$mod Shift, mouse:272, resizewindow"
+  			];
+
+  			# key bindings
+  			bind = [
+  				# Applications
+  				"$mod Shift, F, exec, firefox"
+  				"$mod, Return, exec, kitty"
+  				"$mod, E, exec, emacsclient -c"
+
+          # because not all my changes update the server even on eval.
+          "$mod Shift, E, exec, systemctl --user restart emacs.service" 
+
+  				# Move window
+  				"$mod, H, exec, hyprctl dispatch movewindow l"
+  				"$mod, J, exec, hyprctl dispatch movewindow d"
+  				"$mod, K, exec, hyprctl dispatch movewindow u"
+  				"$mod, L, exec, hyprctl dispatch movewindow r"
+
+  				# Actions 
+  				"$mod, Q, exec, hyprctl dispatch killactive"
+  				"$mod, F, exec, hyprctl dispatch togglefloating"
+  				"$mod, Tab, cyclenext"
+  				"$mod, Tab, bringactivetotop"
+  				"$mod Shift, Escape, exec, hyprctl dispatch exit"
+
+  				# Screenshots
+  				", Print, exec, slurp | grim -g - ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+  				"$mod, Print, exec, grim ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+
+  				# Brightness
+  				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
+  				", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
+
+  				# Audio
+  				", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
+  				", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
+  				", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"
+  			] ++ workspace-binds;
+  		};
+  	};
+
+  	xdg.configFile."hypr/hyprpaper.conf".text = ''
+  		preload = ${wallpaper} 
+  		wallpaper = eDP-1,${wallpaper}
+  	'';
+  }
+#+end_src
+
+**** Default Workspace Bindings
+
+#+begin_src nix :tangle ./home/wayland/hyprland/workspace-binds.nix
+  (
+  	builtins.concatLists (builtins.genList (
+  		x: let 
+  			ws = let
+  				c = (x+1) / 10;
+  			in
+  				builtins.toString (x + 1 - (c * 10));
+  		in [
+  			"$mod, ${ws}, workspace, ${toString (x+1)}"
+  			"$mod SHIFT, ${ws}, movetoworkspace, ${toString (x+1)}"
+  		]
+  	) 10)
+  )
+#+end_src
+
+*** Waybar
+
+#+begin_src nix :tangle ./home/wayland/waybar.nix
+  { inputs, config, pkgs, ... }: 
+
+  with inputs.theme;
+  {
+
+    programs.waybar = with config.valhalla.theme; {
+      enable = true;
+      settings = {
+        mainBar = {
+          layer = "top";
+          position = "top";
+          height = 30;
+          output = [ "eDP-1" ];
+
+          "hyprland/workspaces" = {
+            "format" = "<sub>{icon}</sub>";
+            "on-scroll-up" = "hyprctl dispatch workspace e+1";
+            "on-scroll-down" = "hyprctl dispatch workspace e-1";
+          };
+
+  				"hyprland/window" = {
+  					"format" = "{title}";
+  					"rewrite" = {
+  						"(.*) — Mozilla Firefox" = "&#xf269; $1";
+  						"(.*) - Spotify" = "&#xf1bc; $1";
+  						"(.*) - bash" = "&#xf120 [$1]";
+  						# "(.*) - ";
+  					};
+  					"separate-outputs" = true;
+  				};
+
+          "clock" = {
+            "interval" = 60;
+            "format" = "{:%H:%M}";
+            "max-length" = 25;
+          };
+
+          "battery" = {
+            "states" = {
+              "good" = 95;
+              "warning" = 30;
+              "critical" = 15;
+            };
+            "format" = "{capacity}% {icon}";
+            "format-charging" = "{capacity}% ";
+            "format-plugged" = "{capacity}% ";
+            "format-alt" = "{time} {icon}";
+            "format-icons" = ["" "" "" "" ""];
+          };
+
+          "network" = {
+            "format-wifi" = "";
+            "format-ethernet" = "";
+            "tooltip-format" = " {ifname} via {gwaddr}\nStrength of {signalStrength}%";
+            "format-linked" = " ";
+            "format-disconnected" = "⚠";
+            "format-alt" = "{ifname}: {ipaddr}/{cidr}";
+          };
+
+          "pulseaudio" = {
+            "format" = "{icon} {volume}%";
+            "format-bluetooth" = "{icon}{volume}% ";
+            "format-bluetooth-muted" = " ";
+            "format-muted" = " ";
+            "format-source" = "{volume}% ";
+            "format-source-muted" = "";
+            "format-icons" = {
+              "headphone" = "";
+              "hands-free" = "";
+              "headset" = "";
+              "phone" = "";
+              "portable" = "";
+              "car" = "";
+              "default" = ["" "" ""];
+            };
+            # "on-click" = "pavucontrol";
+          };
+
+  				"mpd" = {
+  					"format" = "{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})";
+  					#"format-disconnected" = "Disconnected ";
+  					"format-stopped" = "";
+  					"interval" = 10;
+  					"tooltip-format" = "<img src='/tmp/mpd_art'/>";
+  					"tooltip-format-disconnected" = "Display art here....";
+  				};
+
+  				/*"image#album-art" = {
+  					"path" = "/tmp/mpd_art";
+  					"size" = 32;
+  					"interval" = 5;
+  					"on-click" = "mpc toggle";
+  				};*/
+
+          modules-left = [ "mpd" ];
+  				modules-center = [ ];
+          modules-right = [ "hyprland/window" "pulseaudio" "network" "battery" "clock" ];
+        };
+      };
+
+      style = 
+  		  let 
+  			  marginUD = "0.40em";	
+  			  marginLR = "0.40em";
+  			  opacity = "0.9";
+  			  padUD = "0.40em";
+  			  padLR = "0.85em";
+  			  radius = "15px";
+
+  			  stdBack = ''
+  				background-color: rgba(${blackAsDec}, ${opacity});
+  			'';
+  			  moduleCSS = ''
+  				padding: ${padUD} ${padLR};
+  				margin: ${marginUD} ${marginLR};
+  				border-radius: ${radius};
+  				border: 1em;
+  				box-shadow: 0.2em 0.3em 0 rgba(${blackAsDec}, 0.3);
+  			'';
+  		  in ''
+              window#waybar {
+  				font-family: Victor Mono, FontAwesome, monospace;
+  				font-size: 18px;
+  				padding: 0 0.7em;
+  				background: rgba(${blackAsDec}, 0.0);
+                  color: ${base05};
+          }
+
+  			#window {
+  				font-style: italic;
+                  color: ${base05};
+  				${moduleCSS}
+  				${stdBack}
+  			}
+
+  			window#waybar.empty #window  {
+  				background: transparent;
+  				box-shadow: -0.3em 0.4em 0 rgba(${blackAsDec}, 0.0);
+  			}
+
+              tooltip {
+                  background: rgba(${blackAsDec}, 1.0);
+                  border: 1px solid rgba(100, 114, 125, 0.9);
+              }
+
+              tooltip mpd {
+  				background-color: rgba(${blackAsDec}, 1.0);
+  				background-image: url("/tmp/mpd_art");
+              }
+
+              #workspaces button {
+                  background-color: rgba(${blackAsDec}, 0.9);
+                  color: ${base05};
+                  border-top: 3px solid ${base05};
+  				${moduleCSS}
+  				${stdBack}
+              }
+
+  			#workspaces button.active {
+  				color: ${base0B};
+  				${moduleCSS}
+  				${stdBack}
+  			}
+
+              #workspaces button.focused {
+  				color: ${base00};
+                  background: ${base04};
+                  border-bottom: 3px solid ${base0D};
+  				${moduleCSS}
+  				${stdBack}
+              }
+
+  			#mpd {
+  				font-style: italic;
+  				${moduleCSS}
+  				${stdBack}
+  			}
+
+  			#mpd.stopped {
+  				background-color: transparent;
+  			}
+
+              #clock {
+  				font-weight: bold; 
+  				${moduleCSS}
+  				${stdBack}
+              }
+
+  			#pulseaudio {
+  				font-weight: bold;
+  				${moduleCSS}
+  				${stdBack}
+  			}
+
+              #battery {
+  				font-weight: bold;
+                  background-color: ${base0B};
+                  color: ${base00};
+  				${moduleCSS}
+              }
+
+              #battery.charging {
+  				font-weight: bold;
+                  color: ${base00};
+                  background-color: ${base0D};
+  				${moduleCSS}
+              }
+
+              @keyframes blink {
+                  to {
+                      background-color: ${base05};
+                      color: ${base00};
+                  }
+              }
+
+              #battery.warning:not(.charging) {
+                  background: ${base0C};
+                  color: ${base05};
+                  animation-name: blink;
+                  animation-duration: 0.5s;
+                  animation-timing-function: linear;
+                  animation-iteration-count: infinite;
+                  animation-direction: alternate;
+  				${moduleCSS}
+              } 
+
+  			#network {
+  				font-weight: bold;
+  				${moduleCSS}
+  				${stdBack}
+  			}
+
+  			#network.disconnected {
+  				font-weight: bold;
+  				color: ${base00};
+  				background-color: ${base08};	
+  				${moduleCSS}
+  			}
+          '';
+    };
+
+  }
+
+#+end_src

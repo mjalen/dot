@@ -1,19 +1,12 @@
+# MPD
+
+
+# [[file:../../../Config.org::*MPD][MPD:1]]
 { config, lib, pkgs, ... }:
 
 with pkgs;
 let
 	hm = config.home.homeDirectory;
-	/*mpd-art-path = runCommand ''mpd-art-path'' {
-		mpc = mpc_cli;
-		inherit coreutils;
-		md = "/home/jalen/Music";
-	} ''${import ./mpd-art-path.sh}''; 
-
-	notify-mpd = runCommand ''notify-mpd'' {
-		art = mpd-art-path.out;
-		mpc = mpc_cli;
-		inherit coreutils;
-	} ''${import ./notify-mpd.sh}'';*/	
 in
 {
 	services.mpd = {
@@ -47,3 +40,4 @@ in
 	'';
 
 }
+# MPD:1 ends here

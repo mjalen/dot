@@ -89,3 +89,9 @@
 ; glow 
 (let [glow (require "glow")]
   (glow.setup))
+
+; nabla latex math
+; WARNING: This breaks a LOT of different modes
+;(let [nabla (require "nabla")]
+;  (nabla.enable_virt 
+;	{ :autogen true }))

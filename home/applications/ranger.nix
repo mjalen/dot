@@ -1,3 +1,7 @@
+# Ranger
+
+
+# [[file:../../Config.org::*Ranger][Ranger:1]]
 { pkgs, ... }: 
 
 {
@@ -13,3 +17,4 @@
 		export PAGER=more
 	'';
 }
+# Ranger:1 ends here

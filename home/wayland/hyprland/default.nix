@@ -1,15 +1,21 @@
+# Default
+
+
+# [[file:../../../Config.org::*Default][Default:1]]
 { self, config, inputs, lib, pkgs, ... }: 
 with inputs;
 
 let
 	hm = config.home.homeDirectory;
 	workspace-binds = import ./workspace-binds.nix;
-	wallpaper = "${hm}/Pictures/black-beach.jpg";
+	wallpaper = "${hm}/Pictures/nier-arch.jpg";
 in
 {
 	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
 		"d /tmp/hypr 0755 jalen users - -"
 	];
+
+	home.packages = with pkgs; [ hyprpaper ];
 
 	wayland.windowManager.hyprland = {
 		enable = true;
@@ -57,9 +63,12 @@ in
 			# key bindings
 			bind = [
 				# Applications
-				# "$mod, Space, exec, tofi-run"
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
+				"$mod, E, exec, emacsclient -c"
+
+        # because not all my changes update the server even on eval.
+        "$mod Shift, E, exec, systemctl --user restart emacs.service" 
 
 				# Move window
 				"$mod, H, exec, hyprctl dispatch movewindow l"
@@ -95,3 +104,4 @@ in
 		wallpaper = eDP-1,${wallpaper}
 	'';
 }
+# Default:1 ends here

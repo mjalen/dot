@@ -1,3 +1,7 @@
+# Scripts
+
+
+# [[file:../../Config.org::*Scripts][Scripts:1]]
 { config, pkgs, ... }:
 
 let
@@ -39,4 +43,4 @@ in pkgs.symlinkJoin {
 		notify-mpd
 	];
 }
-
+# Scripts:1 ends here
