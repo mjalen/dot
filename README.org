@@ -5,6 +5,24 @@
 [[./docs/screenies/current.png]]
 
 * Table of Contents                                          :TOC_2_gh:TOC_2:
+- [[#preamble][Preamble]]
+- [[#impermanent-filesystem][Impermanent Filesystem]]
+- [[#installation][Installation]]
+  - [[#requirements][Requirements]]
+  - [[#partitioning][Partitioning]]
+  - [[#encryption][Encryption]]
+  - [[#formatting][Formatting]]
+  - [[#filesystem-mounting][Filesystem Mounting]]
+  - [[#uuidpartuuid-configuration][UUID/PARTUUID Configuration]]
+  - [[#passwords][Passwords]]
+  - [[#build][Build]]
+- [[#tasks][Tasks]]
+  - [[#priority][Priority]]
+  - [[#org-implementation][Org Implementation]]
+  - [[#documentation][Documentation]]
+  - [[#aesthetic][Aesthetic]]
+  - [[#backlog][Backlog]]
+
 * Preamble
 
 I am revisiting NixOS after two/three long years full of macOS and Arch Linux (primarily the former unfortunately). This is my second major attempt with NixOS and it seems to be going much better (due to better hardware compatibility with different hardware). I am running this nix flake on a Framework 13 with a AMD 7040 series processor; my configuration choice thus reflect this. I will try to make the config as modular and usable to those without this laptop; let me know if there are any issues. 
