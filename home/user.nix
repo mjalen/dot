@@ -37,6 +37,7 @@ let
 		grim
 
 		# botware
+    spotify
 		zoom-us
 
 		# TODO add fonts to fonts.fonts

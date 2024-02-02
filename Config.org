@@ -54,9 +54,11 @@ The flake file for the entire configuration.
 #+end_src
 
 * NixOS Configuration
-** Gateway
+** Bridge 
 
-This file acts as a gateway between our flake and the host configurations.
+The following is the bridge file between the flake and the host configurations. This file returns the NixOS system for each host. Currently there is only one host:
+
+- *valhalla*: Host for my Framework 13 AMD laptop.
 
 #+begin_src nix :tangle ./systems/default.nix
   { inputs, pkgs, ...}:
@@ -81,6 +83,9 @@ This file acts as a gateway between our flake and the host configurations.
 #+end_src
 
 ** Services
+*** Info
+Describes different services for the NixOS system. Only add services here if they rely directly on the NixOS system and nixpkgs.
+
 *** SSH
 
 #+begin_src nix :tangle ./systems/services/ssh.nix
@@ -97,7 +102,7 @@ This file acts as a gateway between our flake and the host configurations.
 
 *** LXD
 
-Currently this LXD configuration does not work.
+Currently this LXD configuration does not work and is not used.
 
 #+begin_src nix :tangle ./systems/services/lxd.nix
   { lib, pkgs, ... }: {
@@ -153,6 +158,7 @@ Currently this LXD configuration does not work.
 #+end_src
 
 ** Valhalla
+*** Info
 
 My main host. Currently configured for the Framework 13 laptop with an AMD processor.
 
@@ -438,5 +444,299 @@ For microphones.
   }
 #+end_src
 * TODO Home Configuration
+** Info
 
 This is where the bulk of the configuration lives.
+
+** Bridge
+
+Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration.
+
+#+begin_src nix :tangle ./home/default.nix
+  { self, inputs, pkgs, ... }: 
+
+  let
+  	sharedModules = [
+  		inputs.impermanence.nixosModules.home-manager.impermanence
+  	];
+
+  	homeImports = {
+  		jalen = [ ./user.nix ] ++ sharedModules;
+  	};
+
+  	inherit (inputs.home-manager.lib) homeManagerConfiguration;
+  in {
+  	jalen = homeManagerConfiguration {
+  		inherit pkgs;
+  		extraSpecialArgs = { inherit inputs self; };
+  		modules = homeImports.jalen;
+  	}; 
+  }
+#+end_src
+
+** Users
+*** Jalen
+
+#+begin_src nix :tangle ./home/user.nix
+  { config, inputs, pkgs, ...}: 
+
+  let
+  	username = "jalen";
+  	uniqueScripts = (import ./scripts) { inherit config pkgs; };
+
+  	packages = with pkgs; [
+  		# my scripts
+  		uniqueScripts
+
+  		# misc
+  		# gobble
+  		neofetch
+  		pinentry
+  		pinentry-curses
+  		openssh
+  		brightnessctl
+  		acpi
+  		gimp
+  		libnotify
+  		mpc-cli
+  		ripgrep
+  		discord
+  		glow
+  		zathura
+      imagemagick
+
+  		# math stuff
+  		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+
+  		# notes and markup
+  		logseq
+  		zotero
+
+  		# screenshot double wammy ;)
+  		slurp
+  		grim
+
+  		# botware
+      spotify
+  		zoom-us
+
+  		# TODO add fonts to fonts.fonts
+  		victor-mono
+  		font-awesome
+
+  		# pulseaudio mixer.
+  		pamixer
+  	];
+
+  in
+
+  {
+  	# fuck these .. are ugly
+    imports = [
+  		# Import theme (accessed via config.valhalla.theme)
+  		../themes/oxocarbon/dark.nix
+
+  		# GUI 
+  		./wayland/hyprland
+  		./wayland/waybar.nix
+
+  		# Apps
+  		./applications/ranger.nix
+  		./applications/firefox 
+  		./applications/tmux.nix
+  		./applications/kitty
+  		./applications/ncmpcpp.nix
+  		./applications/emacs
+
+  		# Editors
+  		./applications/nvim
+
+  		# Other
+  		./utilities/mako.nix # notification daemon
+    ];
+
+    home = {
+      inherit username;
+      inherit packages;
+      homeDirectory = "/home/${username}";
+      stateVersion = "23.11";
+    };
+
+    dconf.settings = { # add to home-manager
+      "org/virt-manager/virt-manager/connections" = {
+        autoconnect = [ "qemu:///system" ];
+        uris = [ "qemu:///system" ];
+      };
+    };
+
+    programs = {
+  		bash = {
+  			enable = true;
+  			bashrcExtra = ''
+          #    if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+          #    exec tmux attach
+          #    fi
+  			'';
+  		};
+  		ssh.enable = true;
+  		git = {
+  			enable = true;
+  			package = pkgs.gitAndTools.gitFull;
+  			userName = "mjalen"; 
+  			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+  			extraConfig = {
+  				color.ui = "always";
+  			};
+  		};
+  	};
+  }
+#+end_src
+
+** Applications
+*** Emacs 
+
+Truly a long configuration just to act as a bootloader ;)
+
+#+begin_src nix :tangle ./home/applications/emacs/default.nix
+  { config, pkgs, ... }:
+
+  let
+  	hm = config.home.homeDirectory;
+  in
+  {
+  	services.emacs = {
+  		enable = true;
+  		defaultEditor = true;
+  		package = pkgs.emacs29-pgtk;
+  	};
+
+  	programs.emacs = {
+  		enable = true;
+  		package = pkgs.emacs29-pgtk;
+  	};
+
+    home.packages = with pkgs; [ cmake texliveFull ]; # may be good to add this to user instead perhaps?
+
+  	systemd.user.tmpfiles.rules = [
+  		# "d ${hm}/.emacs.d 0755 jalen users - -" # Create emacs directory.
+  		# link config files.
+  		"L+ ${hm}/.emacs.d/config.org - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/config.org"
+  		"L+ ${hm}/.emacs.d/init.el - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/init.el"
+  	];
+  }
+
+#+end_src
+
+*** Firefox
+**** Default
+
+- <<userChrome injection>> The ~userChrome.css~ depends on this nix file. 
+
+#+begin_src nix :tangle ./home/applications/firefox/default.nix
+  { config, pkgs, ... }: 
+
+  with config.valhalla.theme;
+  {
+    # firefox stuffs
+    programs.firefox = {
+      enable = true;
+      profiles = {
+        default = {
+          isDefault = true;
+          extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+            ublock-origin
+            sponsorblock
+            old-reddit-redirect
+  		      darkreader
+          ];
+          settings = {
+            "identity.fxaccounts.enabled" = false;
+            "extensions.pocket.enabled" = false;
+            "extensions.autoDisableScopes" = 0;
+            "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+  					"extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+            "extensions.getAddons.cache.enabled" = false;
+  					"media.rdd-ffmpeg.enabled" = true;
+  					"media.ffmpeg.vaapi.enabled" = true;
+  					"media.navigator.mediadatadecoder_vpx_enabled" = true;
+  					"gfx.webrender.all" = true;
+
+  					"browser.startup.blankWindow" = true;
+  					"browser.sessionstore.resume_session_once" = true;
+
+  					# Why would I want this?
+  					"toolkit.telemetry.archive.enabled" = false;
+  					"toolkit.telemetry.enabled" = false;
+  					"toolkit.telemetry.rejected" = true;
+  					"toolkit.telemetry.server" = "<clear value>";
+  					"toolkit.telemetry.unified" = false;
+  					"toolkit.telemetry.unifiedIsOptIn" = false;
+          };
+          userChrome = builtins.readFile ./userChrome.css;
+        };
+      };
+    };
+  }
+#+end_src
+
+**** User Chrome
+
+*WARNING*  This is not a *complete* ~userChrome.css~ file. It depends on custom nix theme variables that are inserted here: [[userChrome injection]].
+
+#+begin_src css :tangle ./home/applications/firefox/userChrome.css
+  @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+  #TabsToolbar .titlebar-spacer[type="post-tabs"] {
+  	display: none !important;
+  }
+
+  #TabsToolbar > .titlebar-buttonbox-container {
+      display: none !important;
+  }
+
+  /* The following is stolen from github:MrOtherGuy/firefox-csshacks - tabs_on_bottom.css */
+  #titlebar {
+  	order: 2;
+  	-moz-appearance: none !important;
+  	--tabs-navbar-shadow-size: 0px;
+  	--uc-menubar-vertical-overlap: 19px;
+  }
+
+  #navigator-toolbox > div { display: contents }
+
+  .global-notificationbox,
+  #tab-notification-deck {
+  	order: 2;
+  }
+
+  #TabsToolbar .titlebar-spacer{ display: none; }
+  /* Also hide the toolbox bottom border which isn't at bottom with this setup */
+  #navigator-toolbox::after{ display: none !important; }
+
+  @media (-moz-gtk-csd-close-button){
+    .titlebar-button{
+      flex-direction: column;
+    }
+  }
+
+  /* At Activated Menubar */
+  :root:not([chromehidden~="menubar"], [sizemode="fullscreen"]) #toolbar-menubar:not([autohide="true"]) + #TabsToolbar > .titlebar-buttonbox-container {
+    display: block !important;
+  }
+  #toolbar-menubar:not([autohide="true"]) > .titlebar-buttonbox-container {
+    visibility: hidden;
+  }
+
+  /* These exist only for compatibility with autohide-tabstoolbar.css */
+  toolbox#navigator-toolbox > toolbar#nav-bar.browser-toolbar{ animation: none; }
+  #navigator-toolbox:hover #TabsToolbar{ animation: slidein ease-out 48ms 1 }
+  #TabsToolbar > .titlebar-buttonbox-container{ visibility: visible }
+  #navigator-toolbox:not(:-moz-lwtheme){ background-color: -moz-dialog }
+
+  window, #toolbar-menubar, #TabsToolbar, #PersonalToolbar, #navigator-toolbox,#sidebar-box, .titlebar-spacer,
+  #nav-bar, .tab-background[selected="true"], {
+  	background-color: rgba(${blackAsDec}, 0.4) !important;
+  	-moz-appearance: none !important;
+  	background-image: none !important;
+  }
+#+end_src

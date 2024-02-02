@@ -61,14 +61,14 @@ Get rid of it, we don't need it!
 Theme needs to be loaded before I add nano-faces.
 
 #+begin_src emacs-lisp
-   (use-package base16-theme
-       :demand t
-       :config
-       (load-theme 'base16-oxocarbon-dark t))
+    (use-package base16-theme
+        :demand t
+        :config
+        (load-theme 'base16-oxocarbon-dark t))
 
- ; opacity 
- (set-frame-parameter nil 'alpha-background 90)
- (add-to-list 'default-frame-alist '(alpha-background . 90))
+  ; opacity 
+  (set-frame-parameter nil 'alpha-background 90)
+  (add-to-list 'default-frame-alist '(alpha-background . 90))
 #+end_src
 
 ** TODO Modeline
@@ -194,6 +194,8 @@ Theme needs to be loaded before I add nano-faces.
 
 ** TODO Org
 
+*** Default
+
 My org mode configuration, so I can live and breathe org. 
 
 #+begin_src emacs-lisp
@@ -201,9 +203,18 @@ My org mode configuration, so I can live and breathe org.
     :custom
     (org-hide-emphasis-markers t)
     (line-spacing 2)
+    (org-highlight-latex-and-related '(latex script entitles))
+    (org-list-allow-alphabetical t)
     :config 
-    (add-hook 'org-mode-hook 'mjalen/remove_line_numbers)
-    (setq org-ellipsis " ▾"))
+    (setq org-ellipsis " ▾")
+    (setq-default org-startup-indented t
+  		org-pretty-entities t
+  		org-use-sub-superscripts "{}"
+  		org-hide-emphasis-markers t
+  		org-startup-with-inline-images t
+  		org-image-actual-width '(300)))
+
+  (use-package org-appear :hook (org-mode . org-appear.mode))
 
   (use-package org-fragtog
     :after org
@@ -236,6 +247,33 @@ My org mode configuration, so I can live and breathe org.
 
   (add-hook 'org-mode-hook 'variable-pitch-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook 'mjalen/remove_line_numbers)
+#+end_src
+
+*** Roam
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :config
+    (setq org-roam-directory (file-truename "~/Documents/org"))
+    (define-key global-map (kbd "C-c n f") #'org-roam-node-find)
+    (define-key global-map (kbd "C-c n c") #'org-roam-capture)
+    (define-key global-map (kbd "C-c n i") #'org-roam-node-insert)
+    (define-key global-map (kbd "C-c n l") #'org-roam-buffer-toggle))
+
+  (defun my/org-add-ids-to-headlines-in-file ()
+    (interactive)
+    (org-map-entries 'org-id-get-create))
+
+  (defun my/org-pop-ids-to-file (file)
+    (interactive)
+    (find-file file)
+    (my/org-add-ids-to-headlines-in-file))
+
+  (require 'find-lisp)
+  (defun my/org-populate-ids ()
+    (interactive)
+    (mapc 'my/org-pop-ids-to-file (find-lisp-find-files "~/org/" "\\.org$")))
 #+end_src
 
 ** LaTeX

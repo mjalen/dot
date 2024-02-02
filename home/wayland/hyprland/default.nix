@@ -63,6 +63,9 @@ in
 				"$mod, Return, exec, kitty"
 				"$mod, E, exec, emacsclient -c"
 
+        # because not all my changes update the server even on eval.
+        "$mod Shift, E, exec, systemctl --user restart emacs.service" 
+
 				# Move window
 				"$mod, H, exec, hyprctl dispatch movewindow l"
 				"$mod, J, exec, hyprctl dispatch movewindow d"
