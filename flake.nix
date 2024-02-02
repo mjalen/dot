@@ -1,6 +1,6 @@
 # Flake
 
-# The flake file for the entire configuration.
+# The ~flake.nix~ is defined entirety below.
 
 
 # [[file:Config.org::*Flake][Flake:1]]
@@ -18,8 +18,8 @@
         ];
       };
     in {
-      nixosConfigurations = import ./systems { inherit inputs pkgs self; };
-      homeConfigurations = import ./home { inherit inputs pkgs self; };
+      nixosConfigurations = import ./tangle/nixosBridge.nix { inherit inputs pkgs self; };
+      homeConfigurations = import ./tangle/homeBridge.nix { inherit inputs pkgs self; };
     };
 
   inputs = {

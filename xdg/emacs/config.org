@@ -1,0 +1,333 @@
+#+title: Emacs Config
+#+author: Jalen Moore
+
+My personal emacs configuration.
+
+* Table of Contents                                                     :TOC:
+* Misc
+** Functions
+
+#+begin_src emacs-lisp
+(defun mjalen/remove_line_numbers ()
+  (interactive)
+  (display-line-numbers-mode 0))
+#+end_src
+
+** UI Clutter
+
+Get rid of it, we don't need it!
+
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)
+  (menu-bar-mode 0)
+  (tool-bar-mode 0)
+  (scroll-bar-mode 0)
+  (setq display-line-numbers-mode 1)
+#+end_src
+
+** Garbage Collection
+
+#+begin_src emacs-lisp
+(setq create-lockfiles nil)
+(setq delete-by-moving-to-trash t)
+#+end_src
+
+** TODO Lines
+
+#+begin_src emacs-lisp
+(global-display-line-numbers-mode)
+(setq column-number-mode t)
+(setq auto-fill-mode t)
+(global-visual-line-mode t)
+(global-hl-line-mode t)
+(blink-cursor-mode t)
+(setq global-visual-fill-column-mode nil)
+(set-display-table-slot standard-display-table 'wrap ?\ )
+#+end_src
+
+* EVIL Mode 
+
+#+begin_src emacs-lisp
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-C-u-scroll t)
+    :config
+    (evil-mode 1))
+#+end_src
+
+* Theme
+** Base16 Themes
+
+Theme needs to be loaded before I add nano-faces.
+
+#+begin_src emacs-lisp
+    (use-package base16-theme
+        :demand t
+        :config
+        (load-theme 'base16-oxocarbon-dark t))
+
+  ; opacity 
+  (set-frame-parameter nil 'alpha-background 90)
+  (add-to-list 'default-frame-alist '(alpha-background . 90))
+#+end_src
+
+** TODO Modeline
+
+- [ ] Edit modeline to have the info I want (git branch, mode, line:col, maybe a language icon?)
+
+#+begin_src emacs-lisp
+  (use-package nano-modeline
+    :custom
+    (mode-line-format nil)
+    :config
+    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
+    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
+    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
+    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
+    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
+    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
+    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
+    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
+    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
+    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
+    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode)
+    (nano-modeline-text-mode t))
+#+end_src
+
+** Fonts
+
+#+begin_src emacs-lisp
+  (add-to-list 'default-frame-alist '(font . "Victor Mono-12"))
+  (set-frame-font "Victor Mono-12")
+ #+end_src
+
+** Indent Guides
+
+#+begin_src emacs-lisp
+  (use-package highlight-indent-guides
+    :custom
+    (highlight-indent-guides-method 'bitmap)
+    :config
+    (set-face-background 'highlight-indent-guides-odd-face "ffffff")
+    (set-face-background 'highlight-indent-guides-even-face "ffffff")
+    (set-face-foreground 'highlight-indent-guides-character-face "ffffff") 
+    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+ #+end_src
+
+* Dashboard
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-display-icons-p t)
+    ;(setq dashboard-banner-logo-png "/Users/jalen/.emacs.d/images/drip.jpeg")
+    (setq dashboard-icon-type 'nerd-icons))
+#+end_src
+* General.el
+
+#+begin_src emacs-lisp
+(use-package general
+   :config
+   (general-evil-setup nil))
+#+end_src
+
+* Helm
+** Configuration
+
+#+begin_src emacs-lisp
+  (use-package helm
+       :straight t
+       :config
+       (helm-autoresize-mode t))
+#+end_src
+
+** Keybindings
+
+#+begin_src emacs-lisp
+  (general-define-key
+      "M-<tab>" 'other-window
+      "M-s" 'switch-to-buffer-other-window
+      "C-<tab>" 'counsel-ibuffer
+      "<escape>" 'keyboard-escape-quit
+      "M-M" 'global-visual-fill-column-mode 
+      "M-x" 'helm-M-x
+      "C-<tab>" 'helm-buffers-list
+      "C-s" 'helm-occur
+      "C-x C-f" 'helm-find-files
+      "C-x C-c" 'delete-frame)
+
+  (general-def helm-map
+      "C-z" 'helm-execute-persistent-action)
+#+end_src
+
+* Tools
+** Language Servers
+
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :commands lsp) ; problematic
+
+  (use-package lsp-latex)
+
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    :config
+    (setq lsp-ui-sideline-show-diagnostics 1
+          lsp-ui-sideline-show-hover 1
+          lsp-ui-doc-enable 1
+          lsp-ui-peek-enable 1)) ; problematic
+
+  (use-package helm-lsp :commands helm-lsp-workspace-symbol) ; problematic
+
+  (use-package dap-mode) ; problematic
+
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config (setq which-key-idle-delay 0.2)) 
+#+end_src
+
+** TODO Org
+
+*** Default
+
+My org mode configuration, so I can live and breathe org. 
+
+#+begin_src emacs-lisp
+  (use-package org
+    :custom
+    (org-hide-emphasis-markers t)
+    (line-spacing 2)
+    (org-highlight-latex-and-related '(latex script entitles))
+    (org-list-allow-alphabetical t)
+    :config 
+    (setq org-ellipsis " ▾")
+    (setq-default org-startup-indented t
+  		org-pretty-entities t
+  		org-use-sub-superscripts "{}"
+  		org-hide-emphasis-markers t
+  		org-startup-with-inline-images t
+  		org-image-actual-width '(300)))
+
+  (use-package org-appear :hook (org-mode . org-appear.mode))
+
+  (use-package toc-org
+    :config
+    (add-hook 'org-mode-hook 'toc-org-mode)
+
+    ;; enable in markdown, too
+    (add-hook 'markdown-mode-hook 'toc-org-mode)
+    (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 0.8)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
+
+  (use-package org-superstar
+    :after org
+    :hook (org-mode . org-superstar-mode)
+    :custom
+    (org-superstar-remove-leading-stars t)
+    (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+  (use-package org-modern
+    :hook
+    (org-mode . global-org-modern-mode)
+    :custom
+    (org-modern-keyword nil)
+    (org-modern-checkbox nil)
+    (org-modern-table nil))
+
+  (use-package markdown-mode)
+
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook 'mjalen/remove_line_numbers)
+#+end_src
+
+*** Roam
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :config
+    (setq org-roam-directory (file-truename "~/Documents/org"))
+    (define-key global-map (kbd "C-c n f") #'org-roam-node-find)
+    (define-key global-map (kbd "C-c n c") #'org-roam-capture)
+    (define-key global-map (kbd "C-c n i") #'org-roam-node-insert)
+    (define-key global-map (kbd "C-c n l") #'org-roam-buffer-toggle))
+
+  (defun my/org-add-ids-to-headlines-in-file ()
+    (interactive)
+    (org-map-entries 'org-id-get-create))
+
+  (defun my/org-pop-ids-to-file (file)
+    (interactive)
+    (find-file file)
+    (my/org-add-ids-to-headlines-in-file))
+
+  (require 'find-lisp)
+  (defun my/org-populate-ids ()
+    (interactive)
+    (mapc 'my/org-pop-ids-to-file (find-lisp-find-files "~/org/" "\\.org$")))
+#+end_src
+
+** LaTeX
+
+#+begin_src emacs-lisp
+(setq TeX-auto-save t
+      Tex-parse-self t)
+
+(setq-default TeX-master nil)
+
+(use-package flyspell)
+
+; convenience for adding hooks to both tex/latex modes.
+;(defun mjalen/hook-latex (hook)
+;    (let ((hook-list (quote (tex-mode-hook latex-mode-hook))))
+;    (mapcar '(lambda (h) (add-hook 'h 'hook)) hook-list)))
+
+;(mjalen/hook-latex 'tex-fold-mode-hook)
+;(mjalen/hook-latex 'flyspell-mode-hook)
+;(mjalen/hook-latex 'lsp-mode-hook)
+
+(add-hook 'TeX-mode-hook 'turn-on-reftex)
+(use-package latex-pretty-symbols)
+#+end_src
+
+** Nix
+
+#+begin_src emacs-lisp
+   (use-package nix-mode
+     :mode "\\.nix\\'")
+#+end_src
+
+** TODO Vterm
+
+- [ ] Figure out why CMAKE is not loading.
+
+#+begin_src emacs-lisp
+  (use-package vterm
+      :commands (vterm)
+      :ensure t
+      :init
+      (unless (file-exists-p (concat (file-name-directory (locate-library "vterm"))
+                                     "vterm-module.so"))
+        (message "Set vterm to install.")
+        (setq vterm-install t)))    
+
+  (add-hook 'vterm-mode-hook 'mjalen/remove_line_numbers)
+#+end_src

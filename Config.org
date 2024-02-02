@@ -4,39 +4,46 @@
 #+title: Nix Configuration
 #+author: Jalen Moore
 
-* Notes
+* Table of Contents                                                     :TOC:
+- [[#preamble][Preamble]]
+  - [[#rationale][Rationale]]
+  - [[#setup][Setup]]
+- [[#nixos-configuration][NixOS Configuration]]
+  - [[#bridge][Bridge]]
+  - [[#services][Services]]
+  - [[#valhalla][Valhalla]]
+  - [[#finishing-touch][Finishing Touch]]
+- [[#home-configuration][Home Configuration]]
+  - [[#info][Info]]
+  - [[#bridge-1][Bridge]]
+  - [[#users][Users]]
+  - [[#applications][Applications]]
+  - [[#scripts][Scripts]]
+  - [[#services-1][Services]]
+  - [[#wayland][Wayland]]
+  - [[#finishing-touch-1][Finishing Touch]]
 
-When combining all the config to one file, use:
+* Preamble
+** Rationale 
 
-#+begin_src nix
-  let
-    concatAttr = list: foldl' (a: b: a // b) {} list;
-  in
+*"WHY?"*, is the question I am sure you are asking. The best answer I have for you is: I felt like it. I have my [[https://nixos.org/][NixOS]] configuration and [[https://github.com/nix-community/home-manager][home-manager]] written in the [[http://www.literateprogramming.com/knuthweb.pdf][literate programming]]-esque style using Emacs' [[https://orgmode.org/][org-mode]]. The idea was to make my operating system configuration like a book! It is still in its early stages, but I wish to document my NixOS configuration choices here in an easy to read format side-by-side with the code itself! The added benefit is that one could simply open up their local Emacs and export the code to an easily buildable configuration! While this /truly/ doesn't serve much of a purpose as of now, I decided to do to this because I thought it would be fun!
+ 
+** Setup
 
-  concatAttr [
-    
-    # block 1
-    (let
-      # ...
-    in {
+The main ~nix~ configuration is split among three files.
 
-    })
+- ~flake.nix~ describes the build environment.
+- ~nixos.nix~ describes the NixOS configuration in its *entirety*.
+- ~home.nix~ describes the /home-manager/ configuration in its *entirety*.
 
-    # block 2
-    (let
-      # ...
-    in {
+The ~flake.nix~ file will be accessed via a bridge file for each configuration file.
 
-    })
+- ~nixosBridge.nix~ Is the bridge to the ~nixos.nix~ configuration file. This is also where external imports are added (if needed in the future).  
+- ~homeBridge.nix~ Is the bridge to the ~home.nix~ configuration file.
 
-    # etc...
-    # Each block must return an attrset.
-  ]
-#+end_src
+*** Flake
 
-* Flake
-
-The flake file for the entire configuration.
+The ~flake.nix~ is defined entirety below.
 
 #+begin_src nix :tangle ./flake.nix
   { 
@@ -53,8 +60,8 @@ The flake file for the entire configuration.
           ];
         };
       in {
-        nixosConfigurations = import ./systems { inherit inputs pkgs self; };
-        homeConfigurations = import ./home { inherit inputs pkgs self; };
+        nixosConfigurations = import ./tangle/nixosBridge.nix { inherit inputs pkgs self; };
+        homeConfigurations = import ./tangle/homeBridge.nix { inherit inputs pkgs self; };
       };
 
     inputs = {
@@ -83,14 +90,40 @@ The flake file for the entire configuration.
   }
 #+end_src
 
+*** NixOS and Home Manager
+
+Here is where it gets interesting. Below are _incomplete_ ~nix~ files, which we will populate as we progress. For now, we are describing the framework we are working with. The ~concatAttr~ function takes a list of attribute sets and returns the the concatenation of each set. This approach was chosen to avoid file management problems, and to also forego the NixOS modules system /nearly/ in its entirety; it is simply to much gross boiler-plate for my liking.
+
+The following is our ~nixos.nix~ file.
+
+#+begin_src nix :tangle ./tangle/nixos.nix
+  { config, inputs, pkgs, lib, ... }:
+  let
+    concatAttr = list: builtins.foldl' (a: b: a // b) {} list;
+  in
+
+  concatAttr [
+#+end_src
+
+The same must /also/ be defined for our home-manager configuration. Below is our ~home.nix~ file.
+
+#+begin_src nix :tangle ./tangle/home.nix
+  { config, inputs, pkgs, lib, ... }:
+  let
+    concatAttr = list: builtins.foldl' (a: b: a // b) {} list;
+  in
+
+  concatAttr [
+#+end_src
+
 * NixOS Configuration
 ** Bridge 
 
-The following is the bridge file between the flake and the host configurations. This file returns the NixOS system for each host. Currently there is only one host:
+The following is the bridge file ~nixosBridge.nix~ between the flake and the host configurations. This file returns the NixOS system for each host. Currently there is only one host:
 
 - *valhalla*: Host for my Framework 13 AMD laptop.
 
-#+begin_src nix :tangle ./systems/default.nix
+#+begin_src nix :tangle ./tangle/nixosBridge.nix
   { inputs, pkgs, ...}:
 
   with inputs; 
@@ -100,7 +133,7 @@ The following is the bridge file between the flake and the host configurations. 
   	inherit (pkgs) lib;	
 
   	valhallaModules = [
-  		./valhalla 
+  		./nixos.nix
   		impermanence.nixosModules.impermanence
   	];
   in {
@@ -114,13 +147,14 @@ The following is the bridge file between the flake and the host configurations. 
 
 ** Services
 *** Info
+
 Describes different services for the NixOS system. Only add services here if they rely directly on the NixOS system and nixpkgs.
 
 *** SSH
 
-#+begin_src nix :tangle ./systems/services/ssh.nix
-  { lib, pkgs, ... }: {
-  	services.openssh = {
+#+begin_src nix :tangle ./tangle/nixos.nix
+  {
+    services.openssh = {
   		enable = true;
   		settings = {
   			PasswordAuthentication = false;
@@ -132,11 +166,10 @@ Describes different services for the NixOS system. Only add services here if the
 
 *** LXD
 
-Currently this LXD configuration does not work and is not used.
+Currently this LXD configuration does not work and *is not currently used*.
 
-#+begin_src nix :tangle ./systems/services/lxd.nix
-  { lib, pkgs, ... }: {
-    # https://srid.ca/lxc-nixos
+# #+begin_src nix :tangle ./tangle/nixos.nix/
+  {
     virtualisation.lxd.enable = true;
 
     virtualisation.lxd.preseed ={
@@ -177,62 +210,21 @@ Currently this LXD configuration does not work and is not used.
           };
         }
       ];
-    }; 
-    /*virtualisation.lxc.systemConfig = ''
-          security.nesting = true
-          lxc.network.type = veth
-          lxc.network.link = br0
-          lxc.network.flags = up
-      '';*/
+    };
   }
-#+end_src
+# #+end_src
 
 ** Valhalla
 *** Info
 
 My main host. Currently configured for the Framework 13 laptop with an AMD processor.
 
-*** Default
-
-During <<installation>>, change the PARTUUID and UUID values below.
-
-#+begin_src nix :tangle ./systems/valhalla/default.nix
-  { config, inputs, lib, pkgs, ... }: {
-  	imports = [
-  		./hardware-configuration.nix
-  		./configuration.nix
-  		../services/ssh.nix
-  	];
-
-  	# DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!
-  	# See installation guide in README on how to derive the UUIDs.
-  	valhalla.hardware = {
-  		enabled = true;
-  		encryptedPARTUUID = "d2ce0233-c9d7-406a-9847-107ad0f0e3f7";
-  		headerPARTUUID = "ab616024-7d8c-44e5-84da-e363e20781a6";
-  		bootUUID = "5251-7E3F";
-  		unencryptedUUID = "69ff994b-9f9d-4014-870f-964273c7944e";
-  	};
-  }
-#+end_src
 *** Configuration
 
 Configuration analogous to the standard configuration generated during NixOS installation.
 
-#+begin_src nix :tangle ./systems/valhalla/configuration.nix
-  { inputs, lib, pkgs, ... }:
-
-  let
-  	persistDir = "/persist";
-  in
+#+begin_src nix :tangle ./tangle/nixos.nix
   {
-    imports = [
-  	  inputs.nixos-hardware.nixosModules.framework-13-7040-amd
-  	  ./persist.nix	
-  	  ./pipewire.nix
-  	  ./virt-manager.nix
-    ];
-
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -242,12 +234,6 @@ Configuration analogous to the standard configuration generated during NixOS ins
 
     # Set your time zone.
     services.automatic-timezoned.enable = true;
-
-    # enable persistence
-    valhalla.persist = {
-  	  enable = true;
-  	  inherit persistDir;
-    };
 
     # hyprland is the GUI of choice
     programs.hyprland.enable = true;
@@ -283,73 +269,62 @@ Configuration analogous to the standard configuration generated during NixOS ins
 
 *** Hardware
 
-My configuration for the Framework 13 laptop. Do not edit directly. Refer to [[installation]] for changing PARTUUIDs and UUIDS. 
+My hardware configuration for the Framework 13 laptop. During installation, it is *necessary* to update the PARTUUIDs and UUIDs. Follow the ~README.org~ installation guide for how to update these identifiers. 
 
-#+begin_src nix :tangle ./systems/valhalla/hardware-configuration.nix
-  { config, lib, pkgs, modulesPath, ... }:
+#+begin_src nix :tangle ./tangle/nixos.nix
+  (
+    with lib;
+    let
+      encryptedPARTUUID = "d2ce0233-c9d7-406a-9847-107ad0f0e3f7";
+  		headerPARTUUID = "ab616024-7d8c-44e5-84da-e363e20781a6";
+  		bootUUID = "5251-7E3F";
+  		unencryptedUUID = "69ff994b-9f9d-4014-870f-964273c7944e";
+    in
+      {
+  		  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
+  		  boot.initrd.kernelModules = [ ];
+  		  boot.kernelModules = [ "kvm-amd" ];
+  		  boot.extraModulePackages = [ ];
 
-  with lib;
-  let
-  	cfg = config.valhalla.hardware;
-  in
-  {
-  	imports = [
-  		(modulesPath + "/installer/scan/not-detected.nix")
-  	];
+  		  fileSystems."/" =
+  		    { device = "/dev/disk/by-uuid/${unencryptedUUID}";
+  		      fsType = "btrfs";
+  		      options = [ "subvol=root" ];
+  		    };
 
-    options.valhalla.hardware = {
-  		enabled = mkOption { type = types.bool; };
-  		encryptedPARTUUID = mkOption { type = types.str; };
-  		unencryptedUUID = mkOption { type = types.str; }; # 534cebad-1be2-4bdb-982d-835da3f6240a
-  		bootUUID = mkOption { type = types.str; };
-  		headerPARTUUID = mkOption { type = types.str; };
-    };
-
-  	config = mkIf cfg.enabled { 
-  		boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
-  		boot.initrd.kernelModules = [ ];
-  		boot.kernelModules = [ "kvm-amd" ];
-  		boot.extraModulePackages = [ ];
-
-  		fileSystems."/" =
-  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
-  		    fsType = "btrfs";
-  		    options = [ "subvol=root" ];
+  		  # luks boot info
+  		  boot.initrd.luks.devices = {
+  			  crypted = {
+  				  device = "/dev/disk/by-partuuid/${encryptedPARTUUID}"; # 9c41d5e1-8b1f-42cb-8bdc-8edd51973791
+  				  header = "/dev/disk/by-partuuid/${headerPARTUUID}"; # 23a9e2b8-d901-411a-a5f9-ea893072a5f4 
+  				  allowDiscards = true;
+  				  preLVM = true;
+  			  };
   		  };
 
-  		# luks boot info
-  		boot.initrd.luks.devices = {
-  			crypted = {
-  				device = "/dev/disk/by-partuuid/${cfg.encryptedPARTUUID}"; # 9c41d5e1-8b1f-42cb-8bdc-8edd51973791
-  				header = "/dev/disk/by-partuuid/${cfg.headerPARTUUID}"; # 23a9e2b8-d901-411a-a5f9-ea893072a5f4 
-  				allowDiscards = true;
-  				preLVM = true;
-  			};
-  		};
+  		  fileSystems."/persist" =
+  		    { device = "/dev/disk/by-uuid/${unencryptedUUID}";
+  		      fsType = "btrfs";
+  		      neededForBoot = true;
+  		      options = [ "subvol=persist" ];
+  		    };
 
-  		fileSystems."/persist" =
-  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
-  		    fsType = "btrfs";
-  		    neededForBoot = true;
-  		    options = [ "subvol=persist" ];
-  		  };
+  		  fileSystems."/nix" =
+  		    { device = "/dev/disk/by-uuid/${unencryptedUUID}";
+  		      fsType = "btrfs";
+  		      options = [ "subvol=nix" ];
+  		    };
 
-  		fileSystems."/nix" =
-  		  { device = "/dev/disk/by-uuid/${cfg.unencryptedUUID}";
-  		    fsType = "btrfs";
-  		    options = [ "subvol=nix" ];
-  		  };
+  		  fileSystems."/boot" =
+  		    { device = "/dev/disk/by-uuid/${bootUUID}";
+  		      fsType = "vfat";
+  		    };
 
-  		fileSystems."/boot" =
-  		  { device = "/dev/disk/by-uuid/${cfg.bootUUID}";
-  		    fsType = "vfat";
-  		  };
+  		  swapDevices = [ ];
 
-  		swapDevices = [ ];
-
-  		boot.initrd.postDeviceCommands = lib.mkAfter ''
+  		  boot.initrd.postDeviceCommands = lib.mkAfter ''
   			mkdir /btrfs_tmp
-  			mount /dev/disk/by-uuid/${cfg.unencryptedUUID} /btrfs_tmp
+  			mount /dev/disk/by-uuid/${unencryptedUUID} /btrfs_tmp
   			if [[ -e /btrfs_tmp/root ]]; then
   				mkdir -p /btrfs_tmp/backups
   				timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
@@ -372,107 +347,85 @@ My configuration for the Framework 13 laptop. Do not edit directly. Refer to [[i
   			umount /btrfs_tmp
   		'';
 
-  		networking.useDHCP = lib.mkDefault true;
-  		nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  		hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  	};
-  }
+  		  networking.useDHCP = lib.mkDefault true;
+  		  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  		  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+      }
+  )
 #+end_src
 *** Impermanence
 
-#+begin_src nix :tangle ./systems/valhalla/persist.nix
-  { config, lib, pkgs, ... }:
+I explained why we are using impermanence in the ~README.org~. If you need my reasonings, I suggest you look there.
 
-  with lib;
-
-  let
-  	cfg = config.valhalla.persist;
-  in
-  {
-  	options.valhalla.persist = {
-  		enable = mkOption {
-  			type = types.bool;
-  			default = false;
-  			description = ''
-  				Signal whether to persist files and directories on reboot.
-  			'';
-  		};
-  		persistDir = mkOption {
-  			type = types.str;
-  			default = "/nix/persist";
-  			description = ''
-  				String path for defining the persisting directory. All other persisting directories and files are stored here.
-  			'';
-  		};
-  	};
-
-  	config = mkIf cfg.enable {
-  		# persist
-  		environment.persistence."${cfg.persistDir}" = {
-  			hideMounts = true;
-  			directories = [
-  				"/var/log"
-  				"/var/lib/bluetooth"
-  				"/var/lib/nixos"
-  				"/var/lib/systemd/coredump"
-  				"/etc/ssh"
-  				"/etc/NetworkManager"
-  				"/etc/nixos"
-  			];
-  			files = [
-  				"/etc/nix/id_rsa"
-  				"/etc/machine-id"
-  				"/etc/systemd/resolved.conf" # using nextdns
-  			];
-  			users.jalen = {
-  				directories = [
-  					"Documents"
-  					".local/state/nix/profiles"
-  					".ssh"
-  					".gnupg"
-  					"Pictures"
-  					"Music"
-  					"VMs"
-  					".emacs.d" # I don't want to sit forever while emacs installs everything.
-  					# TODO create an emacs package manifest
-  				];
-  			};
-  		};
-  	};
-  }
-#+end_src
-
-*** TLP
-
-#+begin_src nix :tangle ./systems/valhalla/tlp.nix
-  { lib, pkgs, ... }: {
-  	services.tlp = {
-  		enable = true;
-  	};
-  }
+#+begin_src nix :tangle ./tangle/nixos.nix
+  (
+    let
+  	  persistDir = "/persist";
+    in
+      {
+  		  environment.persistence."${persistDir}" = {
+  			  hideMounts = true;
+  			  directories = [
+  				  "/var/log"
+  				  "/var/lib/bluetooth"
+  				  "/var/lib/nixos"
+  				  "/var/lib/systemd/coredump"
+  				  "/etc/ssh"
+  				  "/etc/NetworkManager"
+  				  "/etc/nixos"
+  			  ];
+  			  files = [
+  				  "/etc/nix/id_rsa"
+  				  "/etc/machine-id"
+  				  "/etc/systemd/resolved.conf" # using nextdns
+  			  ];
+  			  users.jalen = {
+  				  directories = [
+  					  "Documents"
+  					  ".local/state/nix/profiles"
+  					  ".ssh"
+  					  ".gnupg"
+  					  "Pictures"
+  					  "Music"
+  					  "VMs"
+  					  ".emacs.d" # I don't want to sit forever while emacs installs everything.
+  					  # TODO create an emacs package manifest
+  				  ];
+  			  };
+  		  };
+  	  }
+  )
 #+end_src
 
 *** Pipewire
 
 For microphones.
 
-#+begin_src nix :tangle ./systems/valhalla/pipewire.nix 
-  { config, lib, pkgs, ... }: {
-  	security.rtkit.enable = true;
-  	services.pipewire = {
-  		pulse.enable = true;
-  	};
+#+begin_src nix :tangle ./tangle/nixos.nix
+  {
+    security.rtkit.enable = true;
+  	services.pipewire.pulse.enable = true;
   }
 #+end_src
 
 *** Virt Manager
 
-#+begin_src nix :tangle ./systems/valhalla/virt-manager.nix
-  { config, lib, pkgs, ... }: {
+#+begin_src nix :tangle ./tangle/nixos.nix
+  {
   	virtualisation.libvirtd.enable = true;
   	programs.virt-manager.enable = true;
   }
 #+end_src
+** Finishing Touch
+
+To finish off our NixOS configuration, we need to end our preamble configuration!
+
+#+begin_src nix :tangle ./tangle/nixos.nix
+]
+#+end_src
+
+*"That's it?"*. Well... yeah! Theoretically this should be all we need at the end of the file :). We are simply closing off the list that will be folded via the ~concatAttr~ function.
+
 * TODO Home Configuration
 ** Info
 
@@ -480,9 +433,9 @@ This is where the bulk of the configuration lives.
 
 ** Bridge
 
-Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration.
+Bridge from the ~nix flake~ to each individual ~home-manager~ configuration. Below is the ~homeBridge.nix~ file.
 
-#+begin_src nix :tangle ./home/default.nix
+#+begin_src nix :tangle ./tangle/homeBridge.nix
   { self, inputs, pkgs, ... }: 
 
   let
@@ -491,7 +444,7 @@ Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration
   	];
 
   	homeImports = {
-  		jalen = [ ./user.nix ] ++ sharedModules;
+  		jalen = [ ./home.nix ] ++ sharedModules;
   	};
 
   	inherit (inputs.home-manager.lib) homeManagerConfiguration;
@@ -507,168 +460,144 @@ Bridge from the ~nix flake~ to each individual user ~home-manager~ configuration
 ** Users
 *** Jalen
 
-#+begin_src nix :tangle ./home/user.nix
-  { config, inputs, pkgs, ...}: 
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  username = "jalen";
+  	  # uniqueScripts = (import ./scripts) { inherit config pkgs; };
 
-  let
-  	username = "jalen";
-  	uniqueScripts = (import ./scripts) { inherit config pkgs; };
+  	  packages = with pkgs; [
+  		  # my scripts
+  		  # uniqueScripts
 
-  	packages = with pkgs; [
-  		# my scripts
-  		uniqueScripts
+  		  # misc
+  		  neofetch
+        pinentry
+  		  pinentry-curses
+  		  openssh
+  		  brightnessctl
+  		  acpi
+  		  gimp
+  		  libnotify
+  		  mpc-cli
+  		  ripgrep
+  		  discord
+  		  glow
+  		  zathura
+        imagemagick
 
-  		# misc
-  		# gobble
-  		neofetch
-  		pinentry
-  		pinentry-curses
-  		openssh
-  		brightnessctl
-  		acpi
-  		gimp
-  		libnotify
-  		mpc-cli
-  		ripgrep
-  		discord
-  		glow
-  		zathura
-      imagemagick
+  		  # math stuff
+        # I need a new bndl file.
+  		  # mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
 
-  		# math stuff
-  		# mathematica # /nix/store/d692a31x9p74vxrnwdlqh5k5a7m4kqkd-Mathematica_13.3.1_BNDL_LINUX.sh
+  		  # notes and markup
+  		  logseq
+  		  zotero
 
-  		# notes and markup
-  		logseq
-  		zotero
+  		  # screenshot double wammy ;)
+  		  slurp
+  		  grim
 
-  		# screenshot double wammy ;)
-  		slurp
-  		grim
+  		  # botware
+        spotify
+  		  zoom-us
 
-  		# botware
-      spotify
-  		zoom-us
+  		  # TODO add fonts to fonts.fonts
+  		  victor-mono
+  		  font-awesome
 
-  		# TODO add fonts to fonts.fonts
-  		victor-mono
-  		font-awesome
+  		  # pulseaudio mixer.
+  		  pamixer
+  	  ];
 
-  		# pulseaudio mixer.
-  		pamixer
-  	];
+    in
 
-  in
+      {
+        imports = [
+  		    ../themes/oxocarbon/dark.nix # I have not ported this to org-mode yet.
+        ];
 
-  {
-  	# fuck these .. are ugly
-    imports = [
-  		# Import theme (accessed via config.valhalla.theme)
-  		../themes/oxocarbon/dark.nix
+        home = {
+          inherit username;
+          inherit packages;
+          homeDirectory = "/home/${username}";
+          stateVersion = "23.11";
+        };
 
-  		# GUI 
-  		./wayland/hyprland
-  		./wayland/waybar.nix
+        dconf.settings = { # add to home-manager
+          "org/virt-manager/virt-manager/connections" = {
+            autoconnect = [ "qemu:///system" ];
+            uris = [ "qemu:///system" ];
+          };
+        };
 
-  		# Apps
-  		./applications/ranger.nix
-  		./applications/firefox 
-  		./applications/tmux.nix
-  		./applications/kitty
-  		./applications/ncmpcpp.nix
-  		./applications/emacs
-
-  		# Editors
-  		./applications/nvim
-
-  		# Other
-  		./utilities/mako.nix # notification daemon
-    ];
-
-    home = {
-      inherit username;
-      inherit packages;
-      homeDirectory = "/home/${username}";
-      stateVersion = "23.11";
-    };
-
-    dconf.settings = { # add to home-manager
-      "org/virt-manager/virt-manager/connections" = {
-        autoconnect = [ "qemu:///system" ];
-        uris = [ "qemu:///system" ];
-      };
-    };
-
-    programs = {
-  		bash = {
-  			enable = true;
-  			bashrcExtra = ''
+        programs = {
+  		    bash = {
+  			    enable = true;
+  			    bashrcExtra = ''
           #    if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
           #    exec tmux attach
           #    fi
   			'';
-  		};
-  		ssh.enable = true;
-  		git = {
-  			enable = true;
-  			package = pkgs.gitAndTools.gitFull;
-  			userName = "mjalen"; 
-  			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
-  			extraConfig = {
-  				color.ui = "always";
-  			};
-  		};
-  	};
-  }
+  		    };
+  		    ssh.enable = true;
+  		    git = {
+  			    enable = true;
+  			    package = pkgs.gitAndTools.gitFull;
+  			    userName = "mjalen"; 
+  			    userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
+  			    extraConfig = {
+  				    color.ui = "always";
+  			    };
+  		    };
+  	    };
+      }
+  )
 #+end_src
 
 ** Applications
-*** Emacs 
+*** TODO Emacs 
 
-Truly a long configuration just to act as a bootloader ;)
+- [ ] Fix paths with a more sane file structure given the new org-mode configuration.
 
-#+begin_src nix :tangle ./home/applications/emacs/default.nix
-  { config, pkgs, ... }:
+Truly a long configuration just to act as a bootloader ;). For now I am symlinking directly from this directory to ~~/.emacs.d~ because I want to be able to edit my configuration naturally like in other systems. I would love to find a way to do this through the nix store, but for now it is what it is. Emacs and Nix are at odds with each other configuration-wise (at least I believe). 
 
-  let
-  	hm = config.home.homeDirectory;
-  in
-  {
-  	services.emacs = {
-  		enable = true;
-  		defaultEditor = true;
-  		package = pkgs.emacs29-pgtk;
-  	};
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  hm = config.home.homeDirectory;
+    in
+      {
+  	    services.emacs = {
+  		    enable = true;
+  		    defaultEditor = true;
+  		    package = pkgs.emacs29-pgtk;
+  	    };
 
-  	programs.emacs = {
-  		enable = true;
-  		package = pkgs.emacs29-pgtk;
-  	};
+  	    programs.emacs = {
+  		    enable = true;
+  		    package = pkgs.emacs29-pgtk;
+  	    };
 
-    home.packages = with pkgs; [ cmake texliveFull ]; # may be good to add this to user instead perhaps?
+        home.packages = with pkgs; [ cmake texliveFull ]; # may be good to add this to user instead perhaps?
 
-  	systemd.user.tmpfiles.rules = [
-  		# "d ${hm}/.emacs.d 0755 jalen users - -" # Create emacs directory.
-  		# link config files.
-  		"L+ ${hm}/.emacs.d/config.org - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/config.org"
-  		"L+ ${hm}/.emacs.d/init.el - - - - ${hm}/Documents/dot/home/applications/emacs/emacs.d/init.el"
-  	];
-  }
-
+  	    systemd.user.tmpfiles.rules = [
+  		    # "d ${hm}/.emacs.d 0755 jalen users - -" # Create emacs directory.
+  		    # link config files.
+  		    "L+ ${hm}/.emacs.d/config.org - - - - ${hm}/Documents/dot/xdg/emacs.d/config.org"
+  		    "L+ ${hm}/.emacs.d/init.el - - - - ${hm}/Documents/dot/xdg/emacs/emacs.d/init.el"
+  	    ];
+      }
+  )
 #+end_src
 
 *** Firefox
 **** Default
 
-- <<userChrome injection>> The ~userChrome.css~ depends on this nix file. 
-
-#+begin_src nix :tangle ./home/applications/firefox/default.nix
-  { config, pkgs, ... }: 
-
-  with config.valhalla.theme;
+#+begin_src nix :tangle ./tangle/home.nix
   {
     # firefox stuffs
-    programs.firefox = {
+    programs.firefox = with config.valhalla.theme; {
       enable = true;
       profiles = {
         default = {
@@ -702,18 +631,18 @@ Truly a long configuration just to act as a bootloader ;)
   					"toolkit.telemetry.unified" = false;
   					"toolkit.telemetry.unifiedIsOptIn" = false;
           };
-          userChrome = builtins.readFile ./userChrome.css;
+          userChrome = builtins.readFile ./../xdg/firefox/userChrome.css;
         };
       };
     };
   }
 #+end_src
 
-**** User Chrome
+**** TODO User Chrome
 
-*WARNING*  This is not a *complete* ~userChrome.css~ file. It depends on custom nix theme variables that are inserted here: [[userChrome injection]].
+*WARNING*  This is not a *complete* ~userChrome.css~ file. It depends on custom nix theme variables.
 
-#+begin_src css :tangle ./home/applications/firefox/userChrome.css
+#+begin_src css :tangle ./xdg/firefox/userChrome.css
   @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
   #TabsToolbar .titlebar-spacer[type="post-tabs"] {
@@ -775,9 +704,7 @@ Truly a long configuration just to act as a bootloader ;)
 
 The terminal emulator of choice.
 
-#+begin_src nix :tangle ./home/applications/kitty/default.nix
-  { inputs, config, pkgs, ... }:
-
+#+begin_src nix :tangle ./tangle/home.nix
   {
     programs.kitty = {
       enable = true;
@@ -840,132 +767,129 @@ The terminal emulator of choice.
 
 #+end_src
 
-*** Neovim
+*** TODO Neovim
 
 Terminal editor, when Emacs fails. _It never fails!_
 
-#+begin_src nix :tangle ./home/applications/nvim/default.nix
-  { config, inputs, lib, pkgs, ... }: 
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  hm = config.home.homeDirectory;
 
-  let
-  	hm = config.home.homeDirectory;
-
-  	# copy nvim configuration to store.
-  	nvim-config = pkgs.stdenv.mkDerivation {
-  		name = "nvim config";
-  		src = ./conf;
-  		buildInputs = with pkgs; [ coreutils ];
-  		
-  		buildPhase = "";
-  		
-  		installPhase = ''
+  	  # copy nvim configuration to store.
+  	  nvim-config = pkgs.stdenv.mkDerivation {
+  		  name = "nvim config";
+  		  src = "../xdg/nvim"; 
+  		  buildInputs = with pkgs; [ coreutils ];
+  		  
+  		  buildPhase = "";
+  		  
+  		  installPhase = ''
   			mkdir -p $out
   			cp -r * $out/.
   		'';
-  	};
-  in
-  {
-  	# This symlink is required for my fnl config to work 
-  	# I am symlinking my xdg config to the copied config files.
-  	systemd.user.tmpfiles.rules = [
-  		"L+ ${hm}/.config/nvim/ - - - - ${nvim-config}"
-  	];
+  	  };
+    in
+      {
+  	    # This symlink is required for my fnl config to work 
+  	    # I am symlinking my xdg config to the copied config files.
+  	    systemd.user.tmpfiles.rules = [
+  		    "L+ ${hm}/.config/nvim/ - - - - ${nvim-config}"
+  	    ];
 
-  	# change editor
-  	programs.bash.bashrcExtra = ''
+  	    # change editor
+  	    programs.bash.bashrcExtra = ''
   		export EDITOR=vim
   	'';
 
-  	programs.neovim = {
-  		enable = true;
-  		viAlias = true;
-  		vimAlias = true;
+  	    programs.neovim = {
+  		    enable = true;
+  		    viAlias = true;
+  		    vimAlias = true;
 
-  		# my neovim config is done nearly exclusively in Fennel
-  		# so there is a simple lua script to use as a gateway.
+  		    # my neovim config is done nearly exclusively in Fennel
+  		    # so there is a simple lua script to use as a gateway.
 
-  		plugins = 
-  			with pkgs.vimPlugins; 
-  			with nvim-treesitter-parsers; 
-  			# with pkgs.nur.repos.m15a.vimExtraPlugins; # Having problems with deprecation here. 
-  		  [
-  			  # for fennel
-  			  hotpot-nvim
+  		    plugins = 
+  			    with pkgs.vimPlugins; 
+  			    with nvim-treesitter-parsers; 
+  			    # with pkgs.nur.repos.m15a.vimExtraPlugins; # Having problems with deprecation here. 
+  		      [
+  			      # for fennel
+  			      hotpot-nvim
 
-  			  # line
-  			  lualine-nvim
-  			  indent-blankline-nvim
-  			  # incline-nvim
-  			  
-  			  # language server
-  			  nvim-lspconfig
-  			  cmp-nvim-lsp
-  			  cmp-buffer
-  			  nvim-cmp
+  			      # line
+  			      lualine-nvim
+  			      indent-blankline-nvim
+  			      # incline-nvim
+  			      
+  			      # language server
+  			      nvim-lspconfig
+  			      cmp-nvim-lsp
+  			      cmp-buffer
+  			      nvim-cmp
 
-  			  # TODO LaTeX
-  			  vimtex
-  			  nabla-nvim
+  			      # TODO LaTeX
+  			      vimtex
+  			      nabla-nvim
 
-  			  # tmux 
-  			  (lib.mkIf config.programs.tmux.enable vim-tmux-navigator)
+  			      # tmux 
+  			      (lib.mkIf config.programs.tmux.enable vim-tmux-navigator)
 
-  			  # telescope
-  			  plenary-nvim
-  			  telescope-nvim
-  			  telescope-file-browser-nvim
+  			      # telescope
+  			      plenary-nvim
+  			      telescope-nvim
+  			      telescope-file-browser-nvim
 
-  			  # toggle term
-  			  toggleterm-nvim
+  			      # toggle term
+  			      toggleterm-nvim
 
-  			  # theme
-  			  oxocarbon-nvim
+  			      # theme
+  			      oxocarbon-nvim
 
-  			  # git
-  			  gitsigns-nvim
-  			  diffview-nvim
+  			      # git
+  			      gitsigns-nvim
+  			      diffview-nvim
 
-  			  # TODO lisp
-  			  # add Olical/aniseed and conjure
+  			      # TODO lisp
+  			      # add Olical/aniseed and conjure
 
-  			  # glow
-  			  glow-nvim
+  			      # glow
+  			      glow-nvim
 
-  			  # tree sitter
-  			  nvim-treesitter
-  			  cmp-treesitter
-  			  c
-  			  cpp
-  			  vue
-  			  javascript
-  			  html
-  			  css
-  			  vim
-  			  lua
-  			  fennel
-  			  glsl
-  			  diff
-  			  commonlisp
-  			  latex
-  			  typescript
-  			  markdown
-  			  markdown_inline
-  			  nix
-  			  rust
+  			      # tree sitter
+  			      nvim-treesitter
+  			      cmp-treesitter
+  			      c
+  			      cpp
+  			      vue
+  			      javascript
+  			      html
+  			      css
+  			      vim
+  			      lua
+  			      fennel
+  			      glsl
+  			      diff
+  			      commonlisp
+  			      latex
+  			      typescript
+  			      markdown
+  			      markdown_inline
+  			      nix
+  			      rust
 
-  			  # other	
-  			  nvim-web-devicons
-  		  ];
-  	};
-  }
-
+  			      # other	
+  			      nvim-web-devicons
+  		      ];
+  	    };
+      }
+  )
 #+end_src
 
 *** Ranger
 
-#+begin_src nix :tangle ./home/applications/ranger.nix
-  { pkgs, ... }: 
-
+#+begin_src nix :tangle ./tangle/home.nix
   {
   	home.packages = with pkgs; [ ranger ];
 
@@ -983,8 +907,8 @@ Terminal editor, when Emacs fails. _It never fails!_
 
 *** Terminal Multiplexer
 
-#+begin_src nix :tangle ./home/applications/tmux.nix
-  { inputs, pkgs, ... }: {
+#+begin_src nix :tangle ./tangle/home.nix
+  {
   	programs.tmux = {
   		enable = true;
   		keyMode = "vi";
@@ -1020,7 +944,9 @@ Terminal editor, when Emacs fails. _It never fails!_
 
 *** VScodium
 
-#+begin_src nix :tangle ./home/applications/vscodium.nix
+Currently removed.
+
+##+begin_src nix :tangle ./home/applications/vscodium.nix
   { lib, pkgs, ... }: {
 
     # file to separate my vscodium configuration (vscodium is a telemetry-free vscode)
@@ -1076,26 +1002,25 @@ Terminal editor, when Emacs fails. _It never fails!_
     };
 
   }
-#+end_src
+# #+end_src
 
 ** Scripts
 
-#+begin_src nix :tangle ./home/scripts/default.nix
-  { config, pkgs, ... }:
-
-  let
-  	build-home = 
-  		let
-  			hm = config.home.homeDirectory;
-  		in pkgs.writeShellScriptBin "build-home" ''
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  build-home = 
+  		  let
+  			  hm = config.home.homeDirectory;
+  		  in pkgs.writeShellScriptBin "build-home" ''
   			nix build ${hm}/Documents/dot#homeConfigurations.jalen.activationPackage && \
   			${hm}/Documents/dot/result/activate
   		'';
 
-  	mpd-art-path =
-  		let
-  			md = config.services.mpd.musicDirectory;	
-  		in pkgs.writeShellScriptBin "mpd-art-path" ''
+  	  mpd-art-path =
+  		  let
+  			  md = config.services.mpd.musicDirectory;	
+  		  in pkgs.writeShellScriptBin "mpd-art-path" ''
   			cover="${md}/$(mpc current -f '%artist% - %album%')/cover"
   			coverPNG="$(echo $cover).png"
   			coverJPG="$(echo $cover).jpg"
@@ -1106,7 +1031,7 @@ Terminal editor, when Emacs fails. _It never fails!_
   			fi
   		'';
 
-  	notify-mpd = pkgs.writeShellScriptBin "notify-mpd" ''
+  	  notify-mpd = pkgs.writeShellScriptBin "notify-mpd" ''
   		while "true"; do
   			notify-send `Now Playing` "$(mpc current --wait -f '%artist%\n%title%')" \
   				-i "$(mpd-art-path)" -t 3000
@@ -1114,14 +1039,19 @@ Terminal editor, when Emacs fails. _It never fails!_
   		done
   	'';
 
-  in pkgs.symlinkJoin {
-  	name = "scripts";
-  	paths = [
-  		build-home
-  		mpd-art-path
-  		notify-mpd
-  	];
-  }
+    in {
+      home.packages = [
+        pkgs.symlinkJoin { # custom package containing scripts.
+  	      name = "scripts";
+  	      paths = [
+  		      build-home
+  		      mpd-art-path
+  		      notify-mpd
+  	      ];
+        }
+      ];
+    }
+  )
 #+end_src
 
 ** Services
@@ -1129,15 +1059,9 @@ Terminal editor, when Emacs fails. _It never fails!_
 
 Notification daemon.
 
-#+begin_src nix :tangle ./home/utilities/mako.nix
-  { config, lib, pkgs, ... }: 
-
-  with config.valhalla.theme;
+#+begin_src nix :tangle ./tangle/home.nix
   {
-
-    # home.packages = with pkgs; [  ];
-
-    services.mako = {
+    services.mako = with config.valhalla.theme; {
       enable = true;
       font = "Victor Mono 13";
       sort = "-time";
@@ -1145,34 +1069,29 @@ Notification daemon.
   		backgroundColor = base00;
   		maxIconSize = 64;
     };
-
   }
-
 #+end_src
 
 *** MPD
 
-#+begin_src nix :tangle ./home/utilities/mpd/default.nix
-  { config, lib, pkgs, ... }:
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  hm = config.home.homeDirectory;
+    in {
+  	  services.mpd = {
+  		  enable = true;
+  		  network.startWhenNeeded = true;
+  		  musicDirectory = "${hm}/Music"; # replace with proper non-hardcoded path
+  	  };
 
-  with pkgs;
-  let
-  	hm = config.home.homeDirectory;
-  in
-  {
-  	services.mpd = {
-  		enable = true;
-  		network.startWhenNeeded = true;
-  		musicDirectory = "${hm}/Music"; # replace with proper non-hardcoded path
-  	};
+  	  # create database file.
+  	  systemd.user.tmpfiles.rules = [
+  		  "f ${hm}/.config/mpd/database 0755 jalen users - -"
+  	  ];
 
-  	# create database file.
-  	systemd.user.tmpfiles.rules = [
-  		"f ${hm}/.config/mpd/database 0755 jalen users - -"
-  	];
-
-  	# I could not get mpd to generate this conf without writing it manually.
-  	xdg.configFile."mpd/mpd.conf".text = ''
+  	  # I could not get mpd to generate this conf without writing it manually.
+  	  xdg.configFile."mpd/mpd.conf".text = ''
   		port "6600"
   		db_file "${hm}/.config/mpd/database"
   		music_directory "${hm}/Music"
@@ -1190,17 +1109,15 @@ Notification daemon.
   		}
   	'';
 
-  }
-
+    }
+  )
 #+end_src
 
 *** TODO TexLive
 
 - [ ] Probably should move this elsewhere....
 
-#+begin_src nix :tangle ./home/utilities/tex.nix
-  { pkgs, ... }:
-
+#+begin_src nix :tangle ./tangle/home.nix
   {
   	home.packages = with pkgs; [ texliveFull ];
   }
@@ -1208,142 +1125,129 @@ Notification daemon.
 #+end_src
 
 ** Wayland
-
 *** Hyprland
 
-**** Default
 
-#+begin_src nix :tangle ./home/wayland/hyprland/default.nix
-  { self, config, inputs, lib, pkgs, ... }: 
-  with inputs;
+#+begin_src nix :tangle ./tangle/home.nix
+  (
+    let
+  	  hm = config.home.homeDirectory;
+  	  wallpaper = "${hm}/Pictures/nier-arch.jpg";
 
-  let
-  	hm = config.home.homeDirectory;
-  	workspace-binds = import ./workspace-binds.nix;
-  	wallpaper = "${hm}/Pictures/nier-arch.jpg";
-  in
-  {
-  	systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
-  		"d /tmp/hypr 0755 jalen users - -"
-  	];
+      workspace-binds = (
+  	    builtins.concatLists (builtins.genList (
+  		    x: let 
+  			    ws = let
+  				    c = (x+1) / 10;
+  			    in
+  				    builtins.toString (x + 1 - (c * 10));
+  		    in [
+  			    "$mod, ${ws}, workspace, ${toString (x+1)}"
+  			    "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x+1)}"
+  		    ]
+  	    ) 10)
+      );
+    in {
+  	  systemd.user.tmpfiles.rules = [ # required for hyprland to open properly.
+  		  "d /tmp/hypr 0755 jalen users - -"
+  	  ];
 
-  	home.packages = with pkgs; [ hyprpaper ];
+  	  home.packages = with pkgs; [ hyprpaper ];
 
-  	wayland.windowManager.hyprland = {
-  		enable = true;
-  		settings = {
-  			monitor = "eDP-1,2256x1504@60,0x0,1";
+  	  wayland.windowManager.hyprland = {
+  		  enable = true;
+  		  settings = {
+  			  monitor = "eDP-1,2256x1504@60,0x0,1";
 
-  			general = {
-  				border_size = 3;
-  			};
+  			  general = {
+  				  border_size = 3;
+  			  };
 
-  			decoration = {
-  				rounding = 7;
-  			};
+  			  decoration = {
+  				  rounding = 7;
+  			  };
 
-  			exec-once = [
-  				"hyprpaper"
-  				#config.programs.bash.shellAliases."notify-mpd"
-  				#"notify-mpd" # custom alias that listens to mpd and notifies with new songs.
-  				"waybar"
-  			];
+  			  exec-once = [
+  				  "hyprpaper"
+  				  #config.programs.bash.shellAliases."notify-mpd"
+  				  #"notify-mpd" # custom alias that listens to mpd and notifies with new songs.
+  				  "waybar"
+  			  ];
 
-  			# Window swallowing... which half works.
-  			# It depends on the program. Image viewers like feh seem to swallow. 
-  			misc = {
-  				enable_swallow = true;
-  				swallow_regex = "^(kitty)$";
-  				disable_hyprland_logo = true; # sorry hypr-chan :(
-  			};
+  			  # Window swallowing... which half works.
+  			  # It depends on the program. Image viewers like feh seem to swallow. 
+  			  misc = {
+  				  enable_swallow = true;
+  				  swallow_regex = "^(kitty)$";
+  				  disable_hyprland_logo = true; # sorry hypr-chan :(
+  			  };
 
-  			animation = [
-  				"windows, 1, 1, default, popin"
-  			];
+  			  animation = [
+  				  "windows, 1, 1, default, popin"
+  			  ];
 
-  			# remap capslock to ctrl
-  			input.kb_options = "ctrl:nocaps";
+  			  # remap capslock to ctrl
+  			  input.kb_options = "ctrl:nocaps";
 
-  			"$mod" = "SUPER";
+  			  "$mod" = "SUPER";
 
-  			# mouse bindings 
-  			bindm = [
-  				"$mod, mouse:272, movewindow"
-  				"$mod Shift, mouse:272, resizewindow"
-  			];
+  			  # mouse bindings 
+  			  bindm = [
+  				  "$mod, mouse:272, movewindow"
+  				  "$mod Shift, mouse:272, resizewindow"
+  			  ];
 
-  			# key bindings
-  			bind = [
-  				# Applications
-  				"$mod Shift, F, exec, firefox"
-  				"$mod, Return, exec, kitty"
-  				"$mod, E, exec, emacsclient -c"
+  			  # key bindings
+  			  bind = [
+  				  # Applications
+  				  "$mod Shift, F, exec, firefox"
+  				  "$mod, Return, exec, kitty"
+  				  "$mod, E, exec, emacsclient -c"
 
-          # because not all my changes update the server even on eval.
-          "$mod Shift, E, exec, systemctl --user restart emacs.service" 
+            # because not all my changes update the server even on eval.
+            "$mod Shift, E, exec, systemctl --user restart emacs.service" 
 
-  				# Move window
-  				"$mod, H, exec, hyprctl dispatch movewindow l"
-  				"$mod, J, exec, hyprctl dispatch movewindow d"
-  				"$mod, K, exec, hyprctl dispatch movewindow u"
-  				"$mod, L, exec, hyprctl dispatch movewindow r"
+  				  # Move window
+  				  "$mod, H, exec, hyprctl dispatch movewindow l"
+  				  "$mod, J, exec, hyprctl dispatch movewindow d"
+  				  "$mod, K, exec, hyprctl dispatch movewindow u"
+  				  "$mod, L, exec, hyprctl dispatch movewindow r"
 
-  				# Actions 
-  				"$mod, Q, exec, hyprctl dispatch killactive"
-  				"$mod, F, exec, hyprctl dispatch togglefloating"
-  				"$mod, Tab, cyclenext"
-  				"$mod, Tab, bringactivetotop"
-  				"$mod Shift, Escape, exec, hyprctl dispatch exit"
+  				  # Actions 
+  				  "$mod, Q, exec, hyprctl dispatch killactive"
+  				  "$mod, F, exec, hyprctl dispatch togglefloating"
+  				  "$mod, Tab, cyclenext"
+  				  "$mod, Tab, bringactivetotop"
+  				  "$mod Shift, Escape, exec, hyprctl dispatch exit"
 
-  				# Screenshots
-  				", Print, exec, slurp | grim -g - ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
-  				"$mod, Print, exec, grim ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+  				  # Screenshots
+  				  ", Print, exec, slurp | grim -g - ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
+  				  "$mod, Print, exec, grim ${hm}/Pictures/Screenshots/$(date +%Y%m%d_%H%M)_screenshot.png"
 
-  				# Brightness
-  				", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
-  				", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
+  				  # Brightness
+  				  ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
+  				  ", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
 
-  				# Audio
-  				", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
-  				", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
-  				", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"
-  			] ++ workspace-binds;
-  		};
-  	};
+  				  # Audio
+  				  ", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
+  				  ", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
+  				  ", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"
+  			  ] ++ workspace-binds;
+  		  };
+  	  };
 
-  	xdg.configFile."hypr/hyprpaper.conf".text = ''
+  	  xdg.configFile."hypr/hyprpaper.conf".text = ''
   		preload = ${wallpaper} 
   		wallpaper = eDP-1,${wallpaper}
   	'';
-  }
-#+end_src
-
-**** Default Workspace Bindings
-
-#+begin_src nix :tangle ./home/wayland/hyprland/workspace-binds.nix
-  (
-  	builtins.concatLists (builtins.genList (
-  		x: let 
-  			ws = let
-  				c = (x+1) / 10;
-  			in
-  				builtins.toString (x + 1 - (c * 10));
-  		in [
-  			"$mod, ${ws}, workspace, ${toString (x+1)}"
-  			"$mod SHIFT, ${ws}, movetoworkspace, ${toString (x+1)}"
-  		]
-  	) 10)
+    }
   )
 #+end_src
 
 *** Waybar
 
-#+begin_src nix :tangle ./home/wayland/waybar.nix
-  { inputs, config, pkgs, ... }: 
-
-  with inputs.theme;
+#+begin_src nix :tangle ./tangle/home.nix
   {
-
     programs.waybar = with config.valhalla.theme; {
       enable = true;
       settings = {
@@ -1579,7 +1483,16 @@ Notification daemon.
   			}
           '';
     };
-
   }
 
 #+end_src
+
+** Finishing Touch
+
+Like with our NixOS configuration, we need to end our preamble configuration!
+
+#+begin_src nix :tangle ./tangle/home.nix
+]
+#+end_src
+
+Now we are completed with our home-manager configuration!
