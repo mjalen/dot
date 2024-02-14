@@ -36,7 +36,7 @@ in
 		boot.initrd.luks.devices = {
 			crypted = {
 				device = "/dev/disk/by-partuuid/${cfg.encryptedPARTUUID}"; # 9c41d5e1-8b1f-42cb-8bdc-8edd51973791
-				header = "/dev/disk/by-partuuid/${cfg.headerPARTUUID}"; # 23a9e2b8-d901-411a-a5f9-ea893072a5f4 
+				# header = "/dev/disk/by-partuuid/${cfg.headerPARTUUID}"; # 23a9e2b8-d901-411a-a5f9-ea893072a5f4 
 				allowDiscards = true;
 				preLVM = true;
 			};
