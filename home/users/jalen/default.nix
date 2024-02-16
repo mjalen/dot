@@ -1,4 +1,4 @@
-{ config, inputs, pkgs, ...}: 
+{ config, inputs, pkgs, ...}:
 
 let
 	uniqueScripts = (import ../../scripts) { inherit config pkgs; };
@@ -55,13 +55,13 @@ in
 		# Import theme (accessed via config.valhalla.theme)
 		../../../themes/oxocarbon/dark.nix
 
-		# GUI 
+		# GUI
 		../../wayland/hyprland
 		../../wayland/waybar.nix
 
 		# Apps
 		../../applications/ranger.nix
-		../../applications/firefox 
+		../../applications/firefox
 		../../applications/tmux.nix
 		../../applications/kitty
 		../../applications/ncmpcpp.nix
@@ -94,14 +94,14 @@ in
     programs = {
 		bash = {
 			enable = true;
-			/*bashrcExtra = ''
-
-			'';*/
+			bashrcExtra = ''
+      alias gnome='dbus-run-session -- gnome-shell --display-server --wayland'
+			'';
 		};
 		git = {
 			enable = true;
 			package = pkgs.gitAndTools.gitFull;
-			userName = "mjalen"; 
+			userName = "mjalen";
 			userEmail = "ajalenboi@gmail.com"; # email me [ at your own peril >:) ]
 			extraConfig = {
 				color.ui = "always";
@@ -112,4 +112,3 @@ in
 		};
 	};
 }
-

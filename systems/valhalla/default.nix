@@ -3,6 +3,7 @@
 		./hardware-configuration.nix
 		./configuration.nix
 		../services/ssh.nix
+		../services/podman.nix
 	];
 
 	# DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!

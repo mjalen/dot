@@ -10,8 +10,8 @@ in
 {
   imports = [
 	inputs.nixos-hardware.nixosModules.framework-13-7040-amd
-	./persist.nix	
-	./pipewire.nix
+	./persist.nix
+	# ./pipewire.nix
 	./virt-manager.nix
   ];
 
@@ -50,12 +50,16 @@ in
   users.mutableUsers = false;
   users.users.root.hashedPasswordFile = "${persistDir}/psk/root";
   users.users.jalen = {
-	isNormalUser = true;
- 	home = "/home/jalen";
-	extraGroups = [ "wheel" "networkmanager" ];
- 	hashedPasswordFile = "${persistDir}/psk/jalen";
-	# packages = with pkgs; [ git vim wget ];
+	  isNormalUser = true;
+ 	  home = "/home/jalen";
+	  extraGroups = [ "wheel" "networkmanager" ];
+ 	  hashedPasswordFile = "${persistDir}/psk/jalen";
+	   packages = with pkgs; [ git vim wget ];
   };
+
+  # I want to be able to have access to gnome when needed
+  services.xserver.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   # Enable sound.
   sound.enable = true;
@@ -68,4 +72,3 @@ in
   system.stateVersion = "23.11"; # Did you read the comment?
   nix.settings.experimental-features = "nix-command flakes";
 }
-

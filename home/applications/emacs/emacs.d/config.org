@@ -3,83 +3,116 @@
 
 My personal emacs configuration.
 
-* Table of Contents                                                     :TOC:
-- [[#misc][Misc]]
-  - [[#helper-functions][Helper Functions]]
-  - [[#ui-clutter][UI Clutter]]
-  - [[#garbage-collection][Garbage Collection]]
-  - [[#lines][Lines]]
-- [[#evil-mode][EVIL Mode]]
-- [[#theme][Theme]]
-  - [[#baseline][Baseline]]
-  - [[#modeline][Modeline]]
-  - [[#fonts][Fonts]]
-  - [[#indent-guides][Indent Guides]]
-- [[#dashboard][Dashboard]]
-- [[#generalel][General.el]]
-- [[#helm][Helm]]
-  - [[#configuration][Configuration]]
-  - [[#keybindings][Keybindings]]
-- [[#tools][Tools]]
-  - [[#language-servers][Language Servers]]
-  - [[#org][Org]]
-  - [[#latex][LaTeX]]
-  - [[#nix][Nix]]
-  - [[#term][Term]]
-  - [[#flycheck][Flycheck]]
+* TODOs
 
-* Misc
+- Clean up the mess that is my config.
+- Trim the fat, remove unnecessary packages, make sure that opening Emacs for the first time does not fail because of some random package that decides not to install.
+
+* Preamble
+** Lexical scope
+
+Inspired by [[https://blog.sumtypeofway.com/posts/emacs-config.html][this blog post]]. Adds lexical scope to the configuration.
+
+#+begin_src emacs-lisp
+  ;; -*- coding: utf-8; lexical-binding: t -*-
+#+end_src
+
 ** Helper Functions
 
 Different functions to do common tasks.
 
 #+begin_src emacs-lisp
-(defun mjalen/remove_line_numbers ()
-  (interactive)
-  (display-line-numbers-mode 0))
+  ; A function I can hook to different modes when I don't want line numbers.
+  (defun mjalen/remove_line_numbers ()
+    (interactive)
+    (display-line-numbers-mode 0))
 #+end_src
 
-** UI Clutter
+** Misc.
 
-Get rid of it, we don't need it!
+Get rid of a bunch of UI, we don't need it!
 
 #+begin_src emacs-lisp
-  (setq inhibit-startup-screen t)
-  (menu-bar-mode 0)
-  (tool-bar-mode 0)
-  (scroll-bar-mode 0)
-  (setq display-line-numbers-mode 1)
+  (setq inhibit-startup-screen t
+        use-package-always-ensure t
+        initial-scratch-message nil
+        sentence-end-double-space nil
+        ring-bell-function 'ignore
+        use-dialog-box nil
+        mark-even-if-inactive nil
+        default-directory "~"
+        display-line-numbers-mode 1
+        load-prefer-newer t)
+
+  (setq-default indent-tabs-mode nil)
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tooltip-mode -1)
+  (delete-selection-mode t)
+
+  (use-package exec-path-from-shell
+    :init (exec-path-from-shell-initialize))
+
+  (set-charset-priority 'unicode)
+  (prefer-coding-system 'utf-8-unix)
+
+  (use-package s)
+  (use-package dash)
+
+  (setq read-process-output-max (* 1024 1024))
 #+end_src
 
 ** Garbage Collection
 
 #+begin_src emacs-lisp
-(setq create-lockfiles nil)
-(setq delete-by-moving-to-trash t)
+  (setq gc-cons-threshold 1000000000
+        create-lockfiles nil
+        make-backup-files nil
+        create-lockfiles nil
+        delete-by-moving-to-trash t)
+
+  (setq custom-file (make-temp-name "/tmp/")
+        custom-safe-themes t)
+
+  (use-package recentf
+    :config
+    (add-to-list 'recentf-exclude "\\elpa")
+    (add-to-list 'recentf-exclude "private/tmp")
+    (recentf-mode))
+
+  ; remove whitespace
+  (add-hook 'before-save-hook #'delete-trailing-whitespace)
+  (setq require-final-newline t)
 #+end_src
 
 ** TODO Lines
 
 #+begin_src emacs-lisp
-(global-display-line-numbers-mode)
-(setq column-number-mode t)
-(setq auto-fill-mode t)
-(global-visual-line-mode t)
-(global-hl-line-mode t)
-(blink-cursor-mode t)
-(setq global-visual-fill-column-mode nil)
-(set-display-table-slot standard-display-table 'wrap ?\ )
+  (global-display-line-numbers-mode)
+  (column-number-mode t)
+  (setq auto-fill-mode t)
+  (global-visual-line-mode t)
+  (blink-cursor-mode t)
+  (setq global-visual-fill-column-mode nil)
+  (set-display-table-slot standard-display-table 'wrap ?\ )
+
+  (require 'hl-line)
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  (add-hook 'text-mode-hook #'hl-line-mode)
 #+end_src
 
-* EVIL Mode 
+* GOD Mode
+
+I am trying out *god-mode* instead of *evil-mode*. We'll see how much I like it. It is taking a little bit to get used to, because I have built so much Vim muscle memory.
 
 #+begin_src emacs-lisp
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-C-u-scroll t)
+  (use-package god-mode
+    :custom
+    (god-exempt-major-modes nil)
+    (god-exempt-predicates nil)
     :config
-    (evil-mode 1))
+    (bind-key "<escape>" #'god-mode-all))
 #+end_src
 
 * Theme
@@ -94,29 +127,53 @@ I *had* to switch over to the ~modus-vivendi~ theme. It may be ugly, but my eyes
   (add-to-list 'default-frame-alist '(alpha-background . 90))
 #+end_src
 
-** TODO Modeline
-
-- [ ] Edit modeline to have the info I want (git branch, mode, line:col, maybe a language icon?)
+** Icons
 
 #+begin_src emacs-lisp
-  ;; (use-package nano-modeline
-  ;;   :custom
-  ;;   (mode-line-format nil)
-  ;;   :config
-  ;;   (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
-  ;;   (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
-  ;;   (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
-  ;;   (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
-  ;;   (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
-  ;;   (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
-  ;;   (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
-  ;;   (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
-  ;;   (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
-  ;;   (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
-  ;;   (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
-  ;;   (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
-  ;;   (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode)
-  ;;   (nano-modeline-text-mode t))
+  (use-package all-the-icons)
+  (use-package all-the-icons-dired
+    :after all-the-icons
+    :hook (dired-mode . all-the-icons-dired-mode))
+#+end_src
+
+** Modeline
+
+#+begin_src emacs-lisp
+  (use-package diminish
+    :config
+    (diminish 'visual-line-mode))
+
+  (use-package mood-line
+    :config (mood-line-mode))
+#+end_src
+
+** Dimmer
+
+This essentially dims non-active buffers. Makes the current buffer more apparent.
+
+#+begin_src emacs-lisp
+  (use-package dimmer
+    :custom (dimmer-fraction 0.3)
+    :config (dimmer-mode))
+#+end_src
+
+** Delimiters
+
+#+begin_src emacs-lisp
+  (use-package paren
+    :config (show-paren-mode)
+    :custom (show-paren-style 'expression))
+
+  (use-package rainbow-delimiters
+    :hook ((prog-mode . rainbow-delimiters-mode)))
+#+end_src
+
+** Window Centering
+
+#+begin_src emacs-lisp
+  (use-package centered-window
+    :custom
+    (cwm-centered-window-width 180))
 #+end_src
 
 ** Fonts
@@ -135,7 +192,7 @@ I *had* to switch over to the ~modus-vivendi~ theme. It may be ugly, but my eyes
     :config
     (set-face-background 'highlight-indent-guides-odd-face "ffffff")
     (set-face-background 'highlight-indent-guides-even-face "ffffff")
-    (set-face-foreground 'highlight-indent-guides-character-face "ffffff") 
+    (set-face-foreground 'highlight-indent-guides-character-face "ffffff")
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
  #+end_src
 
@@ -149,76 +206,110 @@ I *had* to switch over to the ~modus-vivendi~ theme. It may be ugly, but my eyes
     ;(setq dashboard-banner-logo-png "/Users/jalen/.emacs.d/images/drip.jpeg")
     (setq dashboard-icon-type 'nerd-icons))
 #+end_src
-* General.el
+* Keybinds
 
 #+begin_src emacs-lisp
-(use-package general
-   :config
-   (general-evil-setup nil))
+  ;; first we unbind
+  (-map (lambda (x) (unbind-key x)) '("C-x C-f"
+                                      "C-x C-d"
+                                      "C-z"
+                                      "C-x C-z"
+                                      "M-o"
+                                      "<mouse-2>"
+                                      "<C-wheel-down>"
+                                      "<C-wheel-up>"
+                                      "s-n"
+                                      "C-x C-q"
+                                      "C-c C-k"))
+
+  ; should probably make a macro for this
+  (bind-key "C-c /" #'comment-dwim)
+  (bind-key "C-<tab>" #'counsel-ibuffer)
+  (bind-key "M-M" #'global-visual-fill-column-mode)
+  (bind-key "M-x" #'helm-M-x)
+  (bind-key  "C-<tab>" #'helm-buffers-list)
+  (bind-key  "C-s" #'helm-occur)
+  (bind-key  "C-x C-f" #'helm-find-files)
+  (bind-key "C-x C-c" #'delete-frame)
+  (bind-key "C-c C-k" #'keyboard-escape-quit)
+  (bind-key "C-c C-'" #'org-edit-src-exit)
+
+  ; Show completions for the current key chord.
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 0.2)
+    (which-key-enable-god-mode-support))
 #+end_src
 
 * Helm
-** Configuration
+
+I should find a better solution here. My Helm configuration in its current state is very *god-mode* unfriendly.
 
 #+begin_src emacs-lisp
   (use-package helm
        :straight t
+       :bind (:map helm-map
+                   ("<tab>" . #'helm-execute-persistent-action))
        :config
        (helm-autoresize-mode t))
-#+end_src
-
-** Keybindings
-
-#+begin_src emacs-lisp
-  (general-define-key
-      "M-<tab>" 'other-window
-      "M-s" 'switch-to-buffer-other-window
-      "C-<tab>" 'counsel-ibuffer
-      "<escape>" 'keyboard-escape-quit
-      "M-M" 'global-visual-fill-column-mode 
-      "M-x" 'helm-M-x
-      "C-<tab>" 'helm-buffers-list
-      "C-s" 'helm-occur
-      "C-x C-f" 'helm-find-files
-      "C-x C-c" 'delete-frame)
-
-  (general-def helm-map
-      "C-z" 'helm-execute-persistent-action)
 #+end_src
 
 * Tools
 ** Language Servers
 
 #+begin_src emacs-lisp
-  (use-package lsp-mode
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :commands lsp) ; problematic
+  (use-package eglot
+    :hook ((python-mode . eglot-ensure)
+           (latex-mode . eglot-ensure)
+           (tex-mode . eglot-ensure))
+    :bind (:map eglot-mode-map
+                ("C-c a r" . #'eglot-rename)
+                ("C-<down-mouse-1>" . #'xref-find-definitions)
+                ("C-S-<down-mouse-1>" . #'xreft-find-references)
+                ("C-c C-c" . #'eglot-code-actions))
+    :custom
+    (eglot-autoshutdown t))
 
-  (use-package lsp-latex)
+  (use-package consult-eglot
+    :bind (:map eglot-mode-map ("C-c t" . #'consult-eglot-symbols)))
 
-  (use-package lsp-ui
-    :commands lsp-ui-mode
+  ;; (use-package lsp-mode
+  ;;   :init
+  ;;   (setq lsp-keymap-prefix "C-c l")
+  ;;   :commands lsp) ; problematic
+
+  ;; (use-package lsp-latex)
+
+  ;; (use-package lsp-ui
+  ;;   :commands lsp-ui-mode
+  ;;   :config
+  ;;   (setq lsp-ui-sideline-show-diagnostics 1
+  ;;         lsp-ui-sideline-show-hover 1
+  ;;         lsp-ui-doc-enable 1
+  ;;         lsp-ui-peek-enable 1)) ; problematic
+
+  ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol) ; problematic
+
+  ;; (use-package dap-mode) ; problematic
+#+end_src
+
+** Snippets
+
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :custom
+    (yas-snippet-dirs
+     '("~/.emacs.d/snippets"))
     :config
-    (setq lsp-ui-sideline-show-diagnostics 1
-          lsp-ui-sideline-show-hover 1
-          lsp-ui-doc-enable 1
-          lsp-ui-peek-enable 1)) ; problematic
-
-  (use-package helm-lsp :commands helm-lsp-workspace-symbol) ; problematic
-
-  (use-package dap-mode) ; problematic
-
-  (use-package which-key
-    :init (which-key-mode)
-    :diminish which-key-mode
-    :config (setq which-key-idle-delay 0.2)) 
+    (yas-global-mode 1))
 #+end_src
 
 ** TODO Org
 *** Default
 
-My org mode configuration, so I can live and breathe org. 
+My org mode configuration, so I can live and breathe org.
 
 #+begin_src emacs-lisp
   (use-package org
@@ -237,7 +328,7 @@ My org mode configuration, so I can live and breathe org.
     (org-hide-emphasis-markers t)
     (org-startup-with-inline-images t)
     (org-image-actual-width '(300))
-    :config 
+    :config
     (setq org-ellipsis " ▾"))
 
   (use-package org-appear :hook (org-mode . org-appear-mode))
