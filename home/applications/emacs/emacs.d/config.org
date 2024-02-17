@@ -91,15 +91,13 @@ Get rid of a bunch of UI, we don't need it!
 #+begin_src emacs-lisp
   (global-display-line-numbers-mode)
   (column-number-mode t)
-  (setq auto-fill-mode t)
+  (setq auto-fill-mode t
+        global-visual-fill-column-mode nil)
   (global-visual-line-mode t)
   (blink-cursor-mode t)
-  (setq global-visual-fill-column-mode nil)
   (set-display-table-slot standard-display-table 'wrap ?\ )
 
   (require 'hl-line)
-  (add-hook 'prog-mode-hook #'hl-line-mode)
-  (add-hook 'text-mode-hook #'hl-line-mode)
 #+end_src
 
 * GOD Mode
@@ -317,6 +315,9 @@ My org mode configuration, so I can live and breathe org.
     ((org-mode . variable-pitch-mode)
      (org-mode . visual-line-mode)
      (org-mode . mjalen/remove_line_numbers))
+    :bind
+    (:map org-mode-map
+          ("C-c C-'" . #'org-edit-special))
     :custom
     (org-hide-emphasis-markers t)
     (line-spacing 2)

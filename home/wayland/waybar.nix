@@ -1,22 +1,22 @@
-{ inputs, config, pkgs, ... }: 
+{ inputs, config, pkgs, ... }:
 
 with inputs.theme;
 {
 
-    programs.waybar = with config.valhalla.theme; {
-        enable = true;
-        settings = {
-            mainBar = {
-                layer = "top";
-                position = "top";
-                height = 30;
-                output = [ "eDP-1" ];
+  programs.waybar = with config.valhalla.theme; {
+    enable = true;
+    settings = {
+      mainBar = {
+        layer = "top";
+        position = "top";
+        height = 30;
+        output = [ "eDP-1" ];
 
-                "hyprland/workspaces" = {
-                    "format" = "<sub>{icon}</sub>";
-                    "on-scroll-up" = "hyprctl dispatch workspace e+1";
-                    "on-scroll-down" = "hyprctl dispatch workspace e-1";
-                };
+        "hyprland/workspaces" = {
+          "format" = "<sub>{icon}</sub>";
+          "on-scroll-up" = "hyprctl dispatch workspace e+1";
+          "on-scroll-down" = "hyprctl dispatch workspace e-1";
+        };
 
 				"hyprland/window" = {
 					"format" = "{title}";
@@ -29,52 +29,52 @@ with inputs.theme;
 					"separate-outputs" = true;
 				};
 
-                "clock" = {
-                    "interval" = 60;
-                    "format" = "{:%H:%M}";
-                    "max-length" = 25;
-                };
+        "clock" = {
+          "interval" = 60;
+          "format" = "{:%H:%M}";
+          "max-length" = 25;
+        };
 
-                "battery" = {
-                    "states" = {
-                        "good" = 95;
-                        "warning" = 30;
-                        "critical" = 15;
-                    };
-                    "format" = "{capacity}% {icon}";
-                    "format-charging" = "{capacity}% ";
-                    "format-plugged" = "{capacity}% ";
-                    "format-alt" = "{time} {icon}";
-                    "format-icons" = ["" "" "" "" ""];
-                };
+        "battery" = {
+          "states" = {
+            "good" = 95;
+            "warning" = 30;
+            "critical" = 15;
+          };
+          "format" = "{capacity}% {icon}";
+          "format-charging" = "{capacity}% ";
+          "format-plugged" = "{capacity}% ";
+          "format-alt" = "{time} {icon}";
+          "format-icons" = ["" "" "" "" ""];
+        };
 
-                "network" = {
-                    "format-wifi" = "";
-                    "format-ethernet" = "";
-                    "tooltip-format" = " {ifname} via {gwaddr}\nStrength of {signalStrength}%";
-                    "format-linked" = " ";
-                    "format-disconnected" = "⚠";
-                    "format-alt" = "{ifname}: {ipaddr}/{cidr}";
-                };
+        "network" = {
+          "format-wifi" = "";
+          "format-ethernet" = "";
+          "tooltip-format" = " {ifname} via {gwaddr}\nStrength of {signalStrength}%";
+          "format-linked" = " ";
+          "format-disconnected" = "⚠";
+          "format-alt" = "{ifname}: {ipaddr}/{cidr}";
+        };
 
-                "pulseaudio" = {
-                    "format" = "{icon} {volume}%";
-                    "format-bluetooth" = "{icon}{volume}% ";
-                    "format-bluetooth-muted" = " ";
-                    "format-muted" = " ";
-                    "format-source" = "{volume}% ";
-                    "format-source-muted" = "";
-                    "format-icons" = {
-                        "headphone" = "";
-                        "hands-free" = "";
-                        "headset" = "";
-                        "phone" = "";
-                        "portable" = "";
-                        "car" = "";
-                        "default" = ["" "" ""];
-                    };
-                    # "on-click" = "pavucontrol";
-                };
+        "pulseaudio" = {
+          "format" = "{icon} {volume}%";
+          "format-bluetooth" = "{icon}{volume}% ";
+          "format-bluetooth-muted" = " ";
+          "format-muted" = " ";
+          "format-source" = "{volume}% ";
+          "format-source-muted" = "";
+          "format-icons" = {
+            "headphone" = "";
+            "hands-free" = "";
+            "headset" = "";
+            "phone" = "";
+            "portable" = "";
+            "car" = "";
+            "default" = ["" "" ""];
+          };
+          # "on-click" = "pavucontrol";
+        };
 
 				"mpd" = {
 					"format" = "{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})";
@@ -85,53 +85,46 @@ with inputs.theme;
 					"tooltip-format-disconnected" = "Display art here....";
 				};
 
-				/*"image#album-art" = {
-					"path" = "/tmp/mpd_art";
-					"size" = 32;
-					"interval" = 5;
-					"on-click" = "mpc toggle";
-				};*/
+        modules-left = [ "mpd" ];
+				modules-center = [ "hyprland/window" ];
+        modules-right = [ "pulseaudio" "network" "battery" "clock" ];
+      };
+    };
 
-                modules-left = [ "mpd" ];
-				modules-center = [ ];
-                modules-right = [ "hyprland/window" "pulseaudio" "network" "battery" "clock" ];
-            };
-        };
+    style =
+		  let
+			  marginUD = "0.0em";
+			  marginLR = "0.0em";
+			  opacity = "0.0";
+			  padUD = "0.40em";
+			  padLR = "0.85em";
+			  radius = "0px";
 
-        style = 
-		let 
-			marginUD = "0.40em";	
-			marginLR = "0.40em";
-			opacity = "0.9";
-			padUD = "0.40em";
-			padLR = "0.85em";
-			radius = "15px";
-
-			stdBack = ''
+			  stdBack = ''
 				background-color: rgba(${blackAsDec}, ${opacity});
 			'';
-			moduleCSS = ''
+			  moduleCSS = ''
 				padding: ${padUD} ${padLR};
 				margin: ${marginUD} ${marginLR};
 				border-radius: ${radius};
 				border: 1em;
 				box-shadow: 0.2em 0.3em 0 rgba(${blackAsDec}, 0.3);
 			'';
-		in ''
+		  in ''
             window#waybar {
 				font-family: Victor Mono, FontAwesome, monospace;
 				font-size: 18px;
 				padding: 0 0.7em;
-				background: rgba(${blackAsDec}, 0.0);
+				background: rgba(${blackAsDec}, 0.8);
                 color: ${base05};
-            }
+        }
 
 			#window {
 				font-style: italic;
                 color: ${base05};
 				${moduleCSS}
 				${stdBack}
-			}
+			  }
 
 			window#waybar.empty #window  {
 				background: transparent;
@@ -181,7 +174,7 @@ with inputs.theme;
 			}
 
             #clock {
-				font-weight: bold; 
+				font-weight: bold;
 				${moduleCSS}
 				${stdBack}
             }
@@ -222,7 +215,7 @@ with inputs.theme;
                 animation-iteration-count: infinite;
                 animation-direction: alternate;
 				${moduleCSS}
-            } 
+            }
 
 			#network {
 				font-weight: bold;
@@ -233,10 +226,10 @@ with inputs.theme;
 			#network.disconnected {
 				font-weight: bold;
 				color: ${base00};
-				background-color: ${base08};	
+				background-color: ${base08};
 				${moduleCSS}
 			}
         '';
-    };
+  };
 
 }
