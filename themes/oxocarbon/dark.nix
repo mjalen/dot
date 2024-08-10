@@ -1,55 +1,56 @@
 { config, lib, pkgs, ... }:
 
 /*
-	Scheme: Oxocarbon Dark
-	Source: shaunsingh/IBM
+  	Scheme: Oxocarbon Dark
+  	Source: shaunsingh/IBM
 */
 
-{ # base16 scheme
-	imports = [
-		./.. # import options.valhalla.theme
-	];
+{
+  # base16 scheme
+  imports = [
+    ./.. # import options.valhalla.theme
+  ];
 
-	valhalla.theme = {
-		blackAsDec = "22, 22, 22";
+  valhalla.theme = {
+    blackAsDec = "22, 22, 22";
 
-		# black
-		base00 = "#161616";
-		base01 = "#262626"; 
+    # black
+    base00 = "#161616";
+    base01 = "#262626";
 
-		# grey
-		base02 = "#393939"; 
-		base03 = "#525252"; 
+    # grey
+    base02 = "#393939";
+    base03 = "#525252";
 
-		# white
-		base04 = "#dde1e6"; 
-		base05 = "#f2f4f8"; 
-		base06 = "#ffffff"; 
+    # white
+    base04 = "#dde1e6";
+    base05 = "#f2f4f8";
+    base06 = "#ffffff";
 
-		# turqoise
-		base07 = "#08bdba";
-		base08 = "#3ddbd9"; 
-		
-		# baby blue?
-		base09 = "#78a9ff"; 
+    # turqoise
+    base07 = "#08bdba";
+    base08 = "#3ddbd9";
 
-		# magenta
-		base0A = "#ee5396"; 
+    # baby blue?
+    base09 = "#78a9ff";
 
-		# blue
-		base0B = "#33b1ff"; 
+    # magenta
+    base0A = "#ee5396";
 
-		# light magenta
-		base0C = "#ff7eb6"; 
+    # blue
+    base0B = "#33b1ff";
 
-		# green
-		base0D = "#42be65"; 
+    # light magenta
+    base0C = "#ff7eb6";
 
-		# purple
-		base0E = "#be95ff"; 
+    # green
+    base0D = "#42be65";
 
-		# cyan
-		base0F = "#82cfff";
-	};
+    # purple
+    base0E = "#be95ff";
+
+    # cyan
+    base0F = "#82cfff";
+  };
 
 }
