@@ -22,7 +22,7 @@ let
 		discord
 		glow
 		zathura
-    imagemagick
+		imagemagick
 
 		# math stuff
     # I need a new bndl file.
@@ -33,7 +33,7 @@ let
 		grim
 
 		# botware
-    spotify
+		spotify
 		zoom-us
 
 		# TODO add fonts to fonts.fonts
@@ -65,7 +65,7 @@ in
 		../../applications/tmux.nix
 		../../applications/kitty
 		../../applications/ncmpcpp.nix
-    ../../applications/emacs
+		../../applications/emacs
 
 		# Editors
 		../../applications/nvim
