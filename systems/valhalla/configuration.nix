@@ -25,6 +25,9 @@ in
   # Set your time zone.
   services.automatic-timezoned.enable = true;
 
+  # ppd
+  services.power-profiles-daemon.enable = true;
+
   # enable persistence
   valhalla.persist = {
 	enable = true;
