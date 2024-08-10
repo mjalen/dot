@@ -1,0 +1,3 @@
+[submodule "home/applications/dot-emacs"]
+	path = home/applications/dot-emacs
+	url = git@github.com:mjalen/dot-emacs

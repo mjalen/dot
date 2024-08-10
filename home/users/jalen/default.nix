@@ -65,7 +65,7 @@ in
 		../../applications/tmux.nix
 		../../applications/kitty
 		../../applications/ncmpcpp.nix
-		../../applications/emacs
+		../../applications/dot-emacs
 
 		# Editors
 		../../applications/nvim
