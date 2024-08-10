@@ -60,8 +60,8 @@ in
 				# "$mod, Space, exec, tofi-run"
 				"$mod Shift, F, exec, firefox"
 				"$mod, Return, exec, kitty"
-        "$mod, E, exec, emacsclient -c"
-        "$mod Shift, E, exec, systemctl --user restart emacs.service"
+				"$mod, E, exec, emacsclient -c"
+				"$mod Shift, E, exec, systemctl --user restart emacs.service"
 
 				# Move window
 				"$mod, H, exec, hyprctl dispatch movewindow l"
