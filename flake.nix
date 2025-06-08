@@ -24,7 +24,17 @@
       };
     in
     {
-      nixosConfigurations = import ./systems { inherit inputs pkgs self; };
+      nixosConfigurations = {
+        valhalla = inputs.nixpkgs.lib.nixosSystem {
+            inherit pkgs;
+            specialArgs = { inherit inputs; };
+            modules = [
+            ./systems/valhalla
+            inputs.impermanence.nixosModules.impermanence
+            ];
+        };
+      };
+      # nixosConfigurations = import ./systems { inherit inputs pkgs self; };
       homeConfigurations = import ./home { inherit inputs pkgs self; };
       formatter.x86_64-linux = pkgs.nixpkgs-fmt;
     };
@@ -47,9 +57,15 @@
       url = "github:nix-community/impermanence";
     };
 
+    # nix lsp
+    nil.url = "github:oxalica/nil";
+
     # nur
     nur = {
       url = "github:nix-community/NUR";
     };
+
+    # emacs config
+    # emacs.url = "github:mjalen/emacs";
   };
 }

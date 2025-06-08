@@ -50,6 +50,8 @@ in
           "Pictures"
           "Music"
           "VMs"
+          ".password-store"
+          ".config"
         ];
       };
     };

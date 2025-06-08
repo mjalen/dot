@@ -1,10 +1,21 @@
-{ self, config, inputs, lib, pkgs, ... }:
-with inputs;
+{ config, ... }:
 
 let
   hm = config.home.homeDirectory;
-  workspace-binds = import ./workspace-binds.nix;
-  wallpaper = "${hm}/Pictures/lotr.jpg";
+  wallpaper = "${hm}/Pictures/saw_travel.jpg";
+
+  workspace-keybinds = with builtins; concatLists
+    (
+      genList
+        (
+          x:
+          [
+            "$mod, ${toString x}, workspace, ${toString x}"
+            "$mod SHIFT, ${toString x}, movetoworkspace, ${toString x}"
+          ]
+        )    
+        10
+    );
 in
 {
   systemd.user.tmpfiles.rules = [
@@ -27,18 +38,10 @@ in
 
       exec-once = [
         "hyprpaper"
-        #config.programs.bash.shellAliases."notify-mpd"
-        #"notify-mpd" # custom alias that listens to mpd and notifies with new songs.
         "waybar"
       ];
 
-      # Window swallowing... which half works.
-      # It depends on the program. Image viewers like feh seem to swallow. 
-      misc = {
-        enable_swallow = true;
-        swallow_regex = "^(kitty)$";
-        disable_hyprland_logo = true; # sorry hypr-chan :(
-      };
+      misc.disable_hyprland_logo = true; # sorry hypr-chan :(
 
       animation = [
         "windows, 1, 1, default, popin"
@@ -49,7 +52,7 @@ in
 
       "$mod" = "SUPER";
 
-      # mouse bindings 
+      # mouse bindings
       bindm = [
         "$mod, mouse:272, movewindow"
         "$mod Shift, mouse:272, resizewindow"
@@ -58,10 +61,8 @@ in
       # key bindings
       bind = [
         # Applications
-        # "$mod, Space, exec, tofi-run"
         "$mod Shift, F, exec, firefox"
-        "$mod, Return, exec, kitty"
-        "$mod, E, exec, emacsclient -c"
+        "$mod, Return, exec, emacsclient -c"
         "$mod Shift, E, exec, systemctl --user restart emacs.service"
 
         # Move window
@@ -70,7 +71,7 @@ in
         "$mod, K, exec, hyprctl dispatch movewindow u"
         "$mod, L, exec, hyprctl dispatch movewindow r"
 
-        # Actions 
+        # Actions
         "$mod, Q, exec, hyprctl dispatch killactive"
         "$mod, F, exec, hyprctl dispatch togglefloating"
         "$mod, Tab, cyclenext"
@@ -86,15 +87,16 @@ in
         ", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
 
         # Audio
-        ", XF86AudioRaiseVolume, exec, pactl -- set-sink-volume 0 +10%"
-        ", XF86AudioLowerVolume, exec, pactl -- set-sink-volume 0 -10%"
-        ", XF86AudioMute, exec, pactl -- set-sink-mute 0 toggle"
-      ] ++ workspace-binds;
+        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +7%"
+        ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -7%"
+        ", XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
+      ] ++ workspace-keybinds;
     };
   };
 
-  xdg.configFile."hypr/hyprpaper.conf".text = ''
+  xdg.configFile."hypr/hyprpaper.conf".text =
+    ''
     		preload = ${wallpaper} 
     		wallpaper = eDP-1,${wallpaper}
-    	'';
+    '';
 }

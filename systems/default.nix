@@ -4,7 +4,7 @@ with inputs;
 
 let
   inherit (nixpkgs.lib) nixosSystem;
-  inherit (pkgs) lib;
+  # inherit (pkgs) lib;
 
   valhallaModules = [
     ./valhalla
