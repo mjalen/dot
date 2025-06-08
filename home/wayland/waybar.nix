@@ -13,7 +13,7 @@ with inputs.theme;
         output = [ "eDP-1" ];
 
         "hyprland/workspaces" = {
-          "format" = "<sub>{icon}</sub>";
+          "format" = "<b><sub>{icon}</sub></b>";
           "on-scroll-up" = "hyprctl dispatch workspace e+1";
           "on-scroll-down" = "hyprctl dispatch workspace e-1";
         };
@@ -73,28 +73,19 @@ with inputs.theme;
             "car" = "";
             "default" = [ "" "" "" ];
           };
-          # "on-click" = "pavucontrol";
         };
 
         "mpd" = {
           "format" = "{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})";
-          #"format-disconnected" = "Disconnected ";
           "format-stopped" = "";
           "interval" = 10;
           "tooltip-format" = "<img src='/tmp/mpd_art'/>";
           "tooltip-format-disconnected" = "Display art here....";
         };
 
-        /*"image#album-art" = {
-                					"path" = "/tmp/mpd_art";
-                					"size" = 32;
-                					"interval" = 5;
-                					"on-click" = "mpc toggle";
-            				};*/
-
-        modules-left = [ "mpd" ];
-        modules-center = [ ];
-        modules-right = [ "hyprland/window" "pulseaudio" "network" "battery" "clock" ];
+        modules-left = [ "hyprland/workspaces" "mpd" ];
+        modules-center = [ "clock" ];
+        modules-right = [ "hyprland/window" "pulseaudio" "battery" "network"  ];
       };
     };
 
@@ -119,11 +110,11 @@ with inputs.theme;
           			'';
       in
       ''
-                    window#waybar {
-        				font-family: Victor Mono, FontAwesome, monospace;
+              window#waybar {
+        				font-family: Input Fonts Regular, FontAwesome, monospace;
         				font-size: 18px;
-        				padding: 0 0.7em;
-        				background: rgba(${blackAsDec}, 0.0);
+        				padding: 0 0.5em;
+        				background: rgba(${blackAsDec}, 1.0);
                         color: ${base05};
                     }
 

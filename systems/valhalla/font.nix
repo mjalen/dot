@@ -1,8 +1,8 @@
-{ config, lib, pkgs, ... }: {
+{ pkgs, ... }: {
   fonts = {
-    enableDefaultFonts = true;
-    fonts = with pkgs; [
-      victor-mono
+    enableDefaultPackages = true;
+    packages = with pkgs; [
+      iosevka
       font-awesome
       source-code-pro
       source-sans-pro
@@ -14,8 +14,8 @@
       hinting.enable = true;
       hinting.autohint = true;
       defaultFonts = {
-        monospace = [ "Source Code Pro" ];
-        sansSerif = [ "Source Sans Pro" ];
+        monospace = [ "Monaspace" ];
+        sansSerif = [ "Monaspace" ];
         serif = [ "Source Serif Pro" ];
       };
     };

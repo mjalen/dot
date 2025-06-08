@@ -36,11 +36,11 @@ in
   services.pcscd.enable = true;
   programs.gnupg.agent = {
     enable = true;
-    pinentryPackage = pkgs.pinentry-curses;
+    # pinentryPackage = pkgs.pinentry-curses;
     enableSSHSupport = true;
-#     settings = {
-#       allow-loopback-entry = true;
-#     };
+    settings = {
+      allow-loopback-entry = true;
+    };
   };
 
   # Select internationalisation properties.
@@ -51,13 +51,6 @@ in
   #   useXkbConfig = true; # use xkb.options in tty.
   # };
   # hyprland is the GUI of choice
-  # programs.hyprland.enable = true;
-#   services.xserver = {
-#     enable = true;
-#     windowManager.exwm.enable = true;
-#     displayManager.startx.enable = true;
-#     xkb.options = "ctrl:swapcaps";
-#   };
   programs.hyprland.enable = true;
 
   # hyprland requires /tmp/hypr to start, so create this

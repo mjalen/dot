@@ -9,6 +9,8 @@ let
     uniqueScripts
 
     # misc
+    # gobble
+    neofetch
     pinentry-curses
     openssh
     brightnessctl
@@ -17,6 +19,8 @@ let
     libnotify
     mpc-cli
     ripgrep
+    discord
+    glow
     zathura
     imagemagick
 
@@ -26,10 +30,8 @@ let
 
     # fonts
     victor-mono
-    iosevka
 
   	# programming stuff
-    emacs
     cargo
   	roswell # clisp implementation manager
     nil-pkg # nix lsp
@@ -45,6 +47,12 @@ let
 
     # move to wayland/hyprland.nix
     hyprpaper
+
+    emacs
+    emacsPackages.exwm
+#     (emacs.withPackages (p: with p; [
+#       exwm
+#     ]))
 
     (sbcl.withPackages (p: with p; [
         hunchentoot
@@ -77,17 +85,26 @@ in
     # Import theme (accessed via config.valhalla.theme)
     ../../../themes/oxocarbon/dark.nix
 
-    # Window Management
-    ../../wayland/hyprland
-    ../../wayland/waybar.nix
+    
+    # GUI
+    # ../../wayland/hyprland
+    # ../../wayland/waybar.nix
 
     # Apps
+    # ../../applications/ranger.nix
     ../../applications/firefox
+    # ../../applications/tmux.nix
     ../../applications/kitty
     ../../applications/ncmpcpp.nix
 
-    # Services
-    ../../utilities/mako.nix
+
+    # Editors
+    # ../../applications/nvim
+
+    # Other
+    # ../../utilities/mpd.nix
+    # ../../utilities/tex.nix
+    ../../utilities/mako.nix # notification daemon
   ];
 
   home = {
@@ -112,34 +129,13 @@ in
     };
   };
 
-#   home.file.".xinitrc.exwm" = {
-#     text =
-#       ''
-# xhost +SI:localuser:$USER
-# export _JAVA_AWT_WM_NONREPARENTING=1
-# 
-# xsetroot -cursor_name left_ptr
-# xmodmap -e "keycode 66 = Control_L"
-# 
-# xset r rate 200 60
-# 
-# exec emacs
-#      '';
-#   };
-
   programs = {
+    
     bash = {
       enable = true;
-      profileExtra =
-        ''
-if [ -z "$DISPLAY" -a "$(tty)" = '/dev/tty5' ]; then
-   exec Hyprland
-fi
-        '';
-      bashrcExtra =
-        ''
+      bashrcExtra = ''
 eval "$(ssh-agent -s)" && ssh-add ${config.home.homeDirectory}/.ssh/id_ed25519
-        '';
+      '';
     };
     git = {
       enable = true;
