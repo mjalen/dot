@@ -2,16 +2,19 @@
   imports = [
     ./hardware-configuration.nix
     ./configuration.nix
-    ../services/ssh.nix
+    ./ssh.nix
     ./font.nix
+    ./persist.nix
+    ./pipewire.nix
+    ./virt-manager.nix
   ];
 
   # DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!
   # See installation guide in README on how to derive the UUIDs.
   valhalla.hardware = {
     enabled = true;
-    encryptedPARTUUID = "e65c3ef5-1abc-4f25-afda-6aec7f69bfd2";
-    bootUUID = "BA82-BADE";
-    unencryptedUUID = "8ecb750c-ad14-4f14-9566-1f317813064b";
+    encryptedPARTUUID = "de621fe3-c331-4dce-b9a1-378549926a5c";
+    bootUUID = "8B1C-B496";
+    unencryptedUUID = "2928f631-7856-461e-b8a3-92422a7ea7d6";
   };
 }

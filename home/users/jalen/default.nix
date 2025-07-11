@@ -43,6 +43,10 @@ let
     # pulseaudio mixer.
     pamixer
 
+    # vpn
+    protonvpn-cli_2
+    # protonvpn-gui
+
     # move to wayland/hyprland.nix
     hyprpaper
 

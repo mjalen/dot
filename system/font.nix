@@ -2,7 +2,6 @@
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [
-      iosevka
       font-awesome
       source-code-pro
       source-sans-pro

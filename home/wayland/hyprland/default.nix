@@ -94,9 +94,9 @@ in
     };
   };
 
-  xdg.configFile."hypr/hyprpaper.conf".text =
-    ''
-    		preload = ${wallpaper} 
-    		wallpaper = eDP-1,${wallpaper}
-    '';
+#   xdg.configFile."hypr/hyprpaper.conf".text =
+#     ''
+#     		preload = ${wallpaper} 
+#     		wallpaper = eDP-1,${wallpaper}
+#     '';
 }

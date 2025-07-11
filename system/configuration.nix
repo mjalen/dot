@@ -4,13 +4,6 @@ let
   persistDir = "/persist";
 in
 {
-  imports = [
-    inputs.nixos-hardware.nixosModules.framework-13-7040-amd
-    ./persist.nix
-    ./pipewire.nix
-    ./virt-manager.nix
-  ];
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -18,10 +11,9 @@ in
   networking.hostName = "valhalla"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
-  time.timeZone = "America/Chicago";
-
   # Set your time zone.
-  services.automatic-timezoned.enable = true;
+  # services.automatic-timezoned.enable = true;
+  time.timeZone = "America/Chicago";
 
   # ppd
   services.power-profiles-daemon.enable = true;
@@ -43,22 +35,10 @@ in
 #     };
   };
 
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
   # hyprland is the GUI of choice
-  # programs.hyprland.enable = true;
-#   services.xserver = {
-#     enable = true;
-#     windowManager.exwm.enable = true;
-#     displayManager.startx.enable = true;
-#     xkb.options = "ctrl:swapcaps";
-#   };
   programs.hyprland.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   # hyprland requires /tmp/hypr to start, so create this
   systemd.tmpfiles.rules = [
@@ -76,14 +56,16 @@ in
     hashedPasswordFile = "${persistDir}/psk/jalen";
   };
 
-  # Enable sound.
-  hardware.pulseaudio.enable = true;
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [ vim wget git ];
 
+#  
+#   services.udev.extraHwdb = ''
+# sensor:modalias:acpi:MXC6655*:dmi:*:svnGPD:pnG1621-02:*
+#  ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, 1, 0; 0, 0, 1
+#   '';
 
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
   nix.settings.experimental-features = "nix-command flakes";
 }

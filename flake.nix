@@ -18,9 +18,7 @@
       pkgs = import inputs.nixpkgs {
         inherit system;
         config.allowUnfree = true;
-        overlays = [
-          inputs.nur.overlay
-        ];
+	overlays = [ inputs.nur.overlays.default ];
       };
     in
     {
@@ -29,12 +27,12 @@
             inherit pkgs;
             specialArgs = { inherit inputs; };
             modules = [
-            ./systems/valhalla
-            inputs.impermanence.nixosModules.impermanence
+		    inputs.impermanence.nixosModules.impermanence
+    		    inputs.nixos-hardware.nixosModules.gpd-pocket-4
+		    ./system
             ];
         };
       };
-      # nixosConfigurations = import ./systems { inherit inputs pkgs self; };
       homeConfigurations = import ./home { inherit inputs pkgs self; };
       formatter.x86_64-linux = pkgs.nixpkgs-fmt;
     };
@@ -63,9 +61,11 @@
     # nur
     nur = {
       url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # emacs config
-    # emacs.url = "github:mjalen/emacs";
+#     erosanix = {
+# 	url = "github:emmanuelrosa/erosanix";
+#     };
   };
 }
