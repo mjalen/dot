@@ -8,13 +8,16 @@ with config.valhalla.theme;
     profiles = {
       default = {
         isDefault = true;
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+		extensions.force = true;
+        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           sponsorblock
           old-reddit-redirect
           darkreader
         ];
         settings = {
+		  "general.autoScroll" = true;
+		  "sidebar.verticalTabs" = true;
           "identity.fxaccounts.enabled" = false;
           "extensions.pocket.enabled" = false;
           "extensions.autoDisableScopes" = 0;

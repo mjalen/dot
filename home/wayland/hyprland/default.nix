@@ -26,7 +26,7 @@ in
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
-      monitor = "eDP-1,2256x1504@60,0x0,1";
+      # monitor = "eDP-1,2256x1504@60,0x0,1";
 
       general = {
         border_size = 3;

@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }: {
+{ pkgs, ... }: {
 
   # Program Launcher.
   home.packages = with pkgs; [ tofi ];

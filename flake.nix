@@ -12,60 +12,66 @@
 {
   description = ''Jalen Moore's Nix configuration.'';
 
-  outputs = { self, ... } @ inputs:
-    let
-      system = "x86_64-linux";
-      pkgs = import inputs.nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-	overlays = [ inputs.nur.overlays.default ];
-      };
-    in
-    {
-      nixosConfigurations = {
-        valhalla = inputs.nixpkgs.lib.nixosSystem {
-            inherit pkgs;
-            specialArgs = { inherit inputs; };
-            modules = [
-		    inputs.impermanence.nixosModules.impermanence
-    		    inputs.nixos-hardware.nixosModules.gpd-pocket-4
-		    ./system
-            ];
+  outputs = inputs@{
+    self,
+    nixpkgs,
+    nur,
+    niri,
+    ...
+   }: let
+        system = "x86_64-linux";
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+	        overlays = [
+            nur.overlays.default
+            niri.overlays.niri
+          ];
         };
+      in {
+        nixosConfigurations = {
+          valhalla = inputs.nixpkgs.lib.nixosSystem {
+              inherit pkgs;
+              specialArgs = { inherit inputs; };
+              modules = [
+        		    inputs.impermanence.nixosModules.impermanence
+      		      inputs.nixos-hardware.nixosModules.gpd-pocket-4
+                inputs.niri.nixosModules.niri
+  		          ./system
+              ];
+          };
+        };
+        homeConfigurations = {
+          jalen = inputs.home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            extraSpecialArgs = {inherit inputs self; };
+            modules = [
+              ./home
+              inputs.impermanence.nixosModules.home-manager.impermanence
+              inputs.niri.homeModules.niri
+  	          inputs.catppuccin.homeModules.catppuccin
+            ];
+          };
+        };
+        formatter.x86_64-linux = pkgs.nixpkgs-fmt;
       };
-      homeConfigurations = import ./home { inherit inputs pkgs self; };
-      formatter.x86_64-linux = pkgs.nixpkgs-fmt;
-    };
 
   inputs = {
-    # nixpkgs.
     nixpkgs.url = "github:NixOS/nixpkgs";
-
-    # hardware (for framework 13 - AMD 7040)
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    impermanence.url = "github:nix-community/impermanence";
+    nil.url = "github:oxalica/nil";
+    niri.url = "github:sodiboo/niri-flake";
+  	catppuccin.url = "github:catppuccin/nix";
 
-    # home-manager for easier user config.
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # impermanence (I only keep /nix on reboot. Any persisting documents are stored in /nix/persist.)
-    impermanence = {
-      url = "github:nix-community/impermanence";
-    };
-
-    # nix lsp
-    nil.url = "github:oxalica/nil";
-
-    # nur
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-#     erosanix = {
-# 	url = "github:emmanuelrosa/erosanix";
-#     };
   };
 }

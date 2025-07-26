@@ -1,0 +1,19 @@
+* {
+	font-family: Victor Mono, Input Fonts Regular, FontAwesome, monospace;
+	font-size: 14px;
+}
+
+window#waybar {
+	/* background-color: black; */
+	opacity: 0.8;
+}
+
+.module {
+		padding: 0.0rem 0.5rem;
+    font-weight: bold;
+    /* color: white; */
+}
+
+/* tooltip { */
+    /* border: 1px solid rgba(100, 114, 125, 0.9); */
+/* } */

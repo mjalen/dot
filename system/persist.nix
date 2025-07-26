@@ -35,6 +35,7 @@ in
         "/etc/ssh"
         "/etc/NetworkManager"
         "/etc/nixos"
+        "/var/lib/waydroid/*"
       ];
       files = [
         "/etc/nix/id_rsa"
@@ -44,7 +45,9 @@ in
       users.jalen = {
         directories = [
           "Documents"
+          ".ollama"
           ".local/state/nix/profiles"
+          ".local/share/waydroid"
           ".ssh"
           ".gnupg"
           "Pictures"

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, modulesPath, ... }:
 
 with lib;
 let
@@ -21,6 +21,11 @@ in
     boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
     boot.initrd.kernelModules = [ ];
     boot.kernelModules = [ "kvm-amd" "wl" ];
+
+    hardware.amdgpu.opencl.enable = true;
+    hardware.amdgpu.amdvlk.enable = true;
+    hardware.graphics.enable = true;
+
     boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
     boot.blacklistedKernelModules = [ "brcmfmac" ];
 

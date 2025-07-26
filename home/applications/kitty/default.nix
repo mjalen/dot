@@ -1,9 +1,10 @@
-{ inputs, config, pkgs, ... }:
+{ config, ... }:
 
 {
   programs.kitty = {
     enable = true;
     settings = with config.valhalla.theme; {
+      hide_window_decorations = true;
       enable_audio_bell = false;
       window_margin_width = 10;
       cursor_shape = "block";
