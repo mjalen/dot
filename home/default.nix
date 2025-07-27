@@ -116,6 +116,11 @@ in
 
   xdg.enable = true;
 
+  programs.ssh = {
+    enable = true;
+    addKeysToAgent = "yes";
+  };
+
   programs = {
     bash = {
       enable = true;
