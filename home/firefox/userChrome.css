@@ -67,6 +67,14 @@ window, #toolbar-menubar, #TabsToolbar, #PersonalToolbar, #navigator-toolbox,#si
 	background-image: none !important;
 }
 
+.titlebar-buttonbox-container {
+    display: none !important;
+}
+
+.tab-close-button.close-icon {
+    display: none !important;
+}
+
 /*window, #nav-bar{
 	background-color: rgba(${blackAsDec}, 0.3) !important;
 	-moz-appearance: none !important;

@@ -18,7 +18,12 @@ in
   time.timeZone = "America/Chicago";
 
   # ppd
-  services.power-profiles-daemon.enable = true;
+  # services.power-profiles-daemon.enable = true;
+
+#   services.udev.enable = true;
+#   services.udev.extraRules = ''
+#    SUBSYSTEM=="power_supply", KERNEL=="BATT", ATTR{charge_control_end_threshold}="80"
+# '';
 
   # enable persistence
   valhalla.persist = {

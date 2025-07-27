@@ -20,8 +20,8 @@ in
     spawn-at-startup = [
       { command = [ "waybar" ]; }
       { command = [ "swww-daemon" ]; }
-      { command = [ "swww" "img" wallpaperStr ]; }
-      { command = [ "niri-auto-rotate" ]; }
+      { command = [ "swww""img" wallpaperStr ]; }
+      { command = [ "niri-auto-rotate" wallpaperStr ]; }
       { command = [ "xwayland-satellite" ]; }
     ];
 
@@ -47,17 +47,9 @@ in
     input.tablet.map-to-output = "eDP-1";
     input.touch.map-to-output = "eDP-1";
 
-    # layer-rules = [
-    #   {
-    #     matches = [
-    #       { namespace = "waybar"; }
-    #     ];
-    #     place-within-backdrop = true;
-    #   }
-    #  ];
     window-rules = [
       {
-        geometry-corner-radius = let radius = 8.0; in {
+        geometry-corner-radius = let radius = 0.0; in {
           top-left = radius;
           top-right = radius; 
           bottom-right = radius;
@@ -67,24 +59,38 @@ in
       }
       {
         matches = [{ app-id = "Emacs"; }];
-        opacity = 0.92;
+        opacity = 0.85;
       }
     ];
 
+    overview = {
+      backdrop-color = "#ebe5d7";
+      workspace-shadow = {
+        enable = false;
+      };
+    };
+
     layout = {
       always-center-single-column = true;
-      gaps = 12;
+      gaps = 0;
       focus-ring.enable = false;
 
+      default-column-width.proportion = 0.5;
+
+      preset-column-widths = [
+        { proportion = 1. / 2.; }
+        { proportion = 1.; }
+      ];
+
       border = {
-        enable = true;
-        width = 8;
-        inactive.color = "#00000077"; # "#6e1a3a99";
-        active.color = "#00000077"; # "#171a4799";
+        enable = false;
+        width = 12;
+        inactive.color = "#00000055"; # "#6e1a3a99";
+        active.color = "#000000AA"; # "#171a4799";
       };
 
       struts = let
-        inline = 8;
+        inline = 0;
         block = 0;
       in {
         left = inline;
@@ -94,12 +100,21 @@ in
       };
     };
 
+    xwayland-satellite = {
+      path = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
+    };
+
     binds = with config.lib.niri.actions; {
       "Mod+Ctrl+Return".action = spawn "emacs";
       "Mod+Return".action = spawn "emacsclient" "-c";
       "Mod+Shift+Return".action = spawn "systemctl" "--user" "restart" "emacs.service";
       "Mod+Shift+Slash".action = show-hotkey-overlay;
       "Mod+Space".action = spawn "fuzzel";
+
+      "Mod+T".action = switch-preset-window-width;
+
+      "Print".action = spawn "screenie";
+      "Shift+Print".action = spawn "screenie" "-s";
 
       "Mod+R".action = spawn "niri-lock-rotation";
       "Mod+Shift+W".action = spawn "swww" "img" wallpaperStr;
@@ -108,7 +123,7 @@ in
       "XF86AudioLowerVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-";
 
       # TODO Fix to actually mute.
-      "XF86AudioMute".action = spawn  "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.0";
+      "XF86AudioMute".action = spawn  "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle";
       "XF86AudioMicMute".action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
  
       "XF86MonBrightnessUp".action = spawn "brightnessctl" "--class=backlight" "set" "+10%";

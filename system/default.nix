@@ -7,6 +7,7 @@
     ./persist.nix
     ./pipewire.nix
     ./virt-manager.nix
+    ./tlp.nix
   ];
 
   # DO NOT EDIT THESE UNLESS YOU ARE INSTALLING NIXOS!

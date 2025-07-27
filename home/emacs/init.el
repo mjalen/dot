@@ -105,6 +105,7 @@
 (set-frame-font "Victor Mono-11")
   
 (add-to-list 'auto-mode-alist '("\\.nix\\'" . nix-mode))
+(add-to-list 'auto-mode-alist '("\\.svelte\\'" . svelte-mode))
 
 (with-eval-after-load 'exec-path-from-shell
   (exec-path-from-shell-initialize))
@@ -135,11 +136,13 @@
   (add-hook 'typescript-ts-mode #'tree-sitter-hl-mode))
 
 (with-eval-after-load 'eglot
-  (require 'eglot)
-  ; (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
   (add-to-list 'eglot-server-programs '(typescript-mode . ("typescript-language-server")))
+  (add-to-list 'eglot-server-programs '(javascript-mode . ("typescript-language-server")))
+  (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+    (add-hook 'typescript-mode 'eglot-ensure)
+  (add-hook 'javascript-mode 'eglot-ensure)
   (add-hook 'web-mode 'eglot-ensure)
-  ; (add-hook 'nix-mode 'eglot-ensure)
+  (add-hook 'nix-mode 'eglot-ensure)
   (eglot t))
 
 (with-eval-after-load 'corfu
@@ -155,4 +158,7 @@
 
 (with-eval-after-load 'slime
   (setq inferior-lisp-program "sbcl"))
+
+(with-eval-after-load 'svelte-mode
+  (customize-set-variable 'svelte-basic-offset 4))
 

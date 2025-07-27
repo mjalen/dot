@@ -31,10 +31,9 @@ let
     rot8
     komikku
 
-    fuzzel
-
     # fonts
     victor-mono
+    font-awesome
 
     # programming stuff
     cargo
@@ -74,6 +73,9 @@ let
 
 	  helix
     wdisplays
+
+    upower
+
   ];
 
   filterImports = (xs: builtins.filter (x: builtins.pathExists x) xs );
@@ -89,9 +91,6 @@ in
     ./emacs
   ];
 
-  catppuccin.enable = true; 
-  catppuccin.flavor = "mocha";
-  
   home = {
     username = "jalen";
     homeDirectory = "/home/jalen";
@@ -119,6 +118,21 @@ in
   programs.ssh = {
     enable = true;
     addKeysToAgent = "yes";
+  };
+
+  programs.fuzzel = {
+    enable = true;
+    settings = {
+      colors = {
+        background = "161616ff";
+        text = "ffffffff";
+        match = "ee5396ff";
+        selection-match = "ee5396ff";
+        selection = "262626ff";
+        selection-text = "33b1ffff";
+        border = "525252ff";
+      };
+    };
   };
 
   programs = {

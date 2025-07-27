@@ -2,22 +2,24 @@
 
 with config.valhalla.theme;
 {
-  # firefox stuffs
   programs.firefox = {
     enable = true;
     profiles = {
       default = {
         isDefault = true;
-		extensions.force = true;
-        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
-          ublock-origin
-          sponsorblock
-          old-reddit-redirect
-          darkreader
-        ];
+		    extensions.force = true;
+        extensions.packages =
+          with pkgs.nur.repos.rycee.firefox-addons; [
+            ublock-origin
+            sponsorblock
+            old-reddit-redirect
+            darkreader
+          ];
         settings = {
-		  "general.autoScroll" = true;
-		  "sidebar.verticalTabs" = true;
+		      "general.autoScroll" = true;
+		      "sidebar.verticalTabs" = true;
+          "sidebar.main.tools" = "";
+          "sidebar.animation.enabled" = false;
           "identity.fxaccounts.enabled" = false;
           "extensions.pocket.enabled" = false;
           "extensions.autoDisableScopes" = 0;
