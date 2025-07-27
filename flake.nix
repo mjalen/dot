@@ -28,7 +28,7 @@
             niri.overlays.niri
           ];
         };
-      in {
+    in {
         nixosConfigurations = {
           valhalla = inputs.nixpkgs.lib.nixosSystem {
               inherit pkgs;
@@ -44,12 +44,15 @@
         homeConfigurations = {
           jalen = inputs.home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
-            extraSpecialArgs = {inherit inputs self; };
+            extraSpecialArgs = {
+              inherit inputs self;
+              wallpaper = ./assets/frieren_doll.jpg;
+            };
             modules = [
-              ./home
               inputs.impermanence.nixosModules.home-manager.impermanence
               inputs.niri.homeModules.niri
   	          inputs.catppuccin.homeModules.catppuccin
+              ./home
             ];
           };
         };
