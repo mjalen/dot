@@ -38,7 +38,6 @@
 ;;  ascii: https://emojicombos.com/frieren%3A-beyond-journey's-end
 
 ;; -*- coding: utf-8; lexical-binding: t -*-
-(load-theme 'modus-vivendi)
 
 (setq package-archives '(("melpa" . "http://melpa.org/packages/")
 			 ("org" . "https://orgmode.org/elpa/")
@@ -69,7 +68,12 @@
    typescript-mode
    web-mode
    svelte-mode
-   catppuccin-theme))
+   gruvbox-theme
+   editorconfig
+   swift-mode
+   go-mode))
+
+(load-theme 'gruvbox-dark-hard)
 
 (setq inhibit-startup-screen t
       use-package-always-ensure t
@@ -143,6 +147,7 @@
   (add-hook 'javascript-mode 'eglot-ensure)
   (add-hook 'web-mode 'eglot-ensure)
   (add-hook 'nix-mode 'eglot-ensure)
+  (add-hook 'go-mode 'eglot-ensure)
   (eglot t))
 
 (with-eval-after-load 'corfu
@@ -156,9 +161,13 @@
   (corfu-popupinfo-mode t)
   (global-corfu-mode))
 
-(with-eval-after-load 'slime
+(with-eval-after-load 'sly
   (setq inferior-lisp-program "sbcl"))
 
 (with-eval-after-load 'svelte-mode
   (customize-set-variable 'svelte-basic-offset 4))
+
+;(with-eval-after-load 'swift-mode
+;  (add-hook 'swift-mode 'eglot-ensure)
+;  (add-to-list 'auto-mode-alist '("\\.swift\\'" . swift-mode)))
 

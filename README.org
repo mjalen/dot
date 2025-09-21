@@ -2,25 +2,7 @@
 #+author: Jalen Moore
 
 #+caption: The most recent screenshot of my system.
-[[./docs/screenies/20250608_0136_screenshot.png]]
-
-* Table of Contents                                          :TOC_2_gh:TOC_2:
-- [[#preamble][Preamble]]
-- [[#impermanent-filesystem][Impermanent Filesystem]]
-- [[#installation][Installation]]
-  - [[#requirements][Requirements]]
-  - [[#partitioning][Partitioning]]
-  - [[#encryption][Encryption]]
-  - [[#formatting][Formatting]]
-  - [[#filesystem-mounting][Filesystem Mounting]]
-  - [[#uuidpartuuid-configuration][UUID/PARTUUID Configuration]]
-  - [[#passwords][Passwords]]
-  - [[#build][Build]]
-- [[#tasks][Tasks]]
-  - [[#priority][Priority]]
-  - [[#documentation][Documentation]]
-  - [[#aesthetic][Aesthetic]]
-  - [[#backlog][Backlog]]
+[[./docs/screenies/20250921_1706_screenshot.png]]
 
 * Preamble
 

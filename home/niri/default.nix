@@ -1,12 +1,7 @@
-/*
-TODO niri
-  - On screen keyboard for tablet.
-	- waybar with auto-rotation lock and wireplumber controls
-*/
+# TODO On screen keyboard for tablet.
+# TODO Waybar with wireplumber controls
 { config, pkgs, wallpaper, ... }:
-let
-  wallpaperStr = builtins.toString wallpaper;
-in
+
 {
   home.packages = with pkgs; [ xwayland-satellite ];
   programs.niri.enable = true;
@@ -19,9 +14,8 @@ in
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
-      { command = [ "swww-daemon" ]; }
-      { command = [ "swww""img" wallpaperStr ]; }
-      { command = [ "niri-auto-rotate" wallpaperStr ]; }
+      { command = [ "wpaperd" ]; }
+      { command = [ "niri-auto-rotate" ]; }
       { command = [ "xwayland-satellite" ]; }
     ];
 
@@ -59,18 +53,34 @@ in
       }
       {
         matches = [{ app-id = "Emacs"; }];
-        opacity = 0.85;
+        opacity = 0.80;
+      }
+      {
+        matches = [{ app-id = "Waydroid"; }];
+        default-column-width.proportion = 1.0;
+      }
+      {
+        matches = [{ title = "^KDE Connect Daemon$"; }];
+        open-fullscreen = true;
+      }
+    ];
+
+    layer-rules = [
+      {
+        matches = [{ namespace = "^wpaperd"; }];
+        place-within-backdrop = true;
       }
     ];
 
     overview = {
-      backdrop-color = "#ebe5d7";
+      backdrop-color = "#3b4747";
       workspace-shadow = {
         enable = false;
       };
     };
 
     layout = {
+      background-color = "#00000000";
       always-center-single-column = true;
       gaps = 0;
       focus-ring.enable = false;
@@ -87,6 +97,14 @@ in
         width = 12;
         inactive.color = "#00000055"; # "#6e1a3a99";
         active.color = "#000000AA"; # "#171a4799";
+      };
+
+      shadow = {
+        enable = true;
+        softness = 8;
+        spread = 5;
+        draw-behind-window = true;
+        color = "#000000AA";
       };
 
       struts = let
@@ -106,10 +124,12 @@ in
 
     binds = with config.lib.niri.actions; {
       "Mod+Ctrl+Return".action = spawn "emacs";
+      "Mod+Ctrl+P".action = spawn "kitty";
       "Mod+Return".action = spawn "emacsclient" "-c";
       "Mod+Shift+Return".action = spawn "systemctl" "--user" "restart" "emacs.service";
       "Mod+Shift+Slash".action = show-hotkey-overlay;
-      "Mod+Space".action = spawn "fuzzel";
+      "Mod+Space".action = spawn "walker";
+      "Mod+Ctrl+T".action = spawn "${pkgs.trayscale}/bin/trayscale";
 
       "Mod+T".action = switch-preset-window-width;
 
@@ -117,15 +137,15 @@ in
       "Shift+Print".action = spawn "screenie" "-s";
 
       "Mod+R".action = spawn "niri-lock-rotation";
-      "Mod+Shift+W".action = spawn "swww" "img" wallpaperStr;
+      # "Mod+Shift+W".action = spawn "swww" "img" "-t" "fade" wallpaperStr;
       
-      "XF86AudioRaiseVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+";
-      "XF86AudioLowerVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-";
+      "XF86AudioRaiseVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "4%+" "--limit" "1";
+      "XF86AudioLowerVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "4%-" "--limit" "1";
 
       # TODO Fix to actually mute.
       "XF86AudioMute".action = spawn  "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle";
       "XF86AudioMicMute".action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
- 
+      
       "XF86MonBrightnessUp".action = spawn "brightnessctl" "--class=backlight" "set" "+10%";
       "XF86MonBrightnessDown".action = spawn "brightnessctl" "--class=backlight" "set" "10%-";
 
@@ -141,8 +161,8 @@ in
       };
 
       "Mod+H".action = focus-column-left;
-      "Mod+J".action = focus-window-down;
-      "Mod+K".action = focus-window-up;
+      "Mod+J".action = focus-workspace-down;
+      "Mod+K".action = focus-workspace-up;
       "Mod+L".action = focus-column-right;
 
       "Mod+Ctrl+H".action = move-column-left;

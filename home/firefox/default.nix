@@ -10,15 +10,39 @@ with config.valhalla.theme;
 		    extensions.force = true;
         extensions.packages =
           with pkgs.nur.repos.rycee.firefox-addons; [
+            pwas-for-firefox
             ublock-origin
             sponsorblock
             old-reddit-redirect
             darkreader
           ];
+        search = {
+          default = "ddg html";
+          engines = {
+            "ddg html" = {
+              urls = [{ template = "https://html.duckduckgo.com/html?q={searchTerms}"; }];
+              icon = "https://html.duckduckgo.com/favicon.ico";
+            };
+            "opts" = {
+              urls = [{
+                template = "https://search.nixos.org/options?query={searchTerms}";
+                icon = "https://search.nixos.org/favicon-96x96.png";
+              }];
+            };
+            "pkgs" = {
+              urls = [{
+                template = "https://search.nixos.org/packages?query={searchTerms}";
+                icon = "https://search.nixos.org/favicon-96x96.png";
+              }];
+            };
+          };
+        };
         settings = {
 		      "general.autoScroll" = true;
 		      "sidebar.verticalTabs" = true;
-          "sidebar.main.tools" = "";
+          "sidebar.main.tools" = [];
+          "sidebar.visibility" = "expand-on-hover";
+          "sidebar.expandOnHover" = true;
           "sidebar.animation.enabled" = false;
           "identity.fxaccounts.enabled" = false;
           "extensions.pocket.enabled" = false;

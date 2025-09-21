@@ -1,4 +1,4 @@
-{ config, inputs, pkgs, ... }:
+{ config, inputs, pkgs, wallpaper, ... }:
 let
   uniqueScripts = (import ./scripts) { inherit config pkgs; };
   nil-pkg = inputs.nil.packages.${pkgs.system}.nil;
@@ -6,6 +6,8 @@ let
   packages = with pkgs; [
     # my scripts
     uniqueScripts
+
+    pciutils
 
     # misc
     openssl
@@ -20,10 +22,10 @@ let
     zathura
     imagemagick
     weston
-    yacreader
-    swww
-    ghostty
-    alsa-utils
+    hwinfo
+    hakuneko
+    rclone
+    trayscale
 
     # gnome
     gnome-tweaks
@@ -42,16 +44,25 @@ let
     gcc
     nodejs_24
     sqlite
+    jdk17
+    raylib
+    go
 
 	  # Common Lisp
     (sbcl.withPackages (p: with p; [
-        hunchentoot
-        spinneret
-        lass
-        parenscript
-        swank
-        swank-client
+      hunchentoot
+      ningle
+      spinneret
+      lass
+      parenscript
+      swank
+      swank-client
+      local-time
+      clack
+      clack-handler-hunchentoot
     ]))
+
+    swift
 
     # node packages
     prisma
@@ -67,15 +78,20 @@ let
     pamixer
 
     # Proton
-    protonvpn-cli_2
-    protonvpn-gui
     proton-pass
+    protonmail-desktop
 
 	  helix
-    wdisplays
-
     upower
-
+    scrcpy
+    vlc
+    strawberry
+    youtube-music
+    easyeffects
+    kdePackages.dolphin
+    wpaperd
+    rustdesk
+    labwc
   ];
 
   filterImports = (xs: builtins.filter (x: builtins.pathExists x) xs );
@@ -89,6 +105,7 @@ in
     ./waybar
     ./niri
     ./emacs
+    ./_old/applications/vscodium.nix
   ];
 
   home = {
@@ -98,10 +115,18 @@ in
     inherit packages;
 
     sessionVariables = {
-      USER_JALEN_IS_ACTIVATED = 1;
+      MOZ_ENABLE_WAYLAND = 1;
       PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
       PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
       PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+    };
+  };
+
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Gruvbox-Dark";
+      package = pkgs.gruvbox-gtk-theme;
     };
   };
 
@@ -117,7 +142,27 @@ in
 
   programs.ssh = {
     enable = true;
-    addKeysToAgent = "yes";
+    # addKeysToAgent = "yes";
+  };
+
+  programs.walker = {
+    enable = true;
+    runAsService = true;
+
+    # All options from the config.toml can be used here.
+    config = {
+      placeholders."default".input = "Example";
+      providers.prefixes = [
+        {provider = "websearch"; prefix = "+";}
+        {provider = "providerlist"; prefix = "_";}
+      ];
+      keybinds.quick_activate = ["F1" "F2" "F3"];
+    };
+  };
+
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
   };
 
   programs.fuzzel = {
@@ -148,5 +193,37 @@ in
         color.ui = "always";
       };
     };
+  };
+
+  xdg.configFile = {
+    "wpaperd/config.toml".text = ''
+[default]
+mode = "tile"
+path = "${builtins.toString wallpaper}"
+    '';
+
+    "rclone/rclone.conf".text = ''
+[macdav]
+type = webdav
+url = https://jalens-macbook-pro.bilberry-frog.ts.net
+vendor = owncloud
+pacer_min_sleep = 0.01ms
+user = k
+pass = Tnkxh76eXRPzL0aoqBGw-PNNJ8yqXjA
+    '';
+  };
+
+  systemd.user.services.macdav-mount = {
+    Unit = {
+      Description = "Mount CopyParty WebDAV";
+      After = [ "network-online.target" ];
+    };
+    Service = {
+      Type = "notify";
+      ExecStartPre = "/usr/bin/env mkdir -p %h/Remote";
+      ExecStart = "${pkgs.rclone}/bin/rclone mount --vfs-cache-mode writes --dir-cache-time 5s macdav: ${config.home.homeDirectory}/Remote";
+      ExecStop="/bin/fusermount -u ${config.home.homeDirectory}/Remote";
+    };
+    Install.WantedBy = [ "default.target" ];
   };
 }

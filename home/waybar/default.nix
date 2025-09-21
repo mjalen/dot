@@ -6,6 +6,10 @@ let
   toggle-overview =
     (pkgs.writeShellScriptBin "toggle-overview"
       (builtins.readFile ./toggle-overview.sh));
+  restart-waydroid =
+    (pkgs.writeShellScriptBin "restart-waydroid"
+      (builtins.readFile ./restart-waydroid.sh));
+      
 in
 {
   programs.waybar = {
@@ -24,6 +28,12 @@ in
           format = "&#xf0c9;";
         };
 
+        "custom/runner" = {
+          on-click = "walker";
+          tooltip = "Run process...";
+          format = "&#xf002;";
+        };
+
         "custom/screen-orientation" = {
           exec = "${monitor-orientation}/bin/monitor-orientation";
           exec-if = "${monitor-orientation}/bin/monitor-orientation";
@@ -37,10 +47,26 @@ in
           };
         };
 
+        "custom/waydroid" = {
+          on-click = "${restart-waydroid}/bin/restart-waydroid";
+          tooltip = "Restart Waydroid.";
+          format = "&#xf2f9;";
+        };
+
+        "custom/trayscale" = {
+          on-click = "${pkgs.trayscale}/bin/trayscale";
+          tooltip = "Open TrayScale.";
+          format = "&#xe4e2;";
+        };
+
         clock = {
           interval = 60;
           format = "{:%d - %I:%M}";
           max-length = 25;
+        };
+
+        temperature = {
+            format = "{temperatureC}°C ";
         };
 
         battery = {
@@ -68,14 +94,30 @@ in
         wireplumber = {
           format = "{volume}% {icon}";
           format-icons = [ "&#xf026;" "&#xf027;" "&#xf028;" ];
-          format-muted = "Muted &#xf6a9;";
+          format-muted = "Muted"; #  &#xf6a9;
           on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
           scroll-step = 5;
         };
 
+#         tray = {
+#           show-passive-items = true;
+#           spacing = 12;
+#           icon-size = 14;
+# #           icons = {
+# #             "blueman" = "&#xf294";
+# #           };
+#        };
+
         modules-left = [ "custom/niri-overview" ];
         modules-center = [ "clock" ];
-        modules-right = [ "custom/screen-orientation" "wireplumber" "battery" "network" ];
+        modules-right = [
+          "custom/screen-orientation"
+          "wireplumber"
+          "temperature"
+          "battery"
+          "custom/trayscale"
+          "network"
+        ];
       };
     };
   };
