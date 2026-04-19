@@ -8,6 +8,9 @@ let
     uniqueScripts
 
     pciutils
+    fuzzel
+    fzf
+    rbw
 
     # misc
     openssl
@@ -105,6 +108,7 @@ in
     ./waybar
     ./niri
     ./emacs
+    ./nvim
     ./_old/applications/vscodium.nix
   ];
 

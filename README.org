@@ -25,13 +25,9 @@ From either the minimal/graphical NixOS iso, run the following as root while rep
 
 #+begin_src bash
 parted /dev/<hard-drive> -- mklabel gpt
-parted /dev/<hard-drive> -- mkpart primary 0% 100% # Reserve the entire hard drive for storage (not boot). 
-
-parted /dev/<usb> -- mklabel gpt
-parted /dev/<usb> -- mkpart ESP 1MB 512MB            # boot partition
-parted /dev/<usb> -- mkpart primary1 512MB 544MB     # where the luks header will reside
-parted /dev/<usb> -- mkpart primary2 544MB 100%      # rest of the usb for storage. format as desired
-parted /dev/<usb> -- set 1 esp on
+parted /dev/<hard-drive> -- mkpart ESP 1MB 512MB
+parted /dev/<hard-drive> -- mkpart primary 512MB 100%
+parted /dev/<hard-drive> -- set 1 esp on
 #+end_src
 
 ** Encryption
@@ -39,8 +35,8 @@ parted /dev/<usb> -- set 1 esp on
 The partition scheme should be setup now. To encrypt the hard-drive and extract the header to the usb drive, run:
 
 #+begin_src bash
-cryptsetup luksFormat /dev/<hard-drive>1 --type luks2 --header /dev/<usb>2 # answer prompts and provide password
-cryptsetup luksOpen /dev/<hard-drive>1 crypted --header /dev/<usb>2 # open hard drive as /dev/mapper/crypted
+cryptsetup luksFormat /dev/<hard-drive>1 # answer prompts and provide password
+cryptsetup luksOpen /dev/<hard-drive>1 crypted # open hard drive as /dev/mapper/crypted
 #+end_src
 
 ** Formatting
@@ -48,7 +44,7 @@ cryptsetup luksOpen /dev/<hard-drive>1 crypted --header /dev/<usb>2 # open hard 
 Now we can format the necessary partitions.
 
 #+begin_src bash
-mkfs.fat -F 32 -n boot /dev/<usb>1
+mkfs.fat -F 32 -n boot /dev/<hard-drive>2
 mkfs.btrfs /dev/mapper/crypted
 #+end_src
 
@@ -77,7 +73,7 @@ mkdir /mnt/{nix,persist,etc,etc/nixos,boot}
 mount /dev/mapper/crypted -o compress-force=zstd,noatime,ssd,subvol=nix /mnt/nix
 mount /dev/mapper/crypted -o compress-force=zstd,noatime,ssd,subvol=persist /mnt/persist
 
-mount /dev/<usb>1 /mnt/boot
+mount /dev/<hard-drive>1 /mnt/boot
 #+end_src
 
 ** UUID/PARTUUID Configuration
@@ -93,15 +89,14 @@ cd /mnt/persist/dot
 lsblk --output NAME,UUID,PARTUUID
 #+end_src
 
-In the hardware file ~/mnt/persist/dot/systems/valhalla/default.nix~, update the PARTUUIDs and UUIDs.
+In the hardware file ~/mnt/persist/dot/systems/valhalla/default.nix~, update the PARTUUIDs and UUIDs. As a tip, paste the ~lsblk~ output into VIM by doing an execute and read: ~:r !lsblk ...~. This will save on copy/paste headaches with multiple terminals. Remember to remove that output after you have finished collecting the proper UUIDs.
 
 #+begin_src nix 
 # line 8 ...
 valhalla.hardware = {
     enabled = true;
-    encryptedPARTUUID = "..."; # /dev/<hard-drive>1 -> PARTUUID 
-    headerPARTUUID = "..."; # /dev/<usb>2 -> PARTUUID
-    bootUUID = "..."; # /dev/<usb>1 -> UUID
+    encryptedPARTUUID = "..."; # /dev/<hard-drive>2 -> PARTUUID 
+    bootUUID = "..."; # /dev/<hard-drive>1 -> UUID
     unencryptedUUID = "..."; # /dev/mapper/crypted -> UUID
 };
 # ...
@@ -123,7 +118,7 @@ mkpasswd > jalen # only change the name if you edited the user configuration
 From the flake directory ~/mnt/persist/dot~ (or where-ever you cloned this repo) run
 
 #+begin_src bash
-nixos-install --impure --flake .#valhalla 
+nixos-install --impure --flake .#robin
 #+end_src
 
 This command should take a while because the operating system is installing. The command will ask to define a root password at the end; We declared one in a file and through the flake, so it really doesn't matter what you enter here. To complete setup, it is safer to run ~umount /mnt/boot~ before ~reboot~.

@@ -14,8 +14,8 @@
   # See installation guide in README on how to derive the UUIDs.
   valhalla.hardware = {
     enabled = true;
-    encryptedPARTUUID = "b55429d1-cda6-42b6-9949-c074cf944ff0";
-    bootUUID = "B047-820D";
-    unencryptedUUID = "f11591fb-0911-4d15-a400-4e7e64e60b38";
+    encryptedPARTUUID = "11f567d6-1d5f-4b3a-b153-5fc6055d318d";
+    bootUUID = "1104-9330";
+    unencryptedUUID = "d0116501-5094-4104-b274-5890c21086fa";
   };
 }

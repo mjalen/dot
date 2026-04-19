@@ -22,15 +22,15 @@
     prefer-no-csd = true;
 
     outputs."eDP-1" = {
-      mode = {
-        width = 1600;
-        height = 2560;
-        refresh = 60.0;
-      };
+#       mode = {
+#         width = 1600;
+#         height = 2560;
+#         refresh = 60.0;
+#       };
       transform = {
-        rotation =  270;
+        rotation =  0; # 270 for GPD
       };
-      scale = 2.0;
+      scale = 1.0;
     };
 
     input.keyboard.xkb = {
@@ -123,12 +123,12 @@
     };
 
     binds = with config.lib.niri.actions; {
-      "Mod+Ctrl+Return".action = spawn "emacs";
-      "Mod+Ctrl+P".action = spawn "kitty";
-      "Mod+Return".action = spawn "emacsclient" "-c";
+      # "Mod+Ctrl+Return".action = spawn "emacs";
+      "Mod+Return".action = spawn "kitty";
+      # "Mod+Return".action = spawn "emacsclient" "-c";
       "Mod+Shift+Return".action = spawn "systemctl" "--user" "restart" "emacs.service";
       "Mod+Shift+Slash".action = show-hotkey-overlay;
-      "Mod+Space".action = spawn "walker";
+      "Mod+Space".action = spawn "fuzzel";
       "Mod+Ctrl+T".action = spawn "${pkgs.trayscale}/bin/trayscale";
 
       "Mod+T".action = switch-preset-window-width;
